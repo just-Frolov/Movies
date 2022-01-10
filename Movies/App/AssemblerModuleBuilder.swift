@@ -7,12 +7,12 @@
 
 import UIKit
 
-protocol AsselderBuilderProtocol {
+protocol AssemblerBuilderProtocol {
     func createMainModule(router: RouterProtocol) -> UIViewController
     func createDetailModule(router: RouterProtocol) -> UIViewController
 }
 
-class AsselderModuleBuilder: AsselderBuilderProtocol {
+class AssemblerModuleBuilder: AssemblerBuilderProtocol {
     func createMainModule(router: RouterProtocol) -> UIViewController {
         let view = MovieListViewController()
         //let networkService = NetworkService()

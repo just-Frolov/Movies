@@ -19,7 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.windowScene = windowScene
         
         let navigationController = UINavigationController()
-        let assemblyBuilder = AsselderModuleBuilder()
+        let assemblyBuilder = AssemblerModuleBuilder()
         let router = Router(navigationController: navigationController,
                             assemblyBuilder: assemblyBuilder)
         router.initialViewController()
