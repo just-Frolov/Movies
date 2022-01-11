@@ -7,6 +7,10 @@
 
 import Foundation
 
-struct Movie {
+struct MovieData: Decodable {
+    let data: [Movie]
+}
+
+struct Movie: Decodable {
     
 }

@@ -8,39 +8,38 @@
 import UIKit
 
 protocol MoviesListViewProtocol: AnyObject {
-    func succes()
-    func failure(error: Error)
+    func setMovies()
+    func showErrorAlert(with message: String)
 }
 
 protocol MoviesListViewPresenterProtocol: AnyObject {
-    init(view: MoviesListViewProtocol, networkService: MoviesManagerProtocol, router: RouterProtocol)
+    init(view: MoviesListViewProtocol, router: RouterProtocol)
     var movies: [Movie]? { get set }
+    func getMovies()
     func tapOnTheMovie(movie: Movie)
-    func getComments()
 }
 
 class MoviesListPresenter: MoviesListViewPresenterProtocol {
     weak var view: MoviesListViewProtocol?
-    let networkService: MoviesManagerProtocol
     var router: RouterProtocol
     var movies: [Movie]?
     
-    required init(view: MoviesListViewProtocol, networkService: MoviesManagerProtocol, router: RouterProtocol) {
+    required init(view: MoviesListViewProtocol, router: RouterProtocol) {
         self.view = view
-        self.networkService = networkService
         self.router = router
     }
     
-    func getComments() {
-        networkService.getComments { [weak self] result in
+    func getMovies() {
+        NetworkService.shared.getMovies { [weak self] result in
             guard let strongSelf = self else { return }
             DispatchQueue.main.async {
                 switch result {
                 case.success(let moviesArray):
                     strongSelf.movies = moviesArray
-                    strongSelf.view?.succes()
+                    strongSelf.view?.setMovies()
                 case.failure(let error):
-                    strongSelf.view?.failure(error: error)
+                    let message = "Failed to get places: \(error)"
+                    strongSelf.view?.showErrorAlert(with: message)
                 }
             }
         }
