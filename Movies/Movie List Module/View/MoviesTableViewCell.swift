@@ -7,16 +7,33 @@
 
 import Kingfisher
 import SnapKit
+import UIKit
 
 class MoviesTableViewCell: BaseTableViewCell {
     //MARK: - UI Elements -
-    private lazy var placeIcon: UIImageView = {
+    private lazy var movieView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .gray
+        view.addSubview(moviePoster)
+        view.addSubview(titleAndReleaseDataInfoView)
+        view.addSubview(genresAndRatingInfoView)
+        return view
+    }()
+    
+    private lazy var moviePoster: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
         return image
     }()
     
-    private lazy var placeNameLabel: UILabel = {
+    private lazy var titleAndReleaseDataInfoView: UIStackView = {
+        let view = UIStackView()
+        view.addSubview(movieTitleLabel)
+        view.addSubview(movieReleaseDataLabel)
+        return view
+    }()
+    
+    private lazy var movieTitleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 20, weight: .semibold)
         label.textColor = .systemMint
@@ -24,27 +41,27 @@ class MoviesTableViewCell: BaseTableViewCell {
         return label
     }()
     
-    private lazy var placeAddressLabel: UILabel = {
+    private lazy var movieReleaseDataLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 15, weight: .regular)
+        label.font = .systemFont(ofSize: 20, weight: .regular)
         label.numberOfLines = 0
         return label
     }()
     
-    private lazy var ratingAndOpenInfoView: UIView = {
-        let view = UIView()
-        view.addSubview(placeIsOpenLabel)
-        view.addSubview(placeRatingLabel)
+    private lazy var genresAndRatingInfoView: UIStackView = {
+        let view = UIStackView()
+        view.addSubview(movieGenresLabel)
+        view.addSubview(movieRatingLabel)
         return view
     }()
 
-    private lazy var placeIsOpenLabel: UILabel = {
+    private lazy var movieGenresLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .regular)
         return label
     }()
     
-    private lazy var placeRatingLabel: UILabel = {
+    private lazy var movieRatingLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .bold)
         return label
@@ -53,7 +70,7 @@ class MoviesTableViewCell: BaseTableViewCell {
     //MARK: - Life Cycle -
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        addSubviews()
+        addSubview()
         setupConstraints()
     }
     
@@ -61,90 +78,91 @@ class MoviesTableViewCell: BaseTableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    //MARK: - Internal -
+    func configure(with model: Movie) {
+        imageView?.image = nil
+        movieTitleLabel.text = model.title
+        movieReleaseDataLabel.text = model.releaseDate
+        movieGenresLabel.text = "\(model.genreIDS)"
+        movieRatingLabel.text = String(model.voteAverage)
+    }
+    
     //MARK: - Private -
-    private func addSubviews() {
-        contentView.addSubview(placeIcon)
-        contentView.addSubview(placeNameLabel)
-        contentView.addSubview(placeAddressLabel)
-        contentView.addSubview(ratingAndOpenInfoView)
+    private func addSubview() {
+        contentView.addSubview(movieView)
     }
     
     private func setupConstraints() {
-        setupPlaceIconConstraints()
-        setupPlaceNameLabelConstraints()
-        setupPlaceAddressLabelConstraints()
-        setupRatingAndOpenInfoViewConstraints()
-        setupPlaceIsOpenLabelConstraints()
-        setupPlaceRatingLabelConstraints()
+        setupMovieViewConstraints()
+        setupMoviePosterConstraints()
+        setupTitleAndReleaseDataInfoViewConstraints()
+        setupMovieTitleLabelConstraints()
+        setupMovieReleaseDataLabelConstraints()
     }
     
-    private func setupPlaceIconConstraints() {
-        placeIcon.snp.makeConstraints { (make) -> Void in
-            make.width.height.equalTo(40)
-            make.left.equalTo(10)
-            make.centerY.equalTo(contentView.snp_centerYWithinMargins)
+    private func setupMovieViewConstraints() {
+        let marginFromEdges = CGFloat(10)
+        movieView.snp.makeConstraints { (make) -> Void in
+            make.edges.equalTo(contentView).inset(UIEdgeInsets(top: marginFromEdges,
+                                                               left: marginFromEdges,
+                                                               bottom: marginFromEdges,
+                                                               right: marginFromEdges))
         }
     }
     
-    private func setupPlaceNameLabelConstraints() {
-        placeNameLabel.snp.makeConstraints { (make) -> Void in
-            make.edges.equalTo(contentView).inset(UIEdgeInsets(top: 10,
-                                                               left: 60,
-                                                               bottom: 50,
+    private func setupMoviePosterConstraints() {
+        moviePoster.snp.makeConstraints { (make) -> Void in
+            make.edges.equalTo(movieView).inset(UIEdgeInsets(top: 25,
+                                                               left: 5,
+                                                               bottom: 25,
                                                                right: 5))
         }
     }
     
-    private func setupPlaceAddressLabelConstraints() {
-        placeAddressLabel.snp.makeConstraints { (make) -> Void in
-            make.edges.equalTo(contentView).inset(UIEdgeInsets(top: 40,
-                                                               left: 60,
-                                                               bottom: 20,
+    private func setupTitleAndReleaseDataInfoViewConstraints() {
+        titleAndReleaseDataInfoView.snp.makeConstraints { (make) -> Void in
+            make.edges.equalTo(movieView).inset(UIEdgeInsets(top: 5,
+                                                               left: 5,
+                                                               bottom: 75,
                                                                right: 5))
         }
     }
     
-    private func setupRatingAndOpenInfoViewConstraints() {
-        ratingAndOpenInfoView.snp.makeConstraints { (make) -> Void in
-            make.edges.equalTo(contentView).inset(UIEdgeInsets(top: 60,
-                                                               left: 60,
-                                                               bottom: 0,
+    private func setupMovieTitleLabelConstraints() {
+        movieTitleLabel.snp.makeConstraints { (make) -> Void in
+            make.left.top.bottom.equalTo(titleAndReleaseDataInfoView)
+            make.width.equalTo(titleAndReleaseDataInfoView).dividedBy(2)
+        }
+    }
+    
+    private func setupMovieReleaseDataLabelConstraints() {
+        movieReleaseDataLabel.snp.makeConstraints { (make) -> Void in
+            make.right.top.bottom.equalTo(titleAndReleaseDataInfoView)
+            make.width.equalTo(titleAndReleaseDataInfoView).dividedBy(2)
+        }
+    }
+    
+    private func setupGenresAndRatingInfoViewConstraints() {
+        genresAndRatingInfoView.snp.makeConstraints { (make) -> Void in
+            make.edges.equalTo(movieView).inset(UIEdgeInsets(top: 75,
+                                                               left: 5,
+                                                               bottom: 5,
                                                                right: 5))
         }
     }
     
-    private func setupPlaceIsOpenLabelConstraints() {
-        placeIsOpenLabel.snp.makeConstraints { (make) -> Void in
-            make.left.equalTo(ratingAndOpenInfoView)
-            make.right.equalTo(ratingAndOpenInfoView.snp_centerXWithinMargins)
-            make.height.equalTo(ratingAndOpenInfoView)
+    private func setupMovieGenresLabelConstraints() {
+        movieGenresLabel.snp.makeConstraints { (make) -> Void in
+            make.left.top.bottom.equalTo(titleAndReleaseDataInfoView)
+            make.width.equalTo(titleAndReleaseDataInfoView).dividedBy(2)
         }
     }
     
-    private func setupPlaceRatingLabelConstraints() {
-        placeRatingLabel.snp.makeConstraints { (make) -> Void in
-            make.left.equalTo(ratingAndOpenInfoView.snp_centerXWithinMargins)
-            make.right.equalTo(ratingAndOpenInfoView)
-            make.height.equalTo(ratingAndOpenInfoView)
+    private func setupMovieRatingLabelConstraints() {
+        movieRatingLabel.snp.makeConstraints { (make) -> Void in
+            make.right.top.bottom.equalTo(titleAndReleaseDataInfoView)
+            make.width.equalTo(titleAndReleaseDataInfoView).dividedBy(2)
         }
     }
-    
-    //MARK: - Internal -
-//    func configure(with model: Place) {
-//        imageView?.image = nil
-//        placeNameLabel.text = model.name
-//        placeAddressLabel.text = model.vicinity
-//        placeRatingLabel.text = String(model.rating ?? 0)
-//
-//        let url = URL(string: model.icon)
-//        placeIcon.kf.setImage(with: url)
-//
-//        guard let isOpen = model.openingHours else {
-//            placeIsOpenLabel.text = "No Information"
-//            return
-//        }
-//
-//        placeIsOpenLabel.text = isOpen.openNow ?  "Open" : "Close"
- //   }
 }
 

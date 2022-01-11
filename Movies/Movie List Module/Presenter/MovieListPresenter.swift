@@ -7,26 +7,28 @@
 
 import UIKit
 
-protocol MoviesListViewProtocol: AnyObject {
-    func setMovies()
+protocol MovieListViewProtocol: AnyObject {
+    func setMovies(_ moviesArray: [Movie])
     func showErrorAlert(with message: String)
 }
 
 protocol MoviesListViewPresenterProtocol: AnyObject {
-    init(view: MoviesListViewProtocol, router: RouterProtocol)
-    var movies: [Movie]? { get set }
+    init(view: MovieListViewProtocol, router: RouterProtocol)
     func getMovies()
     func tapOnTheMovie(movie: Movie)
 }
 
 class MoviesListPresenter: MoviesListViewPresenterProtocol {
-    weak var view: MoviesListViewProtocol?
+    weak var view: MovieListViewProtocol?
     var router: RouterProtocol
-    var movies: [Movie]?
     
-    required init(view: MoviesListViewProtocol, router: RouterProtocol) {
+    required init(view: MovieListViewProtocol, router: RouterProtocol) {
         self.view = view
         self.router = router
+    }
+    
+    func viewDidLoad() {
+        getMovies()
     }
     
     func getMovies() {
@@ -35,8 +37,7 @@ class MoviesListPresenter: MoviesListViewPresenterProtocol {
             DispatchQueue.main.async {
                 switch result {
                 case.success(let moviesArray):
-                    strongSelf.movies = moviesArray
-                    strongSelf.view?.setMovies()
+                    strongSelf.view?.setMovies(moviesArray)
                 case.failure(let error):
                     let message = "Failed to get places: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)

@@ -8,7 +8,7 @@
 import Alamofire
 
 protocol NetworkServiceProtocol {
-    func getMovies(completion: @escaping (Result<[Movie]?, Error>) -> Void)
+    func getMovies(completion: @escaping (Result<[Movie], Error>) -> Void)
 }
 
 class NetworkService: NetworkServiceProtocol {
@@ -27,16 +27,17 @@ class NetworkService: NetworkServiceProtocol {
     private init() {}
     
     //MARK: - Internal -
-    func getMovies(completion: @escaping (Result<[Movie]?, Error>) -> Void) {
+    func getMovies(completion: @escaping (Result<[Movie], Error>) -> Void) {
         let urlString = createURLString()
         
         AF.request(urlString).responseJSON { [ weak self ] responce in
+            guard let strongSelf = self else { return }
             guard responce.error == nil else {
                 completion(.failure(RequestError.failedCreateUrl))
                 return
             }
             if let safeData = responce.data {
-                let movies = self?.parseJson(safeData)
+                let movies = strongSelf.parseJson(safeData)
                 completion(.success(movies))
             } else {
                 completion(.failure(RequestError.failedResponseJSON))
@@ -53,7 +54,7 @@ class NetworkService: NetworkServiceProtocol {
         let decoder = JSONDecoder()
         do {
             let decodateData = try decoder.decode(MovieData.self, from: data)
-            return decodateData.data
+            return decodateData.results
         } catch {
             return []
         }

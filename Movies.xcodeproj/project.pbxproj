@@ -21,6 +21,7 @@
 		B0212D47278C8B8E00CA85E7 /* MovieData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0212D46278C8B8E00CA85E7 /* MovieData.swift */; };
 		B096EAE7278CD28500B1C362 /* MoviesTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B096EAE6278CD28500B1C362 /* MoviesTableViewCell.swift */; };
 		B096EAE9278CD2C300B1C362 /* BaseTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B096EAE8278CD2C300B1C362 /* BaseTableViewCell.swift */; };
+		B096EAEB278D9FF700B1C362 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B096EAEA278D9FF700B1C362 /* Alert.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		B0212D46278C8B8E00CA85E7 /* MovieData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieData.swift; sourceTree = "<group>"; };
 		B096EAE6278CD28500B1C362 /* MoviesTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviesTableViewCell.swift; sourceTree = "<group>"; };
 		B096EAE8278CD2C300B1C362 /* BaseTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTableViewCell.swift; sourceTree = "<group>"; };
+		B096EAEA278D9FF700B1C362 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +88,7 @@
 			isa = PBXGroup;
 			children = (
 				B0212D37278C7A1300CA85E7 /* App */,
+				B096EAEC278DA02C00B1C362 /* Extension */,
 				B0212D3D278C7C7B00CA85E7 /* Service Layer */,
 				B0212D39278C7AF100CA85E7 /* Movie List Module */,
 				B0212D38278C7AC500CA85E7 /* Supporting Files */,
@@ -157,6 +160,14 @@
 				B0212D44278C8B0100CA85E7 /* NetworkService.swift */,
 			);
 			path = "Service Layer";
+			sourceTree = "<group>";
+		};
+		B096EAEC278DA02C00B1C362 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				B096EAEA278D9FF700B1C362 /* Alert.swift */,
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 		FC1BBD42D318B959C9475993 /* Pods */ = {
@@ -291,6 +302,7 @@
 				B0212D47278C8B8E00CA85E7 /* MovieData.swift in Sources */,
 				B0212D28278C733F00CA85E7 /* MovieListViewController.swift in Sources */,
 				B0212D24278C733F00CA85E7 /* AppDelegate.swift in Sources */,
+				B096EAEB278D9FF700B1C362 /* Alert.swift in Sources */,
 				B096EAE9278CD2C300B1C362 /* BaseTableViewCell.swift in Sources */,
 				B0212D26278C733F00CA85E7 /* SceneDelegate.swift in Sources */,
 			);

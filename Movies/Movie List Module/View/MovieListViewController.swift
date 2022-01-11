@@ -39,6 +39,7 @@ class MovieListViewController: UIViewController {
         addSubViews()
         setupConstraints()
         setupView()
+        presenter.viewDidLoad()
     }
     
     //MARK: - Private -
@@ -96,14 +97,13 @@ class MovieListViewController: UIViewController {
 //MARK: - UITableViewDataSource -
 extension MovieListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
-        //return movies.count
+        return movies.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        //let place = movies[indexPath.row]
+        let movie = movies[indexPath.row]
         let cell = MoviesTableViewCell.dequeueingReusableCell(in: tableView, for: indexPath)
-        //cell.configure(with: place)
+        cell.configure(with: movie)
         return cell
     }
     
@@ -112,9 +112,22 @@ extension MovieListViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 80
+        return 120
     }
 }
+
+//MARK: - MovieListViewProtocol -
+extension MovieListViewController: MovieListViewProtocol {
+    func setMovies(_ moviesArray: [Movie]) {
+        movies = moviesArray
+        tableView.reloadData()
+    }
+    
+    func showErrorAlert(with message: String) {
+        showAlert("Error", with: message)
+    }
+}
+
 
 //MARK: - SearchBar Delegate
 extension MovieListViewController: UISearchBarDelegate {
