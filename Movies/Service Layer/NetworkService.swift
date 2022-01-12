@@ -6,9 +6,12 @@
 //
 
 import Alamofire
+import Kingfisher
+import UIKit
 
 protocol NetworkServiceProtocol {
     func getMovies(completion: @escaping (Result<[Movie], Error>) -> Void)
+    func setImage(imageURL: String, imageView: UIImageView)
 }
 
 class NetworkService: NetworkServiceProtocol {
@@ -18,7 +21,7 @@ class NetworkService: NetworkServiceProtocol {
     //MARK: - Private Constants -
     private let baseURL = "https://api.themoviedb.org/3/movie/popular"
     private let apiKey = "a5e9b83ceecaed49515d68d344c79b72"
-    private let language = "uk"
+    private let language = "ru"
     
     //MARK: - Variables -
     private var page = 1
@@ -45,6 +48,15 @@ class NetworkService: NetworkServiceProtocol {
         }
     }
     
+    func setImage(imageURL: String, imageView: UIImageView) {
+        let baseURL = "https://image.tmdb.org/t/p"
+        let imageSize = "/w500"
+        let mainURL = baseURL + imageSize + imageURL
+        let url = URL(string: mainURL)
+        imageView.kf.setImage(with: url)
+    }
+    
+    //MARK: - Private -
     private func createURLString() -> String {
         let url = baseURL + "?api_key=" + apiKey + "&language=" + language + "&page=" + "\(page)"
         return url

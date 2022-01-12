@@ -17,10 +17,9 @@ class MovieListViewController: UIViewController {
         return searchBar
     }()
     
-    
     private lazy var tableView: UITableView = {
         let table = UITableView()
-        table.isHidden = true
+        table.separatorStyle = .none
         MoviesTableViewCell.register(in: table)
         return table
     }()
@@ -35,7 +34,7 @@ class MovieListViewController: UIViewController {
     //MARK: - Life Cycle -
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupNavigationBar()
+        setupView()
         addSubViews()
         setupConstraints()
         setupView()
@@ -43,9 +42,25 @@ class MovieListViewController: UIViewController {
     }
     
     //MARK: - Private -
+    private func setupView() {
+        view.backgroundColor = .white
+        setupNavigationBar()
+        setupTableView()
+        setupSearchBar()
+    }
+    
     private func setupNavigationBar() {
         title = "Movies"
         setupNavigationBarAppearence()
+    }
+    
+    private func setupTableView() {
+        tableView.dataSource = self
+        tableView.delegate = self
+    }
+    
+    private func setupSearchBar() {
+        searchBar.delegate = self
     }
     
     private func setupNavigationBarAppearence() {
@@ -67,7 +82,7 @@ class MovieListViewController: UIViewController {
     private func setupSearchBarConstraints() {
         searchBar.snp.makeConstraints { (make) -> Void in
             make.width.equalTo(view)
-            make.height.equalTo(44)
+            make.height.equalTo(60)
             make.top.equalTo(view).offset(90)
         }
     }
@@ -77,19 +92,6 @@ class MovieListViewController: UIViewController {
             make.width.bottom.equalTo(view)
             make.top.equalTo(searchBar.snp_bottomMargin)
         }
-    }
-    
-    private func setupView() {
-        setupTableView()
-        setupSearchBar()
-    }
-    
-    private func setupTableView() {
-        tableView.dataSource = self
-    }
-    
-    private func setupSearchBar() {
-        searchBar.delegate = self
     }
 }
 
@@ -106,13 +108,23 @@ extension MovieListViewController: UITableViewDataSource {
         cell.configure(with: movie)
         return cell
     }
-    
+}
+
+extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 120
+        return tableView.frame.height/3
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if let lastVisibleIndexPath = tableView.indexPathsForVisibleRows?.last {
+            if indexPath == lastVisibleIndexPath {
+                // do here...
+            }
+        }
     }
 }
 
