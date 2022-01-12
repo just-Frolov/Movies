@@ -160,68 +160,13 @@ extension MovieListViewController: MovieListViewProtocol {
 
 //MARK: - SearchBar Delegate
 extension MovieListViewController: UISearchBarDelegate {
-//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//        guard let text = searchBar.text, !text.replacingOccurrences(of: " ", with: "").isEmpty else { return }
-//
-//        searchBar.resignFirstResponder()
-//
-//        results.removeAll()
-//        spinner.show(in: view)
-//
-//        searchUsers(query: text)
-//    }
-//
-//    func searchUsers(query: String) {
-//        //check if array has firebase result
-//        if !hasFetched {
-//            //if not: fetch then filter
-//            DatabaseManager.shared.getAllUsers { [weak self] result in
-//                switch result {
-//                case .failure(let error):
-//                    print("Failed to get users: \(error)")
-//                    return
-//                case .success(let usersCollection):
-//                    self?.users = usersCollection
-//                    self?.hasFetched = true
-//                    self?.filterUsers(with: query)
-//                }
-//            }
-//        }
-//        else {
-//            filterUsers(with: query)
-//        }
-//    }
-//
-//    func filterUsers(with term: String) {
-//        // Update the UI: either show result or show no result label
-//        guard hasFetched else {
-//            return
-//        }
-//
-//        self.spinner.dismiss(animated: true)
-//
-//        let results: [[String: String]] = self.users.filter({
-//            guard let name = $0["name"]?.lowercased() else { return false }
-//
-//            return name.hasPrefix(term.lowercased())
-//        })
-//
-//        self.results = results
-//
-//        updateUI()
-//    }
-//
-//    func updateUI() {
-//        if results.isEmpty {
-//            self.noResultsLabel.isHidden = false
-//            self.tableView.isHidden = true
-//        }
-//        else {
-//            self.noResultsLabel.isHidden = true
-//            self.tableView.isHidden = false
-//            self.tableView.reloadData()
-//        }
-//    }
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        guard let text = searchBar.text?.capitalized, !text.replacingOccurrences(of: " ", with: "").isEmpty else { return }
+        searchBar.resignFirstResponder()
+        movies.removeAll()
+        spinner.show(in: view)
+        presenter.getMovies()
+    }
 }
 
 
