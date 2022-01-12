@@ -30,6 +30,8 @@ class MovieListViewController: UIViewController {
     //MARK: - Variables -
     var presenter: MoviesListPresenter!
     private var movies: [Movie] = []
+    private var initialScrollTableViewHeight: CGFloat = 0.0
+    private var currentMaxScrollTableViewHeight: CGFloat = 0.0
     
     //MARK: - Life Cycle -
     override func viewDidLoad() {
@@ -119,19 +121,34 @@ extension MovieListViewController: UITableViewDelegate {
         return tableView.frame.height/3
     }
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if let lastVisibleIndexPath = tableView.indexPathsForVisibleRows?.last {
-            if indexPath == lastVisibleIndexPath {
-                // do here...
-            }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let cellHeight = CGFloat(230)
+        let contentHeight = scrollView.contentSize.height - scrollView.frame.height
+        
+        if (offsetY > contentHeight - cellHeight && offsetY > currentMaxScrollTableViewHeight - cellHeight) {
+            changeTableViewValues(scrollView)
+            getNewMovies()
         }
+    }
+    
+    private func changeTableViewValues(_ scrollView: UIScrollView) {
+        let contentHeight = scrollView.contentSize.height - scrollView.frame.height
+        if initialScrollTableViewHeight == 0 {
+            initialScrollTableViewHeight = contentHeight
+        }
+        currentMaxScrollTableViewHeight = contentHeight + initialScrollTableViewHeight
+    }
+    
+    private func getNewMovies() {
+        presenter.getMovies()
     }
 }
 
 //MARK: - MovieListViewProtocol -
 extension MovieListViewController: MovieListViewProtocol {
     func setMovies(_ moviesArray: [Movie]) {
-        movies = moviesArray
+        movies += moviesArray
         tableView.reloadData()
     }
     

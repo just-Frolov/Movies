@@ -113,7 +113,12 @@ class MoviesTableViewCell: BaseTableViewCell {
         movieReleaseDataLabel.text = model.releaseDate
         movieGenresLabel.text = "\(model.genreIDS)"
         movieRatingLabel.text = String(model.voteAverage)
-        NetworkService.shared.setImage(imageURL: model.backdropPath, imageView: moviePoster)
+        
+        if let poster = model.backdropPath {
+            NetworkService.shared.setImage(imageURL: poster, imageView: moviePoster)
+        } else {
+            //imageView?.image = 
+        }
     }
     
     //MARK: - Private -
