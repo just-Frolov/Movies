@@ -30,6 +30,8 @@ class MovieListViewController: UIViewController {
     //MARK: - Variables -
     var presenter: MoviesListPresenter!
     private var movies: [Movie] = []
+    private var initialScrollTableViewHeight: CGFloat = 0.0
+    private var currentMaxScrollTableViewHeight: CGFloat = 0.0
     
     //MARK: - Life Cycle -
     override func viewDidLoad() {
@@ -119,19 +121,34 @@ extension MovieListViewController: UITableViewDelegate {
         return tableView.frame.height/3
     }
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if let lastVisibleIndexPath = tableView.indexPathsForVisibleRows?.last {
-            if indexPath == lastVisibleIndexPath {
-                // do here...
-            }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let cellHeight = CGFloat(230)
+        let contentHeight = scrollView.contentSize.height - scrollView.frame.height
+        
+        if (offsetY > contentHeight - cellHeight && offsetY > currentMaxScrollTableViewHeight - cellHeight) {
+            changeTableViewValues(scrollView)
+            getNewMovies()
         }
+    }
+    
+    private func changeTableViewValues(_ scrollView: UIScrollView) {
+        let contentHeight = scrollView.contentSize.height - scrollView.frame.height
+        if initialScrollTableViewHeight == 0 {
+            initialScrollTableViewHeight = contentHeight
+        }
+        currentMaxScrollTableViewHeight = contentHeight + initialScrollTableViewHeight
+    }
+    
+    private func getNewMovies() {
+        presenter.getMovies()
     }
 }
 
 //MARK: - MovieListViewProtocol -
 extension MovieListViewController: MovieListViewProtocol {
     func setMovies(_ moviesArray: [Movie]) {
-        movies = moviesArray
+        movies += moviesArray
         tableView.reloadData()
     }
     
@@ -143,68 +160,13 @@ extension MovieListViewController: MovieListViewProtocol {
 
 //MARK: - SearchBar Delegate
 extension MovieListViewController: UISearchBarDelegate {
-//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//        guard let text = searchBar.text, !text.replacingOccurrences(of: " ", with: "").isEmpty else { return }
-//
-//        searchBar.resignFirstResponder()
-//
-//        results.removeAll()
-//        spinner.show(in: view)
-//
-//        searchUsers(query: text)
-//    }
-//
-//    func searchUsers(query: String) {
-//        //check if array has firebase result
-//        if !hasFetched {
-//            //if not: fetch then filter
-//            DatabaseManager.shared.getAllUsers { [weak self] result in
-//                switch result {
-//                case .failure(let error):
-//                    print("Failed to get users: \(error)")
-//                    return
-//                case .success(let usersCollection):
-//                    self?.users = usersCollection
-//                    self?.hasFetched = true
-//                    self?.filterUsers(with: query)
-//                }
-//            }
-//        }
-//        else {
-//            filterUsers(with: query)
-//        }
-//    }
-//
-//    func filterUsers(with term: String) {
-//        // Update the UI: either show result or show no result label
-//        guard hasFetched else {
-//            return
-//        }
-//
-//        self.spinner.dismiss(animated: true)
-//
-//        let results: [[String: String]] = self.users.filter({
-//            guard let name = $0["name"]?.lowercased() else { return false }
-//
-//            return name.hasPrefix(term.lowercased())
-//        })
-//
-//        self.results = results
-//
-//        updateUI()
-//    }
-//
-//    func updateUI() {
-//        if results.isEmpty {
-//            self.noResultsLabel.isHidden = false
-//            self.tableView.isHidden = true
-//        }
-//        else {
-//            self.noResultsLabel.isHidden = true
-//            self.tableView.isHidden = false
-//            self.tableView.reloadData()
-//        }
-//    }
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        guard let text = searchBar.text?.capitalized, !text.replacingOccurrences(of: " ", with: "").isEmpty else { return }
+        searchBar.resignFirstResponder()
+        movies.removeAll()
+        spinner.show(in: view)
+        presenter.getMovies()
+    }
 }
 
 

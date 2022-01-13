@@ -22,13 +22,15 @@ class MoviesTableViewCell: BaseTableViewCell {
         view.layer.shadowOffset = CGSize(width: 0.0, height: -2.0)
         view.layer.shadowRadius = 3.0
         view.layer.shadowOpacity = 0.15
-        view.layer.cornerRadius = 3
+        view.layer.cornerRadius = 20
         return view
     }()
     
     private lazy var moviePoster: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
+        image.layer.cornerRadius = 20
+        image.layer.masksToBounds = true
         return image
     }()
     
@@ -113,7 +115,12 @@ class MoviesTableViewCell: BaseTableViewCell {
         movieReleaseDataLabel.text = model.releaseDate
         movieGenresLabel.text = "\(model.genreIDS)"
         movieRatingLabel.text = String(model.voteAverage)
-        NetworkService.shared.setImage(imageURL: model.backdropPath, imageView: moviePoster)
+        
+        if let poster = model.backdropPath {
+            NetworkService.shared.setImage(imageURL: poster, imageView: moviePoster)
+        } else {
+            //imageView?.image = 
+        }
     }
     
     //MARK: - Private -
@@ -146,7 +153,7 @@ class MoviesTableViewCell: BaseTableViewCell {
     
     private func setupMoviePosterConstraints() {
         moviePoster.snp.makeConstraints { (make) -> Void in
-            make.width.height.lessThanOrEqualToSuperview().offset(-20)
+            make.width.height.lessThanOrEqualToSuperview()
             make.centerX.centerY.equalToSuperview()
         }
     }

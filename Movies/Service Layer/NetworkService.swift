@@ -42,6 +42,7 @@ class NetworkService: NetworkServiceProtocol {
             if let safeData = responce.data {
                 let movies = strongSelf.parseJson(safeData)
                 completion(.success(movies))
+                strongSelf.page += 1
             } else {
                 completion(.failure(RequestError.failedResponseJSON))
             }
