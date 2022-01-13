@@ -15,7 +15,7 @@ protocol AssemblerBuilderProtocol {
 class AssemblerModuleBuilder: AssemblerBuilderProtocol {
     func createMainModule(router: RouterProtocol) -> UIViewController {
         let view = MovieListViewController()
-        let presenter = MoviesListPresenter(view: view,
+        let presenter = MovieListPresenter(view: view,
                                             router: router)
         view.presenter = presenter
         return view

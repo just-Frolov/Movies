@@ -10,7 +10,9 @@ import Kingfisher
 import UIKit
 
 protocol NetworkServiceProtocol {
-    func getMovies(completion: @escaping (Result<[Movie], Error>) -> Void)
+    func request<T: Codable>(endPoint: EndPoint,
+                             expecting: T.Type,
+                             completion: @escaping (Result<T?, Error>) -> Void)
     func setImage(imageURL: String, imageView: UIImageView)
 }
 
@@ -18,34 +20,36 @@ class NetworkService: NetworkServiceProtocol {
     //MARK: - Static Constants -
     static let shared = NetworkService()
     
-    //MARK: - Private Constants -
-    private let baseURL = "https://api.themoviedb.org/3/movie/popular"
-    private let apiKey = "a5e9b83ceecaed49515d68d344c79b72"
-    private let language = "ru"
-    
-    //MARK: - Variables -
-    private var page = 1
-    
     //MARK: - Life Cycle -
     private init() {}
     
     //MARK: - Internal -
-    func getMovies(completion: @escaping (Result<[Movie], Error>) -> Void) {
-        let urlString = createURLString()
+    func request<T: Codable>(endPoint: EndPoint,
+                             expecting: T.Type,
+                             completion: @escaping (Result<T?, Error>) -> Void) {
         
-        AF.request(urlString).responseJSON { [ weak self ] responce in
+        let fullURLString = endPoint.fullURLString()
+        guard let url = URL(string: fullURLString) else {
+            completion(.failure(RequestError.invalidURL))
+            return
+        }
+        
+        AF.request(url,
+                   method: endPoint.method,
+                   parameters: endPoint.parameters,
+                   encoding: endPoint.encoding).responseJSON { [ weak self ] responce in
             guard let strongSelf = self else { return }
-            guard responce.error == nil else {
-                completion(.failure(RequestError.failedCreateUrl))
+            guard let safeData = responce.data else {
+                if let error = responce.error {
+                    completion(.failure(error))
+                } else {
+                    completion(.failure(RequestError.invalidData))
+                }
                 return
             }
-            if let safeData = responce.data {
-                let movies = strongSelf.parseJson(safeData)
-                completion(.success(movies))
-                strongSelf.page += 1
-            } else {
-                completion(.failure(RequestError.failedResponseJSON))
-            }
+            
+            let result = strongSelf.parseJson(safeData, expecting: expecting)
+            completion(.success(result))
         }
     }
     
@@ -58,24 +62,19 @@ class NetworkService: NetworkServiceProtocol {
     }
     
     //MARK: - Private -
-    private func createURLString() -> String {
-        let url = baseURL + "?api_key=" + apiKey + "&language=" + language + "&page=" + "\(page)"
-        return url
-    }
-    
-    private func parseJson(_ data: Data) -> [Movie] {
+    private func parseJson<T: Codable>(_ data: Data,
+                           expecting: T.Type) -> T? {
         let decoder = JSONDecoder()
         do {
-            let decodateData = try decoder.decode(MovieData.self, from: data)
-            return decodateData.results
+            let decodateData = try decoder.decode(expecting, from: data)
+            return decodateData
         } catch {
-            return []
+            return nil
         }
     }
     
-    //MARK: - Private -
     private enum RequestError: Error {
-        case failedResponseJSON
-        case failedCreateUrl
+        case invalidURL
+        case invalidData
     }
 }

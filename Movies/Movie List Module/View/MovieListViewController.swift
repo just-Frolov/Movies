@@ -28,7 +28,7 @@ class MovieListViewController: UIViewController {
     private let spinner = JGProgressHUD(style: .dark)
     
     //MARK: - Variables -
-    var presenter: MoviesListPresenter!
+    var presenter: MovieListPresenter!
     private var movies: [Movie] = []
     private var initialScrollTableViewHeight: CGFloat = 0.0
     private var currentMaxScrollTableViewHeight: CGFloat = 0.0
@@ -95,6 +95,15 @@ class MovieListViewController: UIViewController {
             make.top.equalTo(searchBar.snp_bottomMargin)
         }
     }
+    
+    private func showSpinner() {
+        spinner.show(in: view)
+    }
+    
+    private func hideSpinner() {
+        spinner.dismiss()
+    }
+
 }
 
 //MARK: - Extensions -
@@ -141,15 +150,18 @@ extension MovieListViewController: UITableViewDelegate {
     }
     
     private func getNewMovies() {
-        presenter.getMovies()
+        presenter.getMovieList()
     }
 }
 
 //MARK: - MovieListViewProtocol -
 extension MovieListViewController: MovieListViewProtocol {
-    func setMovies(_ moviesArray: [Movie]) {
-        movies += moviesArray
-        tableView.reloadData()
+    func setMovieList(_ moviesArray: [Movie]) {
+        DispatchQueue.main.async {
+            self.hideSpinner()
+            self.movies += moviesArray
+            self.tableView.reloadData()
+        }
     }
     
     func showErrorAlert(with message: String) {
@@ -163,9 +175,9 @@ extension MovieListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let text = searchBar.text?.capitalized, !text.replacingOccurrences(of: " ", with: "").isEmpty else { return }
         searchBar.resignFirstResponder()
+        showSpinner()
         movies.removeAll()
-        spinner.show(in: view)
-        presenter.getMovies()
+        presenter.getMovieListBySearch(text)
     }
 }
 
