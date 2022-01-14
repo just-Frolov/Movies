@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 // MARK: - MovieData
 struct MovieData: Codable {
     let results: [Movie]
@@ -18,7 +17,8 @@ struct Movie: Codable {
     let backdropPath: String?
     let genreIDS: [Int]
     let id: Int
-    let releaseDate, title: String
+    let releaseDate: String?
+    let title: String
     let voteAverage: Double
 
     enum CodingKeys: String, CodingKey {

@@ -10,6 +10,11 @@ import JGProgressHUD
 
 class MovieInfoViewController: UIViewController {
     //MARK: - UI Elements -
+    private lazy var moviePoster: UIImageView = {
+        let image = UIImageView()
+        image.contentMode = .scaleAspectFill
+        return image
+    }()
     
     //MARK: - Constants -
     private let spinner = JGProgressHUD(style: .dark)
@@ -52,8 +57,9 @@ class MovieInfoViewController: UIViewController {
     }
 }
 
+
 extension MovieInfoViewController: MovieInfoViewProtocol {
-    func setMovieInfo(_ moviesArray: [Movie]) {
+    func setMovieInfo(_ moviesArray: MovieDetailsData) {
         
     }
     

@@ -8,12 +8,12 @@
 import UIKit
 
 protocol MovieInfoViewProtocol: AnyObject {
-    func setMovieInfo(_ moviesArray: [Movie])
+    func setMovieInfo(_ moviesArray: MovieDetailsData)
     func showErrorAlert(with message: String)
 }
 
 protocol MovieInfoViewPresenterProtocol: AnyObject {
-    init(view: MovieInfoViewProtocol, router: RouterProtocol)
+    init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?)
     func getMovieInfo()
     func tapOnThePoster(movieID: Int)
 }
@@ -21,12 +21,14 @@ protocol MovieInfoViewPresenterProtocol: AnyObject {
 class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
     //MARK: - Variables -
     weak var view: MovieInfoViewProtocol?
-    var router: RouterProtocol
+    var router: RouterProtocol?
+    let movieID: Int?
     
     //MARK: - Life Cycle -
-    required init(view: MovieInfoViewProtocol, router: RouterProtocol) {
+    required init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?) {
         self.view = view
         self.router = router
+        self.movieID = movieID
     }
     
     //MARK: - Internal -
@@ -35,17 +37,19 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
     }
     
     func getMovieInfo() {
-        let movieInfoPage = 1
-        let endPoint = EndPoint.popular(page: movieInfoPage)
-        NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
+        guard let movieID = movieID else {
+            return
+        }
+        let endPoint = EndPoint.movieDetails(id: movieID)
+        NetworkService.shared.request(endPoint: endPoint, expecting: MovieDetailsData.self) { [weak self] result in
             guard let strongSelf = self else { return }
             DispatchQueue.main.async {
                 switch result {
                 case.success(let data):
-                    guard let moviesArray = data?.results else {return}
+                    guard let moviesArray = data else {return}
                     strongSelf.view?.setMovieInfo(moviesArray)
                 case.failure(let error):
-                    let message = "Failed to get movies: \(error)"
+                    let message = "Failed to get info about movie: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
                 }
             }
@@ -53,7 +57,7 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
     }
     
     func tapOnThePoster(movieID: Int) {
-        router.showInfo(by: movieID)
+        router?.showInfo(by: movieID)
     }
 }
 

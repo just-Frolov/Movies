@@ -24,11 +24,14 @@ class MovieListViewController: UIViewController {
         return table
     }()
     
-    private lazy var movieSortingIcon: UIImageView = {
-        let image = UIImageView()
-        image.contentMode = .scaleAspectFill
-        image.image = UIImage(systemName: "arrow.up.arrow.down.square")
-        return image
+    private lazy var noMoviesLabel: UILabel = {
+            let label = UILabel()
+            label.text = "No movies found for your search!"
+            label.textAlignment = .center
+            label.textColor = .black
+            label.font = .systemFont(ofSize: 20, weight: .bold)
+            label.isHidden = true
+            return label
     }()
     
     //MARK: - Constants -
@@ -39,6 +42,7 @@ class MovieListViewController: UIViewController {
     private var movies: [Movie] = []
     private var initialScrollTableViewHeight: CGFloat = 0.0
     private var currentMaxScrollTableViewHeight: CGFloat = 0.0
+    private var movieSearchText = ""
     
     //MARK: - Life Cycle -
     override func viewDidLoad() {
@@ -100,12 +104,13 @@ class MovieListViewController: UIViewController {
     private func addSubViews() {
         view.addSubview(searchBar)
         view.addSubview(tableView)
-        view.addSubview(movieSortingIcon)
+        view.addSubview(noMoviesLabel)
     }
     
     private func setupConstraints() {
         setupSearchBarConstraints()
         setupTableViewConstraints()
+        setupNoPlacesLabelConstraints()
     }
     
     private func setupSearchBarConstraints() {
@@ -123,6 +128,14 @@ class MovieListViewController: UIViewController {
         }
     }
     
+    private func setupNoPlacesLabelConstraints() {
+            noMoviesLabel.snp.makeConstraints { (make) -> Void in
+                make.width.equalTo(view)
+                make.center.equalTo(view)
+            }
+    }
+
+    
     private func showSpinner() {
         spinner.show(in: view)
     }
@@ -130,7 +143,6 @@ class MovieListViewController: UIViewController {
     private func hideSpinner() {
         spinner.dismiss()
     }
-
 }
 
 //MARK: - Extensions -
@@ -151,7 +163,6 @@ extension MovieListViewController: UITableViewDataSource {
 extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let movieID = movies[indexPath.row].id
-        print(movieID)
         tableView.deselectRow(at: indexPath, animated: true)
         presenter.tapOnTheMovie(with: movieID)
     }
@@ -166,8 +177,9 @@ extension MovieListViewController: UITableViewDelegate {
         let contentHeight = scrollView.contentSize.height - scrollView.frame.height
         
         if (offsetY > contentHeight - cellHeight && offsetY > currentMaxScrollTableViewHeight - cellHeight) {
+            print("time reload")
             changeTableViewValues(scrollView)
-            getNewMovies()
+            movieSearchText != "" ? getNewMoviesBySearch() : getNewMovies()
         }
     }
     
@@ -182,15 +194,55 @@ extension MovieListViewController: UITableViewDelegate {
     private func getNewMovies() {
         presenter.getMovieList()
     }
+    
+    private func getNewMoviesBySearch() {
+        presenter.getMovieListBySearch(movieSearchText)
+    }
+}
+
+//MARK: - SearchBar Delegate
+extension MovieListViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+        showSpinner()
+        movies.removeAll()
+        resetTableViewValues()
+        guard let text = searchBar.text?.capitalized, !text.replacingOccurrences(of: " ", with: "").isEmpty else {
+            movieSearchText = ""
+            presenter.getMovieList(startAgain: true)
+            return
+        }
+        movieSearchText = text
+        presenter.getMovieListBySearch(text, startAgain: true)
+    }
+    
+    private func resetTableViewValues() {
+        currentMaxScrollTableViewHeight = 0.0
+    }
 }
 
 //MARK: - MovieListViewProtocol -
 extension MovieListViewController: MovieListViewProtocol {
     func setMovieList(_ moviesArray: [Movie]) {
+        self.movies += moviesArray
+        updateList()
+    }
+
+    func updateList() {
         DispatchQueue.main.async {
             self.hideSpinner()
-            self.movies += moviesArray
             self.tableView.reloadData()
+        }
+        
+        guard !movies.isEmpty else {
+            tableView.isHidden = true
+            noMoviesLabel.isHidden = false
+            return
+        }
+        
+        if tableView.isHidden {
+            tableView.isHidden = false
+            noMoviesLabel.isHidden = true
         }
     }
     
@@ -202,18 +254,5 @@ extension MovieListViewController: MovieListViewProtocol {
 }
 
 
-//MARK: - SearchBar Delegate
-extension MovieListViewController: UISearchBarDelegate {
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.resignFirstResponder()
-        showSpinner()
-        movies.removeAll()
-        if let text = searchBar.text?.capitalized, !text.replacingOccurrences(of: " ", with: "").isEmpty {
-            presenter.getMovieListBySearch(text)
-        } else {
-            presenter.getMovieList(startAgain: true)
-        }
-    }
-}
 
 

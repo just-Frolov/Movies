@@ -54,8 +54,9 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         }
     }
     
-    func getMovieListBySearch(_ text: String) {
-        let endPoint = EndPoint.searchMovies(query: text)
+    func getMovieListBySearch(_ text: String, startAgain: Bool = false) {
+        if startAgain { movieListPage = 1 }
+        let endPoint = EndPoint.searchMovies(query: text, page: self.movieListPage)
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
             DispatchQueue.main.async {
@@ -63,6 +64,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                 case.success(let data):
                     guard let searchMoviesArray = data?.results else {return}
                     strongSelf.view?.setMovieList(searchMoviesArray)
+                    strongSelf.movieListPage += 1
                 case.failure(let error):
                     let message = "Failed to get places: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)

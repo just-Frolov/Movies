@@ -36,7 +36,7 @@ class Router: RouterProtocol {
     
     func showInfo(by movieID: Int) {
         if let navigationController = navigationController {
-            guard let infoViewController = assemblyBuilder?.createMovieInfoModule(router: self) else { return }
+            guard let infoViewController = assemblyBuilder?.createMovieInfoModule(router: self, movieID: movieID) else { return }
             navigationController.pushViewController(infoViewController, animated: true)
         }
     }

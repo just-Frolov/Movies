@@ -119,7 +119,7 @@ class MoviesTableViewCell: BaseTableViewCell {
         if let poster = model.backdropPath {
             NetworkService.shared.setImage(imageURL: poster, imageView: moviePoster)
         } else {
-            //imageView?.image = 
+            imageView?.tintColor = .black
         }
     }
     
