@@ -14,8 +14,8 @@ protocol MovieListViewProtocol: AnyObject {
 
 protocol MovieListViewPresenterProtocol: AnyObject {
     init(view: MovieListViewProtocol, router: RouterProtocol)
-    func getMovieList()
-    func tapOnTheMovie(movie: Movie)
+    func getMovieList(startAgain: Bool)
+    func tapOnTheMovie(with id: Int)
 }
 
 class MovieListPresenter: MovieListViewPresenterProtocol {
@@ -35,7 +35,8 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         getMovieList()
     }
     
-    func getMovieList() {
+    func getMovieList(startAgain: Bool = false) {
+        if startAgain { movieListPage = 1 }
         let endPoint = EndPoint.popular(page: self.movieListPage)
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
@@ -46,7 +47,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                     strongSelf.view?.setMovieList(moviesArray)
                     strongSelf.movieListPage += 1
                 case.failure(let error):
-                    let message = "Failed to get places: \(error)"
+                    let message = "Failed to get movies: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
                 }
             }
@@ -70,7 +71,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         }
     }
     
-    func tapOnTheMovie(movie: Movie) {
-        router.showDetail(movie: movie)
+    func tapOnTheMovie(with id: Int) {
+        router.showInfo(by: id)
     }
 }

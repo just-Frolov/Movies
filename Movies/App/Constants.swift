@@ -9,8 +9,9 @@ import Alamofire
 
 struct Constants {
     static let baseURL = "https://api.themoviedb.org/3/"
-    static let apiKey = "a5e9b83ceecaed49515d68d344c79b72"
     static let kApiKey = "api_key="
+    static let apiKey = "a5e9b83ceecaed49515d68d344c79b72"
+    static let kLanguage = "language="
     static let language = "ru"
 }
 
@@ -55,10 +56,12 @@ enum EndPoint {
     }
     
     func fullURLString() -> String {
-        return String(format: "%@%@?api_key=%@&language=%@",
+        return String(format: "%@%@?%@%@&%@%@",
                       Constants.baseURL,
                       self.path,
+                      Constants.kApiKey,
                       Constants.apiKey,
+                      Constants.kLanguage,
                       Constants.language)
     }
 }

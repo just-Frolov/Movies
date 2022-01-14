@@ -24,6 +24,13 @@ class MovieListViewController: UIViewController {
         return table
     }()
     
+    private lazy var movieSortingIcon: UIImageView = {
+        let image = UIImageView()
+        image.contentMode = .scaleAspectFill
+        image.image = UIImage(systemName: "arrow.up.arrow.down.square")
+        return image
+    }()
+    
     //MARK: - Constants -
     private let spinner = JGProgressHUD(style: .dark)
     
@@ -52,8 +59,33 @@ class MovieListViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        title = "Movies"
+        title = "Popular Movies"
+        configureItems()
         setupNavigationBarAppearence()
+    }
+    
+    private func configureItems() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "arrow.up.arrow.down.square.fill"),
+            style: .done,
+            target: self,
+            action: #selector(showSortingActionSheet)
+        )
+    }
+    
+    @objc private func showSortingActionSheet() {
+        let alert = UIAlertController(title: "Sort The Movies", message: nil, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "By Title", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "By Release Data", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "By Average Vote", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
+    
+    private func setupNavigationBarAppearence() {
+        let navAppearance = UINavigationBarAppearance()
+        navigationController?.navigationBar.scrollEdgeAppearance = navAppearance
+        navigationController?.navigationBar.standardAppearance = navAppearance
     }
     
     private func setupTableView() {
@@ -65,15 +97,10 @@ class MovieListViewController: UIViewController {
         searchBar.delegate = self
     }
     
-    private func setupNavigationBarAppearence() {
-        let navAppearance = UINavigationBarAppearance()
-        navigationController?.navigationBar.scrollEdgeAppearance = navAppearance
-        navigationController?.navigationBar.standardAppearance = navAppearance
-    }
-    
     private func addSubViews() {
         view.addSubview(searchBar)
         view.addSubview(tableView)
+        view.addSubview(movieSortingIcon)
     }
     
     private func setupConstraints() {
@@ -123,7 +150,10 @@ extension MovieListViewController: UITableViewDataSource {
 
 extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let movieID = movies[indexPath.row].id
+        print(movieID)
         tableView.deselectRow(at: indexPath, animated: true)
+        presenter.tapOnTheMovie(with: movieID)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -165,7 +195,9 @@ extension MovieListViewController: MovieListViewProtocol {
     }
     
     func showErrorAlert(with message: String) {
-        showAlert("Error", with: message)
+        DispatchQueue.main.async {
+            self.showAlert("Error", with: message)
+        }
     }
 }
 
@@ -173,11 +205,14 @@ extension MovieListViewController: MovieListViewProtocol {
 //MARK: - SearchBar Delegate
 extension MovieListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        guard let text = searchBar.text?.capitalized, !text.replacingOccurrences(of: " ", with: "").isEmpty else { return }
         searchBar.resignFirstResponder()
         showSpinner()
         movies.removeAll()
-        presenter.getMovieListBySearch(text)
+        if let text = searchBar.text?.capitalized, !text.replacingOccurrences(of: " ", with: "").isEmpty {
+            presenter.getMovieListBySearch(text)
+        } else {
+            presenter.getMovieList(startAgain: true)
+        }
     }
 }
 

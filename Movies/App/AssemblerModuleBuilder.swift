@@ -8,26 +8,24 @@
 import UIKit
 
 protocol AssemblerBuilderProtocol {
-    func createMainModule(router: RouterProtocol) -> UIViewController
-    func createDetailModule(router: RouterProtocol) -> UIViewController
+    func createMovieListModule(router: RouterProtocol) -> UIViewController
+    func createMovieInfoModule(router: RouterProtocol) -> UIViewController
 }
 
 class AssemblerModuleBuilder: AssemblerBuilderProtocol {
-    func createMainModule(router: RouterProtocol) -> UIViewController {
+    func createMovieListModule(router: RouterProtocol) -> UIViewController {
         let view = MovieListViewController()
         let presenter = MovieListPresenter(view: view,
-                                            router: router)
+                                           router: router)
         view.presenter = presenter
         return view
     }
     
-    func createDetailModule(router: RouterProtocol) -> UIViewController {
-        let view = MovieListViewController()
-        //        let networkService = NetworkService()
-        //        let presenter = DetailPresenter(view: view,
-        //                                        networkService: networkService, router: router,
-        //                                        comment: comment)
-        //        view.presenter = presenter
+    func createMovieInfoModule(router: RouterProtocol) -> UIViewController {
+        let view = MovieInfoViewController()
+        let presenter = MovieInfoPresenter(view: view,
+                                           router: router)
+        view.presenter = presenter
         return view
     }
 }
