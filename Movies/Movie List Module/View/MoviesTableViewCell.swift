@@ -111,15 +111,17 @@ class MoviesTableViewCell: BaseTableViewCell {
     //MARK: - Internal -
     func configure(with model: Movie) {
         imageView?.image = nil
+        moviePoster.image = nil
         movieTitleLabel.text = model.title
         movieReleaseDataLabel.text = model.releaseDate
         movieGenresLabel.text = "\(model.genreIDS)"
         movieRatingLabel.text = String(model.voteAverage)
         
         if let poster = model.backdropPath {
-            NetworkService.shared.setImage(imageURL: poster, imageView: moviePoster)
+            NetworkService.shared.setImage(imageURL: poster, imageView: self.moviePoster)
         } else {
-            imageView?.tintColor = .black
+            self.imageView?.image = UIImage(systemName: "xmark.circle")
+            self.imageView?.tintColor = .black
         }
     }
     

@@ -134,15 +134,6 @@ class MovieListViewController: UIViewController {
                 make.center.equalTo(view)
             }
     }
-
-    
-    private func showSpinner() {
-        spinner.show(in: view)
-    }
-    
-    private func hideSpinner() {
-        spinner.dismiss()
-    }
 }
 
 //MARK: - Extensions -
@@ -204,7 +195,7 @@ extension MovieListViewController: UITableViewDelegate {
 extension MovieListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
-        showSpinner()
+        showSpinner(spinner)
         movies.removeAll()
         resetTableViewValues()
         guard let text = searchBar.text?.capitalized, !text.replacingOccurrences(of: " ", with: "").isEmpty else {
@@ -230,7 +221,7 @@ extension MovieListViewController: MovieListViewProtocol {
 
     func updateList() {
         DispatchQueue.main.async {
-            self.hideSpinner()
+            self.hideSpinner(self.spinner)
             self.tableView.reloadData()
         }
         

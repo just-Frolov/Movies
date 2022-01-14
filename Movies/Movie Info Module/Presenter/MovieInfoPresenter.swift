@@ -8,7 +8,7 @@
 import UIKit
 
 protocol MovieInfoViewProtocol: AnyObject {
-    func setMovieInfo(_ moviesArray: MovieDetailsData)
+    func setMovieInfo(_ model: MovieDetailsData)
     func showErrorAlert(with message: String)
 }
 
