@@ -53,6 +53,13 @@ class MovieInfoViewController: UIViewController {
         return label
     }()
     
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.clipsToBounds = true
+        scrollView.addSubview(movieInfoView)
+        return scrollView
+    }()
+    
     private lazy var movieInfoView: UIView = {
         let view = UIView()
         view.addSubview(movieTitleLabel)
@@ -71,6 +78,7 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieTitleLabel: UILabel = {
         let label = UILabel()
+        label.sizeToFit()
         label.font = .systemFont(ofSize: 26,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -80,6 +88,7 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieGenresLabel: UILabel = {
         let label = UILabel()
+        label.sizeToFit()
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -89,6 +98,7 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieOverviewLabel: UILabel = {
         let label = UILabel()
+        label.sizeToFit()
         label.font = .systemFont(ofSize: 15,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -99,6 +109,7 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var kMovieOriginalTitleLabel: UILabel = {
         let label = UILabel()
+        label.sizeToFit()
         label.text = "Оригинальное название"
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
@@ -109,6 +120,7 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieOriginalTitleLabel: UILabel = {
         let label = UILabel()
+        label.sizeToFit()
         label.font = .systemFont(ofSize: 15,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -118,6 +130,7 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var kMovieReleaseDateLabel: UILabel = {
         let label = UILabel()
+        label.sizeToFit()
         label.text = "Дата релиза"
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
@@ -128,6 +141,7 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieReleaseDateLabel: UILabel = {
         let label = UILabel()
+        label.sizeToFit()
         label.font = .systemFont(ofSize: 15,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -137,6 +151,7 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var kMovieProductionCountriesLabel: UILabel = {
         let label = UILabel()
+        label.sizeToFit()
         label.text = "Производство"
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
@@ -147,6 +162,7 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieProductionCountriesLabel: UILabel = {
         let label = UILabel()
+        label.sizeToFit()
         label.font = .systemFont(ofSize: 15,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -156,6 +172,7 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var kMovieBudgetLabel: UILabel = {
         let label = UILabel()
+        label.sizeToFit()
         label.text = "Бюджет"
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
@@ -166,6 +183,7 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieBudgetLabel: UILabel = {
         let label = UILabel()
+        label.sizeToFit()
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -199,7 +217,7 @@ class MovieInfoViewController: UIViewController {
     private func addSubViews() {
         view.addSubview(moviePoster)
         view.addSubview(movieRatingBackgroundView)
-        view.addSubview(movieInfoView)
+        view.addSubview(scrollView)
     }
     
     private func setupConstraints() {
@@ -207,6 +225,7 @@ class MovieInfoViewController: UIViewController {
         setupRatingBackgroundViewConstraints()
         setupMovieRatingLabelConstraints()
         setupRatingResourceLabelConstraints()
+        setupScrollViewConstraints()
         setupMovieInfoViewConstraints()
         setupMovieTitleLabelConstraints()
         setupMovieGenresLabelConstraints()
@@ -223,8 +242,8 @@ class MovieInfoViewController: UIViewController {
     
     private func setupMoviePosterConstraints() {
         moviePoster.snp.makeConstraints { make in
-            make.top.equalTo(view).offset(90)
-            make.width.equalTo(view)
+            make.top.equalTo(view.snp_topMargin)
+            make.width.equalToSuperview()
             make.height.lessThanOrEqualTo(200)
         }
     }
@@ -252,9 +271,16 @@ class MovieInfoViewController: UIViewController {
         }
     }
     
+    private func setupScrollViewConstraints() {
+        scrollView.snp.makeConstraints { make in
+            make.width.bottom.equalToSuperview()
+            make.top.equalTo(moviePoster.snp_bottomMargin).offset(80)
+        }
+    }
+    
     private func setupMovieInfoViewConstraints() {
         movieInfoView.snp.makeConstraints { make in
-            make.top.equalTo(moviePoster.snp_bottomMargin).offset(80)
+            make.height.equalTo(scrollView)
             make.left.right.equalTo(view).inset(20)
         }
     }

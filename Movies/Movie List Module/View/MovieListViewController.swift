@@ -54,6 +54,11 @@ class MovieListViewController: UIViewController {
         presenter.viewDidLoad()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        createTitle()
+    }
+    
     //MARK: - Private -
     private func setupView() {
         view.backgroundColor = .white
@@ -63,11 +68,15 @@ class MovieListViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        title = "Popular Movies"
+        createTitle()
         configureItems()
         setupNavigationBarAppearence()
     }
     
+    private func createTitle() {
+        title = "Popular Movies"
+    }
+        
     private func configureItems() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "arrow.up.arrow.down.square"),
@@ -118,7 +127,7 @@ class MovieListViewController: UIViewController {
         searchBar.snp.makeConstraints { (make) -> Void in
             make.width.equalTo(view)
             make.height.equalTo(60)
-            make.top.equalTo(view).offset(90)
+            make.top.equalTo(view.snp_topMargin)
         }
     }
     
