@@ -70,7 +70,7 @@ class MovieListViewController: UIViewController {
     
     private func configureItems() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "arrow.up.arrow.down.square.fill"),
+            image: UIImage(systemName: "arrow.up.arrow.down.square"),
             style: .done,
             target: self,
             action: #selector(showSortingActionSheet)
@@ -90,6 +90,7 @@ class MovieListViewController: UIViewController {
         let navAppearance = UINavigationBarAppearance()
         navigationController?.navigationBar.scrollEdgeAppearance = navAppearance
         navigationController?.navigationBar.standardAppearance = navAppearance
+        
     }
     
     private func setupTableView() {

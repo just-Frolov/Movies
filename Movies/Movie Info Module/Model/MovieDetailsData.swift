@@ -15,12 +15,13 @@ struct MovieDetailsData: Codable {
     let backdropPath: String?
     let productionCountries: [Genre]
     let releaseDate: String?
-    let overview, tagline, title: String
+    let originalTitle, overview, tagline, title: String
     let video: Bool
     let voteAverage: Double
 
     enum CodingKeys: String, CodingKey {
         case budget, genres, id, overview
+        case originalTitle = "original_title"
         case backdropPath = "backdrop_path"
         case productionCountries = "production_countries"
         case releaseDate = "release_date"
@@ -31,5 +32,5 @@ struct MovieDetailsData: Codable {
 
 // MARK: - Genre
 struct Genre: Codable {
-    let name: String
+    var name: String
 }

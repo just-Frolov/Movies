@@ -113,7 +113,7 @@ class MoviesTableViewCell: BaseTableViewCell {
         imageView?.image = nil
         moviePoster.image = nil
         movieTitleLabel.text = model.title
-        movieReleaseDataLabel.text = model.releaseDate
+        movieReleaseDataLabel.text = model.releaseDate?.replace(target: "-", withString: ".")
         movieGenresLabel.text = "\(model.genreIDS)"
         movieRatingLabel.text = String(model.voteAverage)
         

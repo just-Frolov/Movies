@@ -22,4 +22,9 @@ extension UIViewController {
     func hideSpinner(_ spinner: JGProgressHUD) {
         spinner.dismiss()
     }
+    
+    func setupBackButton() {
+        let customBackButton = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
+        navigationItem.backBarButtonItem = customBackButton
+    }
 }

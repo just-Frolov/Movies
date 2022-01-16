@@ -24,7 +24,8 @@ class MovieInfoViewController: UIViewController {
                                        blue: 245/255,
                                        alpha: 1)
         view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOffset = CGSize(width: 0.0, height: -2.0)
+        view.layer.shadowOffset = CGSize(width: 0.0,
+                                         height: -2.0)
         view.layer.shadowRadius = 2.0
         view.layer.shadowOpacity = 0.15
         view.addSubview(movieRatingLabel)
@@ -32,20 +33,142 @@ class MovieInfoViewController: UIViewController {
         return view
     }()
     
+    private lazy var movieRatingLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 20,
+                                 weight: .bold)
+        label.textColor = .black
+        return label
+    }()
+    
     private lazy var ratingResourceLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 14, weight: .bold)
-        label.textColor = UIColor(red: 190/255,
-                                  green: 190/255,
-                                  blue: 190/255,
+        label.font = .systemFont(ofSize: 14,
+                                 weight: .bold)
+        label.textColor = UIColor(red: 170/255,
+                                  green: 170/255,
+                                  blue: 170/255,
                                   alpha: 1)
         label.text = "IMDB"
         return label
     }()
     
-    private lazy var movieRatingLabel: UILabel = {
+    private lazy var movieInfoView: UIView = {
+        let view = UIView()
+        view.addSubview(movieTitleLabel)
+        view.addSubview(movieGenresLabel)
+        view.addSubview(movieOverviewLabel)
+        view.addSubview(kMovieOriginalTitleLabel)
+        view.addSubview(movieOriginalTitleLabel)
+        view.addSubview(kMovieReleaseDateLabel)
+        view.addSubview(movieReleaseDateLabel)
+        view.addSubview(kMovieProductionCountriesLabel)
+        view.addSubview(movieProductionCountriesLabel)
+        view.addSubview(kMovieBudgetLabel)
+        view.addSubview(movieBudgetLabel)
+        return view
+    }()
+    
+    private lazy var movieTitleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 20, weight: .bold)
+        label.font = .systemFont(ofSize: 26,
+                                 weight: .bold)
+        label.numberOfLines = 0
+        label.textColor = .black
+        return label
+    }()
+    
+    private lazy var movieGenresLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14,
+                                 weight: .bold)
+        label.numberOfLines = 0
+        label.textColor = .lightGray
+        return label
+    }()
+    
+    private lazy var movieOverviewLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 15,
+                                 weight: .bold)
+        label.numberOfLines = 0
+        label.textAlignment = .justified
+        label.textColor = .black
+        return label
+    }()
+    
+    private lazy var kMovieOriginalTitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Оригинальное название"
+        label.font = .systemFont(ofSize: 14,
+                                 weight: .bold)
+        label.numberOfLines = 0
+        label.textColor = .lightGray
+        return label
+    }()
+    
+    private lazy var movieOriginalTitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 15,
+                                 weight: .bold)
+        label.numberOfLines = 0
+        label.textColor = .black
+        return label
+    }()
+    
+    private lazy var kMovieReleaseDateLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Дата релиза"
+        label.font = .systemFont(ofSize: 14,
+                                 weight: .bold)
+        label.numberOfLines = 0
+        label.textColor = .lightGray
+        return label
+    }()
+    
+    private lazy var movieReleaseDateLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 15,
+                                 weight: .bold)
+        label.numberOfLines = 0
+        label.textColor = .black
+        return label
+    }()
+    
+    private lazy var kMovieProductionCountriesLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Производство"
+        label.font = .systemFont(ofSize: 14,
+                                 weight: .bold)
+        label.numberOfLines = 0
+        label.textColor = .lightGray
+        return label
+    }()
+    
+    private lazy var movieProductionCountriesLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 15,
+                                 weight: .bold)
+        label.numberOfLines = 0
+        label.textColor = .black
+        return label
+    }()
+    
+    private lazy var kMovieBudgetLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Бюджет"
+        label.font = .systemFont(ofSize: 14,
+                                 weight: .bold)
+        label.numberOfLines = 0
+        label.textColor = .lightGray
+        return label
+    }()
+    
+    private lazy var movieBudgetLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14,
+                                 weight: .bold)
+        label.numberOfLines = 0
         label.textColor = .black
         return label
     }()
@@ -67,10 +190,16 @@ class MovieInfoViewController: UIViewController {
     }
     
     //MARK: - Private -
+    private func setupView() {
+        navigationController?.navigationBar.topItem?.title = " ";
+        view.backgroundColor = .white
+        showSpinner(spinner)
+    }
+    
     private func addSubViews() {
         view.addSubview(moviePoster)
         view.addSubview(movieRatingBackgroundView)
-        view.addSubview(movieRatingLabel)
+        view.addSubview(movieInfoView)
     }
     
     private func setupConstraints() {
@@ -78,6 +207,18 @@ class MovieInfoViewController: UIViewController {
         setupRatingBackgroundViewConstraints()
         setupMovieRatingLabelConstraints()
         setupRatingResourceLabelConstraints()
+        setupMovieInfoViewConstraints()
+        setupMovieTitleLabelConstraints()
+        setupMovieGenresLabelConstraints()
+        setupMovieOverviewLabelConstraints()
+        setupKOriginalTitleLabelConstraints()
+        setupOriginalTitleLabelConstraints()
+        setupKReleaseDataLabelConstraints()
+        setupReleaseDataLabelConstraints()
+        setupKProductionCountriesLabelConstraints()
+        setupProductionCountriesLabelConstraints()
+        setupKBudgetLabelConstraints()
+        setupBudgetLabelConstraints()
     }
     
     private func setupMoviePosterConstraints() {
@@ -111,25 +252,124 @@ class MovieInfoViewController: UIViewController {
         }
     }
     
-    private func setupView() {
-        view.backgroundColor = .white
-        showSpinner(spinner)
+    private func setupMovieInfoViewConstraints() {
+        movieInfoView.snp.makeConstraints { make in
+            make.top.equalTo(moviePoster.snp_bottomMargin).offset(80)
+            make.left.right.equalTo(view).inset(20)
+        }
+    }
+    
+    private func setupMovieTitleLabelConstraints() {
+        movieTitleLabel.snp.makeConstraints { make in
+            make.top.left.right.equalToSuperview()
+        }
+    }
+    
+    private func setupMovieGenresLabelConstraints() {
+        movieGenresLabel.snp.makeConstraints { make in
+            make.top.equalTo(movieTitleLabel.snp_bottomMargin).offset(15)
+            make.left.right.equalToSuperview()
+        }
+    }
+    
+    private func setupMovieOverviewLabelConstraints() {
+        movieOverviewLabel.snp.makeConstraints { make in
+            make.top.equalTo(movieGenresLabel.snp_bottomMargin).offset(30)
+            make.left.right.equalToSuperview()
+        }
+    }
+    
+    private func setupKOriginalTitleLabelConstraints() {
+        kMovieOriginalTitleLabel.snp.makeConstraints { make in
+            make.top.equalTo(movieOverviewLabel.snp_bottomMargin).offset(30)
+            make.left.right.equalToSuperview()
+        }
+    }
+    
+    private func setupOriginalTitleLabelConstraints() {
+        movieOriginalTitleLabel.snp.makeConstraints { make in
+            make.top.equalTo(kMovieOriginalTitleLabel.snp_bottomMargin).offset(15)
+            make.left.right.equalToSuperview()
+        }
+    }
+    
+    private func setupKReleaseDataLabelConstraints() {
+        kMovieReleaseDateLabel.snp.makeConstraints { make in
+            make.top.equalTo(movieOriginalTitleLabel.snp_bottomMargin).offset(30)
+            make.left.right.equalToSuperview()
+        }
+    }
+    
+    private func setupReleaseDataLabelConstraints() {
+        movieReleaseDateLabel.snp.makeConstraints { make in
+            make.top.equalTo(kMovieReleaseDateLabel.snp_bottomMargin).offset(15)
+            make.left.right.equalToSuperview()
+        }
+    }
+    
+    private func setupKProductionCountriesLabelConstraints() {
+        kMovieProductionCountriesLabel.snp.makeConstraints { make in
+            make.top.equalTo(movieReleaseDateLabel.snp_bottomMargin).offset(30)
+            make.left.right.equalToSuperview()
+        }
+    }
+    
+    private func setupProductionCountriesLabelConstraints() {
+        movieProductionCountriesLabel.snp.makeConstraints { make in
+            make.top.equalTo(kMovieProductionCountriesLabel.snp_bottomMargin).offset(15)
+            make.left.right.equalToSuperview()
+        }
+    }
+    
+    private func setupKBudgetLabelConstraints() {
+        kMovieBudgetLabel.snp.makeConstraints { make in
+            make.top.equalTo(movieProductionCountriesLabel.snp_bottomMargin).offset(30)
+            make.left.right.equalToSuperview()
+        }
+    }
+    
+    private func setupBudgetLabelConstraints() {
+        movieBudgetLabel.snp.makeConstraints { make in
+            make.top.equalTo(kMovieBudgetLabel.snp_bottomMargin).offset(15)
+            make.left.right.equalToSuperview()
+        }
     }
 }
 
-
+//MARK: - Extension -
+//MARK: - MovieInfoViewProtocol -
 extension MovieInfoViewController: MovieInfoViewProtocol {
     func setMovieInfo(_ model: MovieDetailsData) {
         self.hideSpinner(self.spinner)
-        self.title = model.title
-        self.movieRatingLabel.text = String(model.voteAverage)
-        
+        configure(with: model)
         
         if let poster = model.backdropPath {
-            NetworkService.shared.setImage(imageURL: poster, imageView: self.moviePoster)
+            NetworkService.shared.setImage(imageURL: poster,
+                                           imageView: self.moviePoster)
         } else {
             self.moviePoster.image = UIImage(systemName: "xmark.circle")
             self.moviePoster.tintColor = .black
+        }
+    }
+    
+    func configure(with model: MovieDetailsData) {
+        var genresArray = ""
+        for genre in model.genres {
+            genresArray.addingDevidingPrefixIfNeeded()
+            genresArray += genre.name.capitalizingFirstLetter()
+        }
+        
+        DispatchQueue.main.async {
+            self.title = model.title
+            self.movieRatingLabel.text = String(model.voteAverage)
+            self.movieTitleLabel.text = model.title
+            self.movieGenresLabel.text = genresArray
+            self.movieOverviewLabel.text = model.overview
+            self.movieOriginalTitleLabel.text = model.originalTitle
+            self.movieReleaseDateLabel.text = model.releaseDate?.replace(target: "-",
+                                                                         withString: ".")
+            self.movieProductionCountriesLabel.text = model.productionCountries[0].name
+            self.movieBudgetLabel.text = String(model.budget) + "₴"
         }
     }
     
