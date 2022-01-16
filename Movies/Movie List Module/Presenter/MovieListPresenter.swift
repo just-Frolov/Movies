@@ -14,7 +14,9 @@ protocol MovieListViewProtocol: AnyObject {
 
 protocol MovieListViewPresenterProtocol: AnyObject {
     init(view: MovieListViewProtocol, router: RouterProtocol)
+    func viewDidLoad()
     func getMovieList(startAgain: Bool)
+    func getMovieListBySearch(_ text: String, startAgain: Bool)
     func tapOnTheMovie(with id: Int)
 }
 

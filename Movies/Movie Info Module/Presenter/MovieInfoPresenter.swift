@@ -14,8 +14,10 @@ protocol MovieInfoViewProtocol: AnyObject {
 
 protocol MovieInfoViewPresenterProtocol: AnyObject {
     init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?)
+    func viewDidLoad()
     func getMovieInfo()
-    func tapOnThePoster(movieID: Int)
+    func tapOnThePoster()
+    func tapOnTheTrailer()
 }
 
 class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
@@ -56,8 +58,18 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
         }
     }
     
-    func tapOnThePoster(movieID: Int) {
+    func tapOnThePoster() {
+        guard let movieID = movieID else {
+            return
+        }
         router?.showInfo(by: movieID)
+    }
+    
+    func tapOnTheTrailer() {
+        guard let movieID = movieID else {
+            return
+        }
+        router?.showTrailer(by: movieID)
     }
 }
 

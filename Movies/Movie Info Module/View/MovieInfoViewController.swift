@@ -16,6 +16,19 @@ class MovieInfoViewController: UIViewController {
         return image
     }()
     
+    private lazy var movieTrailerButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .white
+        button.setImage(UIImage(systemName: "play.circle.fill"),
+                        for: .normal)
+        button.imageView?.tintColor = .red
+        button.layer.cornerRadius = 20
+        button.addTarget(self,
+                         action: #selector(trailerButtonPressed),
+                         for: .touchUpInside)
+        return button
+    }()
+    
     private lazy var movieRatingBackgroundView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 5
@@ -23,11 +36,11 @@ class MovieInfoViewController: UIViewController {
                                        green: 245/255,
                                        blue: 245/255,
                                        alpha: 1)
-        view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOffset = CGSize(width: 0.0,
-                                         height: -2.0)
-        view.layer.shadowRadius = 2.0
-        view.layer.shadowOpacity = 0.15
+//        view.layer.shadowColor = UIColor.black.cgColor
+//        view.layer.shadowOffset = CGSize(width: 0.0,
+//                                         height: -2.0)
+//        view.layer.shadowRadius = 2.0
+//        view.layer.shadowOpacity = 0.15
         view.addSubview(movieRatingLabel)
         view.addSubview(ratingResourceLabel)
         return view
@@ -78,7 +91,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieTitleLabel: UILabel = {
         let label = UILabel()
-        label.sizeToFit()
         label.font = .systemFont(ofSize: 26,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -88,7 +100,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieGenresLabel: UILabel = {
         let label = UILabel()
-        label.sizeToFit()
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -98,7 +109,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieOverviewLabel: UILabel = {
         let label = UILabel()
-        label.sizeToFit()
         label.font = .systemFont(ofSize: 15,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -109,7 +119,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var kMovieOriginalTitleLabel: UILabel = {
         let label = UILabel()
-        label.sizeToFit()
         label.text = "Оригинальное название"
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
@@ -120,7 +129,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieOriginalTitleLabel: UILabel = {
         let label = UILabel()
-        label.sizeToFit()
         label.font = .systemFont(ofSize: 15,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -130,7 +138,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var kMovieReleaseDateLabel: UILabel = {
         let label = UILabel()
-        label.sizeToFit()
         label.text = "Дата релиза"
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
@@ -141,7 +148,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieReleaseDateLabel: UILabel = {
         let label = UILabel()
-        label.sizeToFit()
         label.font = .systemFont(ofSize: 15,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -151,7 +157,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var kMovieProductionCountriesLabel: UILabel = {
         let label = UILabel()
-        label.sizeToFit()
         label.text = "Производство"
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
@@ -162,7 +167,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieProductionCountriesLabel: UILabel = {
         let label = UILabel()
-        label.sizeToFit()
         label.font = .systemFont(ofSize: 15,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -172,7 +176,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var kMovieBudgetLabel: UILabel = {
         let label = UILabel()
-        label.sizeToFit()
         label.text = "Бюджет"
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
@@ -183,7 +186,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var movieBudgetLabel: UILabel = {
         let label = UILabel()
-        label.sizeToFit()
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
         label.numberOfLines = 0
@@ -195,8 +197,7 @@ class MovieInfoViewController: UIViewController {
     private let spinner = JGProgressHUD(style: .light)
     
     //MARK: - Variables -
-    var presenter: MovieInfoPresenter!
-    var movieID: Int!
+    var presenter: MovieInfoViewPresenterProtocol!
     
     //MARK: - Life Cycle -
     override func viewDidLoad() {
@@ -216,12 +217,14 @@ class MovieInfoViewController: UIViewController {
     
     private func addSubViews() {
         view.addSubview(moviePoster)
+        view.addSubview(movieTrailerButton)
         view.addSubview(movieRatingBackgroundView)
         view.addSubview(scrollView)
     }
     
     private func setupConstraints() {
         setupMoviePosterConstraints()
+        setupMovieTrailerButtonConstraints()
         setupRatingBackgroundViewConstraints()
         setupMovieRatingLabelConstraints()
         setupRatingResourceLabelConstraints()
@@ -245,6 +248,13 @@ class MovieInfoViewController: UIViewController {
             make.top.equalTo(view.snp_topMargin)
             make.width.equalToSuperview()
             make.height.lessThanOrEqualTo(200)
+        }
+    }
+    
+    private func setupMovieTrailerButtonConstraints() {
+        movieTrailerButton.snp.makeConstraints { make in
+            make.center.equalTo(moviePoster)
+            make.height.width.equalTo(40)
         }
     }
     
@@ -273,7 +283,7 @@ class MovieInfoViewController: UIViewController {
     
     private func setupScrollViewConstraints() {
         scrollView.snp.makeConstraints { make in
-            make.width.bottom.equalToSuperview()
+            make.left.right.bottom.equalToSuperview()
             make.top.equalTo(moviePoster.snp_bottomMargin).offset(80)
         }
     }
@@ -360,6 +370,10 @@ class MovieInfoViewController: UIViewController {
             make.left.right.equalToSuperview()
         }
     }
+    
+    @objc private func trailerButtonPressed() {
+        presenter.tapOnTheTrailer()
+    }
 }
 
 //MARK: - Extension -
@@ -385,6 +399,13 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
             genresArray += genre.name.capitalizingFirstLetter()
         }
         
+        var production = ""
+        if model.productionCountries.isEmpty {
+            production = "No Info"
+        }  else {
+            production = model.productionCountries[0].name
+        }
+        
         DispatchQueue.main.async {
             self.title = model.title
             self.movieRatingLabel.text = String(model.voteAverage)
@@ -394,9 +415,13 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
             self.movieOriginalTitleLabel.text = model.originalTitle
             self.movieReleaseDateLabel.text = model.releaseDate?.replace(target: "-",
                                                                          withString: ".")
-            self.movieProductionCountriesLabel.text = model.productionCountries[0].name
+            self.movieProductionCountriesLabel.text = production
             self.movieBudgetLabel.text = String(model.budget) + "₴"
         }
+    }
+    
+    func playMovieVideo(with id: String) {
+        print(id)
     }
     
     func showErrorAlert(with message: String) {

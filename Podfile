@@ -8,5 +8,6 @@ target 'Movies' do
   pod 'Kingfisher'
   pod 'JGProgressHUD'
   pod 'SnapKit'
+  pod 'youtube-ios-player-helper'
     
 end

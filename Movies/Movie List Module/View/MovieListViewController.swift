@@ -38,7 +38,7 @@ class MovieListViewController: UIViewController {
     private let spinner = JGProgressHUD(style: .dark)
     
     //MARK: - Variables -
-    var presenter: MovieListPresenter!
+    var presenter: MovieListViewPresenterProtocol!
     private var movies: [Movie] = []
     private var initialScrollTableViewHeight: CGFloat = 0.0
     private var currentMaxScrollTableViewHeight: CGFloat = 0.0
@@ -120,7 +120,7 @@ class MovieListViewController: UIViewController {
     private func setupConstraints() {
         setupSearchBarConstraints()
         setupTableViewConstraints()
-        setupNoPlacesLabelConstraints()
+        setupNoMoviesLabelConstraints()
     }
     
     private func setupSearchBarConstraints() {
@@ -138,7 +138,7 @@ class MovieListViewController: UIViewController {
         }
     }
     
-    private func setupNoPlacesLabelConstraints() {
+    private func setupNoMoviesLabelConstraints() {
             noMoviesLabel.snp.makeConstraints { (make) -> Void in
                 make.width.equalTo(view)
                 make.center.equalTo(view)
@@ -193,11 +193,11 @@ extension MovieListViewController: UITableViewDelegate {
     }
     
     private func getNewMovies() {
-        presenter.getMovieList()
+        presenter.getMovieList(startAgain: false)
     }
     
     private func getNewMoviesBySearch() {
-        presenter.getMovieListBySearch(movieSearchText)
+        presenter.getMovieListBySearch(movieSearchText, startAgain: false)
     }
 }
 
