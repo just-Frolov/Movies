@@ -68,7 +68,6 @@ class MovieInfoViewController: UIViewController {
     
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
-        scrollView.clipsToBounds = true
         scrollView.addSubview(movieInfoView)
         return scrollView
     }()
@@ -208,6 +207,12 @@ class MovieInfoViewController: UIViewController {
         setupConstraints()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        scrollView.contentSize = CGSize(width: view.frame.width,
+                                        height: 800)
+    }
+    
     //MARK: - Private -
     private func setupView() {
         navigationController?.navigationBar.topItem?.title = " ";
@@ -290,7 +295,7 @@ class MovieInfoViewController: UIViewController {
     
     private func setupMovieInfoViewConstraints() {
         movieInfoView.snp.makeConstraints { make in
-            make.height.equalTo(scrollView)
+            make.bottom.top.equalTo(scrollView)
             make.left.right.equalTo(view).inset(20)
         }
     }
@@ -387,8 +392,7 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
             NetworkService.shared.setImage(imageURL: poster,
                                            imageView: self.moviePoster)
         } else {
-            self.moviePoster.image = UIImage(systemName: "xmark.circle")
-            self.moviePoster.tintColor = .black
+            self.moviePoster.image = UIImage(named: "noImageFound")
         }
     }
     

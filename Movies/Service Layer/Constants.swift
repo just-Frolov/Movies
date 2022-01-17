@@ -6,6 +6,7 @@
 //
 
 import Alamofire
+import SwiftUI
 
 struct Constants {
     static let baseURL = "https://api.themoviedb.org/3/"
@@ -17,6 +18,7 @@ struct Constants {
 
 enum EndPoint {
     case popular(page: Int)
+    case genres
     case searchMovies(query: String, page: Int)
     case movieDetails(id: Int)
     case movieTrailer(id: Int)
@@ -25,6 +27,8 @@ enum EndPoint {
         switch self {
         case .popular:
             return "movie/popular"
+        case .genres:
+            return "genre/movie/list"
         case .searchMovies:
             return "search/movie"
         case .movieDetails(let id):
@@ -37,6 +41,7 @@ enum EndPoint {
     var method: HTTPMethod {
         switch self {
         case .popular,
+                .genres,
                 .searchMovies,
                 .movieDetails,
                 .movieTrailer:
@@ -47,6 +52,7 @@ enum EndPoint {
     var encoding: ParameterEncoding {
         switch self {
         case .popular,
+                .genres,
                 .searchMovies,
                 .movieDetails,
                 .movieTrailer:
@@ -60,6 +66,8 @@ enum EndPoint {
         switch self {
         case .popular(page: let page):
             return ["page": page]
+        case .genres:
+            return ["": ""]
         case .searchMovies(query: let query, page: let page):
             return ["query": query, "page": page]
         case .movieDetails(_):

@@ -120,8 +120,7 @@ class MoviesTableViewCell: BaseTableViewCell {
         if let poster = model.backdropPath {
             NetworkService.shared.setImage(imageURL: poster, imageView: self.moviePoster)
         } else {
-            self.imageView?.image = UIImage(systemName: "xmark.circle")
-            self.imageView?.tintColor = .black
+            moviePoster.image = UIImage(named: "noImageFound")
         }
     }
     
