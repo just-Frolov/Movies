@@ -43,6 +43,7 @@ class MovieListViewController: UIViewController {
     private var initialScrollTableViewHeight: CGFloat = 0.0
     private var currentMaxScrollTableViewHeight: CGFloat = 0.0
     private var movieSearchText = ""
+    private var movieSort = "Popular"
     
     //MARK: - Life Cycle -
     override func viewDidLoad() {
@@ -88,11 +89,27 @@ class MovieListViewController: UIViewController {
     
     @objc private func showSortingActionSheet() {
         let alert = UIAlertController(title: "Sort The Movies", message: nil, preferredStyle: .actionSheet)
-        alert.addAction(UIAlertAction(title: "By Title", style: .default, handler: nil))
-        alert.addAction(UIAlertAction(title: "By Release Data", style: .default, handler: nil))
-        alert.addAction(UIAlertAction(title: "By Average Vote", style: .default, handler: nil))
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "By Popularity",
+                                      style: .default,
+                                      handler: { _ in
+            self.sortList(by: "Popular")
+        }))
+        alert.addAction(UIAlertAction(title: "By Average Vote",
+                                      style: .default,
+                                      handler: { _ in
+            self.sortList(by: "AverageVote")
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel",
+                                      style: .cancel,
+                                      handler: nil))
         present(alert, animated: true, completion: nil)
+    }
+    
+    private func sortList(by sort: String) {
+        showSpinner(self.spinner)
+        movieSort = sort
+        movies.removeAll()
+        presenter.getMovieList(by: sort, startAgain: true)
     }
     
     private func setupNavigationBarAppearence() {
@@ -193,7 +210,7 @@ extension MovieListViewController: UITableViewDelegate {
     }
     
     private func getNewMovies() {
-        presenter.getMovieList(startAgain: false)
+        presenter.getMovieList(by: movieSort, startAgain: false)
     }
     
     private func getNewMoviesBySearch() {
@@ -210,7 +227,7 @@ extension MovieListViewController: UISearchBarDelegate {
         resetTableViewValues()
         guard let text = searchBar.text?.capitalized, !text.replacingOccurrences(of: " ", with: "").isEmpty else {
             movieSearchText = ""
-            presenter.getMovieList(startAgain: true)
+            presenter.getMovieList(by: movieSort, startAgain: true)
             return
         }
         movieSearchText = text
