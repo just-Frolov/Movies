@@ -15,7 +15,7 @@ protocol MovieListViewProtocol: AnyObject {
 protocol MovieListViewPresenterProtocol: AnyObject {
     init(view: MovieListViewProtocol, router: RouterProtocol)
     func viewDidLoad()
-    func getMovieList(startAgain: Bool)
+    func getMovieList(by sort: String, startAgain: Bool)
     func getMovieListBySearch(_ text: String, startAgain: Bool)
     func tapOnTheMovie(with id: Int)
 }
@@ -37,9 +37,19 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         getMovieList()
     }
     
-    func getMovieList(startAgain: Bool = false) {
+    func getMovieList(by sort: String = "Popular", startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
-        let endPoint = EndPoint.popular(page: self.movieListPage)
+        var sortBy = ""
+        if sort == "Popular" {
+            sortBy = "popularity.desc"
+        } else {
+            sortBy = "vote_average.desc"
+        }
+        let endPoint = EndPoint.list(sort: sortBy, page: movieListPage)
+        request(with: endPoint)
+    }
+    
+    private func request(with endPoint: EndPoint) {
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
             DispatchQueue.main.async {
