@@ -194,7 +194,7 @@ extension MovieListViewController: UITableViewDelegate {
         let cellHeight = CGFloat(230)
         let contentHeight = scrollView.contentSize.height - scrollView.frame.height
         
-        if (offsetY > contentHeight - cellHeight && offsetY > currentMaxScrollTableViewHeight - cellHeight) {
+        if (offsetY > contentHeight - cellHeight*3 && offsetY > currentMaxScrollTableViewHeight - cellHeight*3) {
             print("time reload")
             changeTableViewValues(scrollView)
             movieSearchText != "" ? getNewMoviesBySearch() : getNewMovies()

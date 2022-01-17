@@ -114,14 +114,24 @@ class MoviesTableViewCell: BaseTableViewCell {
         moviePoster.image = nil
         movieTitleLabel.text = model.title
         movieReleaseDataLabel.text = model.releaseDate?.replace(target: "-", withString: ".")
-        movieGenresLabel.text = "\(model.genreIDS)"
         movieRatingLabel.text = String(model.voteAverage)
         
         if let poster = model.backdropPath {
             NetworkService.shared.setImage(imageURL: poster, imageView: self.moviePoster)
         } else {
             moviePoster.image = UIImage(named: "noImageFound")
+            movieTitleLabel.textColor = .black
         }
+        
+        var genreList = ""
+        var genreName = ""
+        for genre in model.genreIDS {
+            genreName = Genres.shared.getGenreName(id: genre)
+            genreList.addingDevidingPrefixIfNeeded()
+            genreList += genreName.capitalizingFirstLetter()
+        }
+        
+        movieGenresLabel.text = genreList
     }
     
     //MARK: - Private -
@@ -187,6 +197,18 @@ class MoviesTableViewCell: BaseTableViewCell {
         }
     }
     
+    private func setupMovieGenresBackgroundViewConstraints() {
+        movieGenresBackgroundView.snp.makeConstraints { (make) -> Void in
+            make.left.top.equalTo(movieGenresLabel).offset(-3)
+            make.right.bottom.equalTo(movieGenresLabel).offset(3)
+        }
+    }
+    
+    private func setupMovieGenresLabelConstraints() {
+        movieGenresLabel.snp.makeConstraints { (make) -> Void in
+            make.left.top.equalTo(movieView).offset(20)
+        }
+    }
     
     private func setupMovieDataBackgroundViewConstraints() {
         movieDataBackgroundView.snp.makeConstraints { (make) -> Void in
@@ -197,21 +219,8 @@ class MoviesTableViewCell: BaseTableViewCell {
     
     private func setupMovieReleaseDataLabelConstraints() {
         movieReleaseDataLabel.snp.makeConstraints { (make) -> Void in
-            make.left.top.equalTo(movieView).offset(20)
-        }
-    }
-    
-    private func setupMovieGenresBackgroundViewConstraints() {
-        movieGenresBackgroundView.snp.makeConstraints { (make) -> Void in
-            make.left.top.equalTo(movieGenresLabel).offset(-3)
-            make.right.bottom.equalTo(movieGenresLabel).offset(3)
-        }
-    }
-    
-    private func setupMovieGenresLabelConstraints() {
-        movieGenresLabel.snp.makeConstraints { (make) -> Void in
             make.left.equalTo(movieView).offset(20)
-            make.top.equalTo(movieReleaseDataLabel.snp_bottomMargin).offset(20)
+            make.top.equalTo(movieGenresLabel.snp_bottomMargin).offset(20)
         }
     }
 }
