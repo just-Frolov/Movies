@@ -15,17 +15,15 @@ struct MovieDetailsData: Codable {
     let backdropPath: String?
     let productionCountries: [Genre]
     let releaseDate: String?
-    let originalTitle, overview, tagline, title: String
-    let video: Bool
+    let originalTitle, overview, title: String
     let voteAverage: Double
 
     enum CodingKeys: String, CodingKey {
-        case budget, genres, id, overview
+        case budget, genres, id, overview, title
         case originalTitle = "original_title"
         case backdropPath = "backdrop_path"
         case productionCountries = "production_countries"
         case releaseDate = "release_date"
-        case tagline, title, video
         case voteAverage = "vote_average"
     }
 }

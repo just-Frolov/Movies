@@ -126,7 +126,7 @@ class MoviesTableViewCell: BaseTableViewCell {
         var genreList = ""
         var genreName = ""
         for genre in model.genreIDS {
-            genreName = Genres.shared.getGenreName(id: genre)
+            genreName = GenreListConfigurable.shared.getGenreName(id: genre)
             genreList.addingDevidingPrefixIfNeeded()
             genreList += genreName.capitalizingFirstLetter()
         }

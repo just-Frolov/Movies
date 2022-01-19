@@ -46,7 +46,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                 switch result {
                 case.success(let data):
                     guard let genresArray = data else {return}
-                    Genres.shared.genreList = genresArray
+                    GenreListConfigurable.shared.genreList = genresArray
                 case.failure(let error):
                     let message = "Failed to get genres: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)

@@ -7,8 +7,6 @@
 
 import Foundation
 
-
-
 // MARK: - GenreData
 struct GenreData: Codable {
     let genres: [MainGenre]
@@ -20,8 +18,8 @@ struct MainGenre: Codable {
     let name: String
 }
 
-class Genres {
-    static let shared = Genres()
+class GenreListConfigurable {
+    static let shared = GenreListConfigurable()
     
     var genreList: GenreData!
     
