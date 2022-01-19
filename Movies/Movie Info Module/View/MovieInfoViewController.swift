@@ -23,23 +23,11 @@ class MovieInfoViewController: UIViewController {
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.separatorStyle = .none
+        table.allowsSelection = false
         InfoTableViewCell.register(in: table)
+        table.register(InfoTableViewHeader.self,
+                       forHeaderFooterViewReuseIdentifier: InfoTableViewHeader.identifier)
         return table
-    }()
-    
-    private lazy var tableViewHeader: UIView = {
-        let header = UIView()
-        header.addSubview(movieTitleLabel)
-        return header
-    }()
-    
-    private lazy var movieTitleLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 25,
-                                 weight: .bold)
-        label.numberOfLines = 0
-        label.textColor = .black
-        return label
     }()
     
     //MARK: - Constants -
@@ -47,6 +35,7 @@ class MovieInfoViewController: UIViewController {
     
     //MARK: - Variables -
     var presenter: MovieInfoViewPresenterProtocol!
+    private var movieTitle = String()
     private var movieInfo = [String: String]()
     
     //MARK: - Life Cycle -
@@ -76,15 +65,12 @@ class MovieInfoViewController: UIViewController {
         view.addSubview(playerView)
         view.addSubview(moviePoster)
         view.addSubview(tableView)
-        view.addSubview(tableViewHeader)
     }
     
     private func setupConstraints() {
         setupPlayerViewConstraints()
         setupMoviePosterConstraints()
         setupTableViewConstraints()
-        setupTableViewHeaderConstraints()
-        setupMovieTitleLabelConstraints()
     }
     
     private func setupPlayerViewConstraints() {
@@ -109,22 +95,6 @@ class MovieInfoViewController: UIViewController {
             make.left.right.bottom.equalToSuperview()
         }
     }
-    
-    private func setupTableViewHeaderConstraints() {
-        tableViewHeader.snp.makeConstraints { make in
-            make.width.equalTo(tableView)
-            make.height.equalTo(60)
-        }
-    }
-    
-    private func setupMovieTitleLabelConstraints() {
-        movieTitleLabel.snp.makeConstraints { make in
-            make.width.lessThanOrEqualToSuperview().offset(-40)
-            make.height.equalToSuperview()
-            make.left.equalToSuperview().offset(20)
-            make.right.equalToSuperview().offset(-20).priority(.required)
-        }
-    }
 }
 
 //MARK: - Extension -
@@ -145,16 +115,10 @@ extension MovieInfoViewController: UITableViewDataSource {
 
 //MARK: - UITableViewDelegate -
 extension MovieInfoViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-    }
-    
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        return tableViewHeader
-    }
-    
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 60
+        let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: InfoTableViewHeader.identifier) as? InfoTableViewHeader
+        header?.configure(title: movieTitle)
+        return header
     }
 }
 
@@ -194,7 +158,7 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
     private func setMovieDetails(from model: MovieDetailsData) {
         let movieGenres = createGenreList(by: model.genres) ?? "No Info"
         let movieBudget = createDecimalNumber(from: model.budget) ?? "No Info"
-        movieTitleLabel.text = model.title
+        movieTitle = model.title
         movieInfo[TableViewCellType.genres.rawValue] = movieGenres
         movieInfo[TableViewCellType.description.rawValue] = model.overview
         movieInfo[TableViewCellType.rating.rawValue] = String(model.voteAverage)
@@ -204,7 +168,7 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
         movieInfo[TableViewCellType.budget.rawValue] = movieBudget
     }
     
-    private func createGenreList(by genreArray: [Genre]) -> String? {
+    private func createGenreList(by genreArray: [DataName]) -> String? {
         var genreList = String()
         for genre in genreArray {
             genreList.addingDevidingPrefixIfNeeded()

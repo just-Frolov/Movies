@@ -9,11 +9,11 @@ import Foundation
 
 // MARK: - GenreData
 struct GenreData: Codable {
-    let genres: [MainGenre]
+    let genres: [Genre]
 }
 
 // MARK: - Genre
-struct MainGenre: Codable {
+struct Genre: Codable {
     let id: Int
     let name: String
 }

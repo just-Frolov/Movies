@@ -30,6 +30,7 @@
 		B096EAE9278CD2C300B1C362 /* BaseTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B096EAE8278CD2C300B1C362 /* BaseTableViewCell.swift */; };
 		B096EAEB278D9FF700B1C362 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B096EAEA278D9FF700B1C362 /* UIViewController.swift */; };
 		B0D754FB2796D554001B96DA /* MovieTrailerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D754FA2796D554001B96DA /* MovieTrailerData.swift */; };
+		B0D754FD27984CB8001B96DA /* InfoTableViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D754FC27984CB8001B96DA /* InfoTableViewHeader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +61,7 @@
 		B096EAE8278CD2C300B1C362 /* BaseTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTableViewCell.swift; sourceTree = "<group>"; };
 		B096EAEA278D9FF700B1C362 /* UIViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewController.swift; sourceTree = "<group>"; };
 		B0D754FA2796D554001B96DA /* MovieTrailerData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieTrailerData.swift; sourceTree = "<group>"; };
+		B0D754FC27984CB8001B96DA /* InfoTableViewHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoTableViewHeader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,11 +119,9 @@
 		B0212D37278C7A1300CA85E7 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				B0212D29278C733F00CA85E7 /* Main.storyboard */,
-				B0212D23278C733F00CA85E7 /* AppDelegate.swift */,
-				B0212D25278C733F00CA85E7 /* SceneDelegate.swift */,
-				B0212D3E278C7CE600CA85E7 /* Router.swift */,
-				B0212D40278C7DB000CA85E7 /* AssemblerModuleBuilder.swift */,
+				B0D755002798562D001B96DA /* Resource */,
+				B0D754FF27985624001B96DA /* Model */,
+				B0D754FE27985615001B96DA /* View */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -150,7 +150,6 @@
 			children = (
 				B0212D27278C733F00CA85E7 /* MovieListViewController.swift */,
 				B096EAE6278CD28500B1C362 /* MoviesTableViewCell.swift */,
-				B096EAE8278CD2C300B1C362 /* BaseTableViewCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -158,8 +157,8 @@
 		B0212D3B278C7B1E00CA85E7 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				B0212D46278C8B8E00CA85E7 /* MovieData.swift */,
 				B090771927957DB800AD46DD /* GenreData.swift */,
+				B0212D46278C8B8E00CA85E7 /* MovieData.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -213,6 +212,7 @@
 			children = (
 				B064D2B0279168DA00301B4F /* MovieInfoViewController.swift */,
 				B090771B2795B73D00AD46DD /* InfoTableViewCell.swift */,
+				B0D754FC27984CB8001B96DA /* InfoTableViewHeader.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -224,6 +224,33 @@
 				B0545B1227938927009410D8 /* String.swift */,
 			);
 			path = Extension;
+			sourceTree = "<group>";
+		};
+		B0D754FE27985615001B96DA /* View */ = {
+			isa = PBXGroup;
+			children = (
+				B096EAE8278CD2C300B1C362 /* BaseTableViewCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		B0D754FF27985624001B96DA /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		B0D755002798562D001B96DA /* Resource */ = {
+			isa = PBXGroup;
+			children = (
+				B0212D23278C733F00CA85E7 /* AppDelegate.swift */,
+				B0212D25278C733F00CA85E7 /* SceneDelegate.swift */,
+				B0212D29278C733F00CA85E7 /* Main.storyboard */,
+				B0212D3E278C7CE600CA85E7 /* Router.swift */,
+				B0212D40278C7DB000CA85E7 /* AssemblerModuleBuilder.swift */,
+			);
+			path = Resource;
 			sourceTree = "<group>";
 		};
 		FC1BBD42D318B959C9475993 /* Pods */ = {
@@ -366,6 +393,7 @@
 				B0212D26278C733F00CA85E7 /* SceneDelegate.swift in Sources */,
 				B064D2A9279021E600301B4F /* Constants.swift in Sources */,
 				B090771A27957DB800AD46DD /* GenreData.swift in Sources */,
+				B0D754FD27984CB8001B96DA /* InfoTableViewHeader.swift in Sources */,
 				B090771C2795B73D00AD46DD /* InfoTableViewCell.swift in Sources */,
 				B0545B1327938927009410D8 /* String.swift in Sources */,
 				B064D2AF2791680200301B4F /* MovieInfoPresenter.swift in Sources */,
