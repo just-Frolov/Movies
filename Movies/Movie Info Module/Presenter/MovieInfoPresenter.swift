@@ -9,15 +9,14 @@ import UIKit
 
 protocol MovieInfoViewProtocol: AnyObject {
     func setMovieInfo(_ model: MovieDetailsData)
+    func showMoviePoster()
+    func showMovieVideo(with id: String)
     func showErrorAlert(with message: String)
 }
 
 protocol MovieInfoViewPresenterProtocol: AnyObject {
     init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?)
     func viewDidLoad()
-    func getMovieInfo()
-    func tapOnThePoster()
-    func tapOnTheTrailer()
 }
 
 class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
@@ -36,6 +35,7 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
     //MARK: - Internal -
     func viewDidLoad() {
         getMovieInfo()
+        getMovieTrailerLink()
     }
     
     func getMovieInfo() {
@@ -58,18 +58,28 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
         }
     }
     
-    func tapOnThePoster() {
+    func getMovieTrailerLink() {
         guard let movieID = movieID else {
             return
         }
-        router?.showInfo(by: movieID)
-    }
-    
-    func tapOnTheTrailer() {
-        guard let movieID = movieID else {
-            return
+        let endPoint = EndPoint.movieTrailer(id: movieID)
+        NetworkService.shared.request(endPoint: endPoint, expecting: MovieTrailerData.self) { [weak self] result in
+            guard let strongSelf = self else { return }
+            DispatchQueue.main.async {
+                switch result {
+                case.success(let data):
+                    guard let video = data?.results, !video.isEmpty else {
+                        strongSelf.view?.showMoviePoster()
+                        return
+                    }
+
+                    let id = video[0].key
+                    strongSelf.view?.showMovieVideo(with: id)
+                case.failure(_):
+                    strongSelf.view?.showMoviePoster()
+                }
+            }
         }
-        router?.showTrailer(by: movieID)
     }
 }
 

@@ -34,7 +34,25 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     
     //MARK: - Internal -
     func viewDidLoad() {
+        getGenreList()
         getMovieList()
+    }
+    
+    private func getGenreList() {
+        let endPoint = EndPoint.genres
+        NetworkService.shared.request(endPoint: endPoint, expecting: GenreData.self) { [weak self] result in
+            guard let strongSelf = self else { return }
+            DispatchQueue.main.async {
+                switch result {
+                case.success(let data):
+                    guard let genresArray = data else {return}
+                    GenreListConfigurable.shared.genreList = genresArray
+                case.failure(let error):
+                    let message = "Failed to get genres: \(error)"
+                    strongSelf.view?.showErrorAlert(with: message)
+                }
+            }
+        }
     }
     
     func getMovieList(by sort: String = "Popular", startAgain: Bool = false) {
