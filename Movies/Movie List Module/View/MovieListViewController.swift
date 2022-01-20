@@ -143,7 +143,6 @@ extension MovieListViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        print(indexPath.row)
         let movie = movies[indexPath.row]
         let cell = MoviesTableViewCell.dequeueingReusableCell(in: tableView,
                                                               for: indexPath)
@@ -239,7 +238,7 @@ extension MovieListViewController {
                                       handler: { _ in
             self.sortList(by: SortType.byAverageCount.rawValue)
         }))
-        alert.addAction(UIAlertAction(title: "Cancel",
+        alert.addAction(UIAlertAction(title: "Отмена",
                                       style: .cancel,
                                       handler: nil))
         present(alert, animated: true, completion: nil)
@@ -273,11 +272,12 @@ extension MovieListViewController: MovieListViewProtocol {
     }
     
     private func updateMovieList() {
-        DispatchQueue.main.async { [self] in
-            hideSpinner(spinner)
-            tableView.reloadData()
-            if movies.count == 20 {
-                scrollToTop()
+        DispatchQueue.main.async { [weak self] in
+            guard let strongSelf = self else { return }
+            strongSelf.hideSpinner(strongSelf.spinner)
+            strongSelf.tableView.reloadData()
+            if strongSelf.movies.count == 20 {
+                strongSelf.scrollToTop()
             }
         }
         

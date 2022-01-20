@@ -11,7 +11,13 @@ import youtube_ios_player_helper
 
 class MovieInfoViewController: UIViewController {
     //MARK: - UI Elements -
-    private lazy var playerView = YTPlayerView()
+    private lazy var playerView: YTPlayerView = {
+        let player = YTPlayerView()
+        player.isHidden = true
+        return player
+    }()
+    
+    private lazy var playerViewSpinner = UIActivityIndicatorView(style: .medium)
     
     private lazy var moviePoster: UIImageView = {
         let image = UIImageView()
@@ -31,7 +37,7 @@ class MovieInfoViewController: UIViewController {
     }()
     
     //MARK: - Constants -
-    private let spinner = JGProgressHUD(style: .light)
+    private let spinner = JGProgressHUD(style: .dark)
     
     //MARK: - Variables -
     var presenter: MovieInfoViewPresenterProtocol!
@@ -52,23 +58,32 @@ class MovieInfoViewController: UIViewController {
         title = "Movie Details"
         navigationController?.navigationBar.topItem?.title = " ";
         view.backgroundColor = .white
-        showSpinner(spinner)
         setupTableView()
+        setupPlayerView()
     }
     
     private func setupTableView() {
+        showSpinner(spinner)
+        tableView.isHidden = true
         tableView.dataSource = self
         tableView.delegate = self
     }
     
+    private func setupPlayerView() {
+        playerViewSpinner.startAnimating()
+        playerView.delegate = self
+    }
+    
     private func addSubViews() {
         view.addSubview(playerView)
+        view.addSubview(playerViewSpinner)
         view.addSubview(moviePoster)
         view.addSubview(tableView)
     }
     
     private func setupConstraints() {
         setupPlayerViewConstraints()
+        setupPlayerViewSpinnerConstraints()
         setupMoviePosterConstraints()
         setupTableViewConstraints()
     }
@@ -78,6 +93,12 @@ class MovieInfoViewController: UIViewController {
             make.top.equalTo(view.snp_topMargin)
             make.left.right.equalToSuperview()
             make.height.lessThanOrEqualTo(200)
+        }
+    }
+    
+    private func setupPlayerViewSpinnerConstraints() {
+        playerViewSpinner.snp.makeConstraints { make in
+            make.center.equalTo(playerView)
         }
     }
     
@@ -128,13 +149,13 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
     func setMovieInfo(_ model: MovieDetailsData) {
             setImage(from: model.backdropPath)
             setMovieDetails(from: model)
-            hideSpinner(self.spinner)
-            tableView.reloadData()
+            showTableView()
+            hideSpinner(spinner)
     }
     
     func showMoviePoster() {
+        playerViewSpinner.stopAnimating()
         moviePoster.isHidden = false
-        playerView.isHidden = true
     }
     
     func showMovieVideo(with id: String) {
@@ -146,6 +167,11 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
     }
     
     //MARK: - Private -
+    private func showTableView() {
+        tableView.reloadData()
+        tableView.isHidden = false
+    }
+    
     private func setImage(from url: String?) {
         if let poster = url {
             NetworkService.shared.setImage(imageURL: poster,
@@ -185,5 +211,13 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
         numberFormatter.numberStyle = .decimal
         let formattedNumber = numberFormatter.string(from: NSNumber(value:largeNumber))
         return formattedNumber
+    }
+}
+
+//MARK: - YTPlayerViewDelegate -
+extension MovieInfoViewController: YTPlayerViewDelegate {
+    func playerViewDidBecomeReady(_ playerView: YTPlayerView) {
+        playerViewSpinner.stopAnimating()
+        playerView.isHidden = false
     }
 }

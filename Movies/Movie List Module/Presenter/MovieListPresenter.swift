@@ -25,6 +25,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     weak var view: MovieListViewProtocol?
     var router: RouterProtocol
     private var movieListPage = 1
+    private let group = DispatchGroup()
     
     //MARK: - Life Cycle -
     required init(view: MovieListViewProtocol, router: RouterProtocol) {
@@ -56,6 +57,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     
     //MARK: - Private -
     private func getGenreList() {
+        group.enter()
         let endPoint = EndPoint.genres
         NetworkService.shared.request(endPoint: endPoint, expecting: GenreData.self) { [weak self] result in
             guard let strongSelf = self else { return }
@@ -64,6 +66,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                 case.success(let data):
                     guard let genresArray = data else {return}
                     GenreListConfigurable.shared.genreList = genresArray
+                    strongSelf.group.leave()
                 case.failure(let error):
                     let message = "Failed to get genres: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
@@ -79,7 +82,9 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                 switch result {
                 case.success(let data):
                     guard let moviesArray = data?.results else {return}
-                    strongSelf.view?.setMovieList(moviesArray)
+                    strongSelf.group.notify(queue: .main) {
+                        strongSelf.view?.setMovieList(moviesArray)
+                    }
                     strongSelf.movieListPage += 1
                 case.failure(let error):
                     let message = "Failed to get data: \(error)"
