@@ -41,10 +41,10 @@ class MovieInfoViewController: UIViewController {
     //MARK: - Life Cycle -
     override func viewDidLoad() {
         super.viewDidLoad()
+        presenter.viewDidLoad()
         setupView()
         addSubViews()
         setupConstraints()
-        presenter.viewDidLoad()
     }
     
     //MARK: - Private -
@@ -126,10 +126,10 @@ extension MovieInfoViewController: UITableViewDelegate {
 extension MovieInfoViewController: MovieInfoViewProtocol {
     //MARK: - Internal -
     func setMovieInfo(_ model: MovieDetailsData) {
-        setImage(from: model.backdropPath)
-        setMovieDetails(from: model)
-        hideSpinner(self.spinner)
-        tableView.reloadData()
+            setImage(from: model.backdropPath)
+            setMovieDetails(from: model)
+            hideSpinner(self.spinner)
+            tableView.reloadData()
     }
     
     func showMoviePoster() {

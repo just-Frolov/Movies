@@ -67,7 +67,7 @@ class InfoTableViewCell: BaseTableViewCell {
     
     private func setupStaticMovieHeaderLabel() {
         staticMovieHeaderLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview()
+            make.top.equalToSuperview().offset(10)
             make.left.right.equalToSuperview().inset(20)
         }
     }
@@ -76,7 +76,7 @@ class InfoTableViewCell: BaseTableViewCell {
         movieInfoLabel.snp.makeConstraints { make in
             make.top.equalTo(staticMovieHeaderLabel.snp_bottomMargin).offset(15)
             make.left.right.equalToSuperview().inset(20)
-            make.bottom.equalToSuperview().inset(30)
+            make.bottom.equalToSuperview().inset(20)
         }
     }
 }

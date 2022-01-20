@@ -39,29 +39,11 @@ class MovieListViewController: UIViewController {
     
     //MARK: - Variables -
     var presenter: MovieListViewPresenterProtocol!
-    private var movies = [Movie]() {
-        didSet {
-            DispatchQueue.main.async {
-                self.hideSpinner(self.spinner)
-                self.tableView.reloadData()
-            }
-            
-            guard !movies.isEmpty else {
-                tableView.isHidden = true
-                noMoviesLabel.isHidden = false
-                return
-            }
-            
-            if tableView.isHidden {
-                tableView.isHidden = false
-                noMoviesLabel.isHidden = true
-            }
-        }
-    }
+    private var movies = [Movie]()
     private var initialScrollTableViewHeight: CGFloat = 0.0
     private var currentMaxScrollTableViewHeight: CGFloat = 0.0
-    private var movieSearchText = ""
-    private var movieSort = "Popular"
+    private var movieSearchText = String()
+    private var movieSort = SortType.byPopular.rawValue
     
     //MARK: - Life Cycle -
     override func viewDidLoad() {
@@ -86,7 +68,6 @@ class MovieListViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        createTitle()
         configureItems()
         setupNavigationBarAppearence()
     }
@@ -103,32 +84,7 @@ class MovieListViewController: UIViewController {
             action: #selector(showSortingActionSheet)
         )
     }
-    
-    @objc private func showSortingActionSheet() {
-        let alert = UIAlertController(title: "Sort The Movies", message: nil, preferredStyle: .actionSheet)
-        alert.addAction(UIAlertAction(title: "By Popularity",
-                                      style: .default,
-                                      handler: { _ in
-            self.sortList(by: "Popular")
-        }))
-        alert.addAction(UIAlertAction(title: "By Average Vote",
-                                      style: .default,
-                                      handler: { _ in
-            self.sortList(by: "AverageVote")
-        }))
-        alert.addAction(UIAlertAction(title: "Cancel",
-                                      style: .cancel,
-                                      handler: nil))
-        present(alert, animated: true, completion: nil)
-    }
-    
-    private func sortList(by sort: String) {
-        showSpinner(self.spinner)
-        movieSort = sort
-        movies.removeAll()
-        presenter.getMovieList(by: sort, startAgain: true)
-    }
-    
+
     private func setupNavigationBarAppearence() {
         let navAppearance = UINavigationBarAppearance()
         navigationController?.navigationBar.scrollEdgeAppearance = navAppearance
@@ -187,8 +143,10 @@ extension MovieListViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        print(indexPath.row)
         let movie = movies[indexPath.row]
-        let cell = MoviesTableViewCell.dequeueingReusableCell(in: tableView, for: indexPath)
+        let cell = MoviesTableViewCell.dequeueingReusableCell(in: tableView,
+                                                              for: indexPath)
         cell.configure(with: movie)
         return cell
     }
@@ -201,28 +159,32 @@ extension MovieListViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         presenter.tapOnTheMovie(with: movieID)
     }
-    
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return tableView.frame.height/3
+        return 250
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
-        let cellHeight = CGFloat(230)
+        let cellHeight = CGFloat(250)
+        let loadingMark = cellHeight * 3
         let contentHeight = scrollView.contentSize.height - scrollView.frame.height
         
-        if (offsetY > contentHeight - cellHeight*3 && offsetY > currentMaxScrollTableViewHeight - cellHeight*3) {
-            changeTableViewValues(scrollView)
-            movieSearchText != "" ? getNewMoviesBySearch() : getNewMovies()
+        if (offsetY > contentHeight - loadingMark && offsetY > currentMaxScrollTableViewHeight - loadingMark) {
+            changeTableViewValues(contentHeight)
+            movieSearchText.isEmpty ? getNewMovies() : getNewMoviesBySearch()
         }
     }
     
-    private func changeTableViewValues(_ scrollView: UIScrollView) {
-        let contentHeight = scrollView.contentSize.height - scrollView.frame.height
+    private func changeTableViewValues(_ contentHeight: CGFloat) {
         if initialScrollTableViewHeight == 0 {
             initialScrollTableViewHeight = contentHeight
         }
         currentMaxScrollTableViewHeight = contentHeight + initialScrollTableViewHeight
+    }
+    
+    private func resetCurrentTableViewHeight() {
+        currentMaxScrollTableViewHeight = 0.0
     }
     
     private func getNewMovies() {
@@ -234,25 +196,72 @@ extension MovieListViewController: UITableViewDelegate {
     }
 }
 
-//MARK: - SearchBar Delegate
+//MARK: - SearchBar Delegate -
 extension MovieListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
         showSpinner(spinner)
+        resetCurrentTableViewHeight()
         movies.removeAll()
-        resetTableViewValues()
-        guard let text = searchBar.text?.capitalized,
-                !text.replacingOccurrences(of: " ", with: "").isEmpty else {
-            movieSearchText = ""
+        if let text = searchBar.text?.capitalized,
+           !text.replacingOccurrences(of: " ", with: "").isEmpty {
+            movieSearchText = text
+            presenter.getMovieListBySearch(text, startAgain: true)
+        } else {
+            movieSearchText.removeAll()
             presenter.getMovieList(by: movieSort, startAgain: true)
-            return
         }
-        movieSearchText = text
-        presenter.getMovieListBySearch(text, startAgain: true)
+    }
+}
+
+//MARK: - ActionSheet -
+extension MovieListViewController {
+    public enum SortType: String {
+        case byPopular = "popularity.desc"
+        case byRevenue = "revenue.desc"
+        case byAverageCount = "vote_count.desc"
     }
     
-    private func resetTableViewValues() {
-        currentMaxScrollTableViewHeight = 0.0
+    @objc private func showSortingActionSheet() {
+        let alert = UIAlertController(title: "Как остортировать фильмы?", message: nil, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "Самые популярные",
+                                      style: .default,
+                                      handler: { _ in
+            self.sortList(by: SortType.byPopular.rawValue)
+        }))
+        alert.addAction(UIAlertAction(title: "Cамые прибыльные",
+                                      style: .default,
+                                      handler: { _ in
+            self.sortList(by: SortType.byRevenue.rawValue)
+        }))
+        alert.addAction(UIAlertAction(title: "Самые известные",
+                                      style: .default,
+                                      handler: { _ in
+            self.sortList(by: SortType.byAverageCount.rawValue)
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel",
+                                      style: .cancel,
+                                      handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
+    
+    private func sortList(by sort: String) {
+        showSpinner(spinner)
+        clearSearchBar()
+        setValuesForCurrentVariables(with: sort)
+        resetCurrentTableViewHeight()
+        presenter.getMovieList(by: sort, startAgain: true)
+    }
+    
+    private func clearSearchBar() {
+        searchBar.resignFirstResponder()
+        searchBar.text?.removeAll()
+    }
+    
+    private func setValuesForCurrentVariables(with sort: String) {
+        movies.removeAll()
+        movieSort = sort
+        movieSearchText.removeAll()
     }
 }
 
@@ -260,6 +269,36 @@ extension MovieListViewController: UISearchBarDelegate {
 extension MovieListViewController: MovieListViewProtocol {
     func setMovieList(_ moviesArray: [Movie]) {
         self.movies.append(contentsOf: moviesArray)
+        updateMovieList()
+    }
+    
+    private func updateMovieList() {
+        DispatchQueue.main.async { [self] in
+            hideSpinner(spinner)
+            tableView.reloadData()
+            if movies.count == 20 {
+                scrollToTop()
+            }
+        }
+        
+        guard !movies.isEmpty else {
+            tableView.isHidden = true
+            noMoviesLabel.isHidden = false
+            return
+        }
+        
+        if tableView.isHidden {
+            tableView.isHidden = false
+            noMoviesLabel.isHidden = true
+        }
+    }
+    
+    private func scrollToTop() {
+        let topRow = IndexPath(row: 0,
+                               section: 0)
+        tableView.scrollToRow(at: topRow,
+                                   at: .top,
+                                   animated: false)
     }
     
     func showErrorAlert(with message: String) {

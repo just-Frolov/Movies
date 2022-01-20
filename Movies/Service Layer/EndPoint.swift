@@ -1,5 +1,5 @@
 //
-//  Constants.swift
+//  EndPoint.swift
 //  Movies
 //
 //  Created by Данил Фролов on 13.01.2022.

@@ -38,6 +38,23 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         getMovieList()
     }
     
+    func getMovieList(by sort: String = "popularity.desc", startAgain: Bool = false) {
+        if startAgain { movieListPage = 1 }
+        let endPoint = EndPoint.list(sort: sort, page: movieListPage)
+        movieListRequest(with: endPoint)
+    }
+    
+    func getMovieListBySearch(_ text: String, startAgain: Bool = false) {
+        if startAgain { movieListPage = 1 }
+        let endPoint = EndPoint.searchMovies(query: text, page: self.movieListPage)
+        movieListRequest(with: endPoint)
+    }
+    
+    func tapOnTheMovie(with id: Int) {
+        router.showMovieDetails(by: id)
+    }
+    
+    //MARK: - Private -
     private func getGenreList() {
         let endPoint = EndPoint.genres
         NetworkService.shared.request(endPoint: endPoint, expecting: GenreData.self) { [weak self] result in
@@ -55,19 +72,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         }
     }
     
-    func getMovieList(by sort: String = "Popular", startAgain: Bool = false) {
-        if startAgain { movieListPage = 1 }
-        var sortBy = ""
-        if sort == "Popular" {
-            sortBy = "popularity.desc"
-        } else {
-            sortBy = "vote_average.desc"
-        }
-        let endPoint = EndPoint.list(sort: sortBy, page: movieListPage)
-        request(with: endPoint)
-    }
-    
-    private func request(with endPoint: EndPoint) {
+    private func movieListRequest(with endPoint: EndPoint) {
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
             DispatchQueue.main.async {
@@ -77,33 +82,10 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                     strongSelf.view?.setMovieList(moviesArray)
                     strongSelf.movieListPage += 1
                 case.failure(let error):
-                    let message = "Failed to get movies: \(error)"
+                    let message = "Failed to get data: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
                 }
             }
         }
-    }
-    
-    func getMovieListBySearch(_ text: String, startAgain: Bool = false) {
-        if startAgain { movieListPage = 1 }
-        let endPoint = EndPoint.searchMovies(query: text, page: self.movieListPage)
-        NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
-            guard let strongSelf = self else { return }
-            DispatchQueue.main.async {
-                switch result {
-                case.success(let data):
-                    guard let searchMoviesArray = data?.results else {return}
-                    strongSelf.view?.setMovieList(searchMoviesArray)
-                    strongSelf.movieListPage += 1
-                case.failure(let error):
-                    let message = "Failed to get places: \(error)"
-                    strongSelf.view?.showErrorAlert(with: message)
-                }
-            }
-        }
-    }
-    
-    func tapOnTheMovie(with id: Int) {
-        router.showInfo(by: id)
     }
 }

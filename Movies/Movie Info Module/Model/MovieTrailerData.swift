@@ -6,11 +6,12 @@
 //
 import Foundation
 
+// MARK: - MovieTrailerData -
 struct MovieTrailerData: Codable {
     let results: [TrailerId]
 }
 
-// MARK: - TrailerId
+// MARK: - TrailerId -
 struct TrailerId: Codable {
     let key: String
 }

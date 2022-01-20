@@ -68,12 +68,12 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
             DispatchQueue.main.async {
                 switch result {
                 case.success(let data):
-                    guard let video = data?.results, !video.isEmpty else {
+                    guard let videoList = data?.results, !videoList.isEmpty else {
                         strongSelf.view?.showMoviePoster()
                         return
                     }
-
-                    let id = video[0].key
+                    let firstVideo = 0
+                    let id = videoList[firstVideo].key
                     strongSelf.view?.showMovieVideo(with: id)
                 case.failure(_):
                     strongSelf.view?.showMoviePoster()
