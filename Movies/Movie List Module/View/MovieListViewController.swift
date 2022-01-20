@@ -87,6 +87,7 @@ class MovieListViewController: UIViewController {
 
     private func setupNavigationBarAppearence() {
         let navAppearance = UINavigationBarAppearance()
+        navigationController?.navigationBar.tintColor = .black
         navigationController?.navigationBar.scrollEdgeAppearance = navAppearance
         navigationController?.navigationBar.standardAppearance = navAppearance
     }
@@ -302,8 +303,10 @@ extension MovieListViewController: MovieListViewProtocol {
     }
     
     func showErrorAlert(with message: String) {
-        DispatchQueue.main.async {
-            self.showAlert("Error", with: message)
+        DispatchQueue.main.async { [weak self] in
+            guard let strongSelf = self else { return }
+            strongSelf.hideSpinner(strongSelf.spinner)
+            strongSelf.showAlert("Error", with: message)
         }
     }
 }

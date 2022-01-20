@@ -25,6 +25,9 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     weak var view: MovieListViewProtocol?
     var router: RouterProtocol
     private var movieListPage = 1
+    private var startMovieList = [Movie]()
+    
+    //MARK: - Constants -
     private let group = DispatchGroup()
     
     //MARK: - Life Cycle -
@@ -35,27 +38,48 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     
     //MARK: - Internal -
     func viewDidLoad() {
-        getGenreList()
-        getMovieList()
+        if NetworkMonitor.shared.isConnected {
+            getGenreList()
+            getMovieList()
+        } else {
+            showOfflineAlert()
+        }
     }
     
     func getMovieList(by sort: String = "popularity.desc", startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
+        guard NetworkMonitor.shared.isConnected else {
+            showOfflineAlert()
+            return
+        }
         let endPoint = EndPoint.list(sort: sort, page: movieListPage)
         movieListRequest(with: endPoint)
     }
     
     func getMovieListBySearch(_ text: String, startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
+        guard NetworkMonitor.shared.isConnected else {
+            showOfflineAlert()
+            return
+        }
         let endPoint = EndPoint.searchMovies(query: text, page: self.movieListPage)
         movieListRequest(with: endPoint)
     }
     
     func tapOnTheMovie(with id: Int) {
+        guard NetworkMonitor.shared.isConnected else {
+            showOfflineAlert()
+            return
+        }
         router.showMovieDetails(by: id)
     }
     
     //MARK: - Private -
+    private func showOfflineAlert() {
+        let message = "You are offline. Please, enable your Wi-Fi or connect using cellular data."
+        view?.showErrorAlert(with: message)
+    }
+    
     private func getGenreList() {
         group.enter()
         let endPoint = EndPoint.genres
@@ -84,6 +108,9 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                     guard let moviesArray = data?.results else {return}
                     strongSelf.group.notify(queue: .main) {
                         strongSelf.view?.setMovieList(moviesArray)
+                    }
+                    if strongSelf.startMovieList.isEmpty {
+                        strongSelf.startMovieList = moviesArray
                     }
                     strongSelf.movieListPage += 1
                 case.failure(let error):
