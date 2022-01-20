@@ -24,7 +24,6 @@ final class NetworkMonitor {
         monitor.start(queue: queue)
         monitor.pathUpdateHandler = { [weak self] path in
             self?.isConnected = path.status == .satisfied
-            print(self?.isConnected ?? "N/A")
         }
     }
     

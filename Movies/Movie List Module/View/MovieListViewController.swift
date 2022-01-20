@@ -304,9 +304,10 @@ extension MovieListViewController: MovieListViewProtocol {
     
     func showErrorAlert(with message: String) {
         DispatchQueue.main.async { [weak self] in
-            guard let strongSelf = self else { return }
-            strongSelf.hideSpinner(strongSelf.spinner)
-            strongSelf.showAlert("Error", with: message)
+            self?.showAlert("Error", with: message)
+        }
+        if spinner.isVisible {
+            hideSpinner(spinner)
         }
     }
 }

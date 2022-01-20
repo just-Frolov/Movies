@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RealmSwift
 
 protocol MovieListViewProtocol: AnyObject {
     func setMovieList(_ moviesArray: [Movie])
@@ -25,10 +26,21 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     weak var view: MovieListViewProtocol?
     var router: RouterProtocol
     private var movieListPage = 1
-    private var startMovieList = [Movie]()
+    private var startMovieList = [Movie]() {
+        didSet {
+            do {
+                try realm.write {
+                    startMovieList
+                }
+            } catch  {
+                print("Error saving movie \(error)")
+            }
+        }
+    }
     
     //MARK: - Constants -
     private let group = DispatchGroup()
+    let realm = try! Realm()
     
     //MARK: - Life Cycle -
     required init(view: MovieListViewProtocol, router: RouterProtocol) {
@@ -42,6 +54,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             getGenreList()
             getMovieList()
         } else {
+            loadLastMovies()
             showOfflineAlert()
         }
     }
@@ -75,6 +88,10 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     }
     
     //MARK: - Private -
+    private func loadLastMovies() {
+        //let movieList = realm.objects(Movie.self)
+    }
+    
     private func showOfflineAlert() {
         let message = "You are offline. Please, enable your Wi-Fi or connect using cellular data."
         view?.showErrorAlert(with: message)
@@ -100,6 +117,9 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     }
     
     private func movieListRequest(with endPoint: EndPoint) {
+        if GenreListConfigurable.shared.genreList == nil {
+            getGenreList()
+        }
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
             DispatchQueue.main.async {
