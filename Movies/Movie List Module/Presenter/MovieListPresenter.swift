@@ -11,6 +11,7 @@ import RealmSwift
 protocol MovieListViewProtocol: AnyObject {
     func setMovieList(_ moviesArray: [Movie])
     func showErrorAlert(with message: String)
+    func searchDesiredMoviesLocally()
 }
 
 protocol MovieListViewPresenterProtocol: AnyObject {
@@ -72,7 +73,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     func getMovieListBySearch(_ text: String, startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
         guard NetworkMonitor.shared.isConnected else {
-            showOfflineAlert()
+            view?.searchDesiredMoviesLocally()
             return
         }
         let endPoint = EndPoint.searchMovies(query: text, page: self.movieListPage)
