@@ -7,12 +7,12 @@
 
 import Foundation
 
-// MARK: - MovieData
+// MARK: - MovieData -
 struct MovieData: Codable {
     let results: [Movie]
 }
 
-// MARK: - Movie
+// MARK: - Movie -
 struct Movie: Codable {
     let backdropPath: String?
     let genreIDS: [Int]

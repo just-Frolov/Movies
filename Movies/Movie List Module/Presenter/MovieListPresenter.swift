@@ -6,10 +6,12 @@
 //
 
 import UIKit
+import RealmSwift
 
 protocol MovieListViewProtocol: AnyObject {
     func setMovieList(_ moviesArray: [Movie])
     func showErrorAlert(with message: String)
+    func searchDesiredMoviesLocally()
 }
 
 protocol MovieListViewPresenterProtocol: AnyObject {
@@ -25,6 +27,21 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     weak var view: MovieListViewProtocol?
     var router: RouterProtocol
     private var movieListPage = 1
+    private var startMovieList = [Movie]() {
+        didSet {
+            do {
+                try realm.write {
+                    startMovieList
+                }
+            } catch  {
+                print("Error saving movie \(error)")
+            }
+        }
+    }
+    
+    //MARK: - Constants -
+    private let group = DispatchGroup()
+    let realm = try! Realm()
     
     //MARK: - Life Cycle -
     required init(view: MovieListViewProtocol, router: RouterProtocol) {
@@ -34,11 +51,55 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     
     //MARK: - Internal -
     func viewDidLoad() {
-        getGenreList()
-        getMovieList()
+        if NetworkMonitor.shared.isConnected {
+            getGenreList()
+            getMovieList()
+        } else {
+            loadLastMovies()
+            showOfflineAlert()
+        }
+    }
+    
+    func getMovieList(by sort: String = "popularity.desc", startAgain: Bool = false) {
+        if startAgain { movieListPage = 1 }
+        guard NetworkMonitor.shared.isConnected else {
+            showOfflineAlert()
+            return
+        }
+        let endPoint = EndPoint.list(sort: sort, page: movieListPage)
+        movieListRequest(with: endPoint)
+    }
+    
+    func getMovieListBySearch(_ text: String, startAgain: Bool = false) {
+        if startAgain { movieListPage = 1 }
+        guard NetworkMonitor.shared.isConnected else {
+            view?.searchDesiredMoviesLocally()
+            return
+        }
+        let endPoint = EndPoint.searchMovies(query: text, page: self.movieListPage)
+        movieListRequest(with: endPoint)
+    }
+    
+    func tapOnTheMovie(with id: Int) {
+        guard NetworkMonitor.shared.isConnected else {
+            showOfflineAlert()
+            return
+        }
+        router.showMovieDetails(by: id)
+    }
+    
+    //MARK: - Private -
+    private func loadLastMovies() {
+        //let movieList = realm.objects(Movie.self)
+    }
+    
+    private func showOfflineAlert() {
+        let message = "You are offline. Please, enable your Wi-Fi or connect using cellular data."
+        view?.showErrorAlert(with: message)
     }
     
     private func getGenreList() {
+        group.enter()
         let endPoint = EndPoint.genres
         NetworkService.shared.request(endPoint: endPoint, expecting: GenreData.self) { [weak self] result in
             guard let strongSelf = self else { return }
@@ -47,6 +108,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                 case.success(let data):
                     guard let genresArray = data else {return}
                     GenreListConfigurable.shared.genreList = genresArray
+                    strongSelf.group.leave()
                 case.failure(let error):
                     let message = "Failed to get genres: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
@@ -55,55 +117,28 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         }
     }
     
-    func getMovieList(by sort: String = "Popular", startAgain: Bool = false) {
-        if startAgain { movieListPage = 1 }
-        var sortBy = ""
-        if sort == "Popular" {
-            sortBy = "popularity.desc"
-        } else {
-            sortBy = "vote_average.desc"
+    private func movieListRequest(with endPoint: EndPoint) {
+        if GenreListConfigurable.shared.genreList == nil {
+            getGenreList()
         }
-        let endPoint = EndPoint.list(sort: sortBy, page: movieListPage)
-        request(with: endPoint)
-    }
-    
-    private func request(with endPoint: EndPoint) {
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
             DispatchQueue.main.async {
                 switch result {
                 case.success(let data):
                     guard let moviesArray = data?.results else {return}
-                    strongSelf.view?.setMovieList(moviesArray)
+                    strongSelf.group.notify(queue: .main) {
+                        strongSelf.view?.setMovieList(moviesArray)
+                    }
+                    if strongSelf.startMovieList.isEmpty {
+                        strongSelf.startMovieList = moviesArray
+                    }
                     strongSelf.movieListPage += 1
                 case.failure(let error):
-                    let message = "Failed to get movies: \(error)"
+                    let message = "Failed to get data: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
                 }
             }
         }
-    }
-    
-    func getMovieListBySearch(_ text: String, startAgain: Bool = false) {
-        if startAgain { movieListPage = 1 }
-        let endPoint = EndPoint.searchMovies(query: text, page: self.movieListPage)
-        NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
-            guard let strongSelf = self else { return }
-            DispatchQueue.main.async {
-                switch result {
-                case.success(let data):
-                    guard let searchMoviesArray = data?.results else {return}
-                    strongSelf.view?.setMovieList(searchMoviesArray)
-                    strongSelf.movieListPage += 1
-                case.failure(let error):
-                    let message = "Failed to get places: \(error)"
-                    strongSelf.view?.showErrorAlert(with: message)
-                }
-            }
-        }
-    }
-    
-    func tapOnTheMovie(with id: Int) {
-        router.showInfo(by: id)
     }
 }

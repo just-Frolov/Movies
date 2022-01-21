@@ -7,7 +7,7 @@
 
 import Alamofire
 
-// MARK: - MovieDetailsData
+// MARK: - MovieDetailsData -
 struct MovieDetailsData: Codable {
     let budget: Int
     let genres: [DataName]
@@ -28,7 +28,7 @@ struct MovieDetailsData: Codable {
     }
 }
 
-// MARK: - Genre
+// MARK: - Genre -
 struct DataName: Codable {
     var name: String
 }

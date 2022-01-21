@@ -110,31 +110,40 @@ class MoviesTableViewCell: BaseTableViewCell {
     
     //MARK: - Internal -
     func configure(with model: Movie) {
+        setMovieInfo(from: model)
+        setImage(from: model.backdropPath)
+        setMovieGenres(by: model.genreIDS)
+    }
+    
+    //MARK: - Private -
+    private func setMovieInfo(from model: Movie) {
         imageView?.image = nil
-        moviePoster.image = nil
         movieTitleLabel.text = model.title
+        movieTitleLabel.textColor = .white
         movieReleaseDataLabel.text = model.releaseDate?.replace(target: "-", withString: ".")
         movieRatingLabel.text = String(model.voteAverage)
-        
-        if let poster = model.backdropPath {
+    }
+    
+    private func setImage(from link: String?) {
+        if let poster = link {
             NetworkService.shared.setImage(imageURL: poster, imageView: self.moviePoster)
         } else {
             moviePoster.image = UIImage(named: "noImageFound")
             movieTitleLabel.textColor = .black
         }
-        
-        var genreList = ""
-        var genreName = ""
-        for genre in model.genreIDS {
+    }
+    
+    private func setMovieGenres(by genreIDS: [Int]) {
+        var genreList = String()
+        var genreName = String()
+        for genre in genreIDS {
             genreName = GenreListConfigurable.shared.getGenreName(id: genre)
             genreList.addingDevidingPrefixIfNeeded()
             genreList += genreName.capitalizingFirstLetter()
         }
-        
         movieGenresLabel.text = genreList
     }
     
-    //MARK: - Private -
     private func addSubview() {
         contentView.addSubview(movieView)
     }
@@ -206,7 +215,8 @@ class MoviesTableViewCell: BaseTableViewCell {
     
     private func setupMovieGenresLabelConstraints() {
         movieGenresLabel.snp.makeConstraints { (make) -> Void in
-            make.left.top.equalTo(movieView).offset(20)
+            make.left.equalTo(movieView).offset(20)
+            make.top.equalTo(movieView).offset(15)
         }
     }
     

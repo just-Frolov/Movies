@@ -16,7 +16,7 @@ protocol NetworkServiceProtocol {
     func setImage(imageURL: String, imageView: UIImageView)
 }
 
-class NetworkService: NetworkServiceProtocol {
+final class NetworkService: NetworkServiceProtocol {
     //MARK: - Static Constants -
     static let shared = NetworkService()
     
