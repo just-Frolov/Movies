@@ -40,7 +40,7 @@ class MovieListViewController: UIViewController {
     
     //MARK: - Variables -
     var presenter: MovieListViewPresenterProtocol!
-    private var currentMovieList = [Movie]()
+    private var currentMovieList = [MovieModel]()
     private var initialScrollTableViewHeight: CGFloat = 0.0
     private var currentMaxScrollTableViewHeight: CGFloat = 0.0
     private var movieSearchText = String()
@@ -296,7 +296,7 @@ extension MovieListViewController {
 
 //MARK: - MovieListViewProtocol -
 extension MovieListViewController: MovieListViewProtocol {
-    func setMovieList(_ moviesArray: [Movie]) {
+    func setMovieList(_ moviesArray: [MovieModel]) {
         self.currentMovieList.append(contentsOf: moviesArray)
         updateMovieList()
     }

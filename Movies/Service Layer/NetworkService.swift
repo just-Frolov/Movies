@@ -33,7 +33,7 @@ final class NetworkService: NetworkServiceProtocol {
             completion(.failure(RequestError.invalidURL))
             return
         }
-        
+
         AF.request(url,
                    method: endPoint.method,
                    parameters: endPoint.parameters,

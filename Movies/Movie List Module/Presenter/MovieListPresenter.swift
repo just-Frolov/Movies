@@ -8,7 +8,7 @@
 import UIKit
 
 protocol MovieListViewProtocol: AnyObject {
-    func setMovieList(_ moviesArray: [Movie])
+    func setMovieList(_ moviesArray: [MovieModel])
     func showErrorAlert(with message: String)
     func searchDesiredMoviesLocally()
 }
@@ -26,7 +26,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     weak var view: MovieListViewProtocol?
     var router: RouterProtocol
     private var movieListPage = 1
-    private var startMovieList = [Movie]() {
+    private var startMovieList = [MovieModel]() {
         didSet {
          
         }
@@ -54,6 +54,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     
     func getMovieList(by sort: String = "popularity.desc", startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
+        print(movieListPage)
         guard NetworkMonitor.shared.isConnected else {
             showOfflineAlert()
             return

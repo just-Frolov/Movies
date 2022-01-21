@@ -22,4 +22,8 @@ extension UIViewController {
     func hideSpinner(_ spinner: JGProgressHUD) {
         spinner.dismiss()
     }
+    
+    func dismissKeyboard() {
+        view.endEditing(true)
+    }
 }

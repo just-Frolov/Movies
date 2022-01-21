@@ -8,15 +8,17 @@
 import UIKit
 
 protocol MovieInfoViewProtocol: AnyObject {
-    func setMovieInfo(_ model: MovieDetailsData)
+    func setMovieInfo(from movieDetails: MovieDetailsData)
     func showMoviePoster()
     func showMovieVideo(with id: String)
     func showErrorAlert(with message: String)
+    func updateSections(_ sections: [InfoTableSectionModel])
 }
 
 protocol MovieInfoViewPresenterProtocol: AnyObject {
     init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?)
     func viewDidLoad()
+    func showPosterInFullScreen(image: UIImage)
 }
 
 class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
@@ -38,7 +40,11 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
         getMovieTrailerLink()
     }
     
-    func getMovieInfo() {
+    func showPosterInFullScreen(image: UIImage) {
+        router?.showPosterInFullScreen(image: image)
+    }
+    
+    private func getMovieInfo() {
         guard let movieID = movieID else {
             return
         }
@@ -48,8 +54,10 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
             DispatchQueue.main.async {
                 switch result {
                 case.success(let data):
-                    guard let moviesArray = data else {return}
-                    strongSelf.view?.setMovieInfo(moviesArray)
+                    guard let movieDetails = data else {return}
+                    let tableViewSectionTypes = strongSelf.assembleModels()
+                    strongSelf.view?.setMovieInfo(from: movieDetails)
+                    strongSelf.view?.updateSections(tableViewSectionTypes)
                 case.failure(let error):
                     let message = "Failed to get info about movie: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
@@ -58,7 +66,7 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
         }
     }
     
-    func getMovieTrailerLink() {
+    private func getMovieTrailerLink() {
         guard let movieID = movieID else {
             return
         }
@@ -80,6 +88,16 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
                 }
             }
         }
+    }
+    
+    private func assembleModels() -> [InfoTableSectionModel] {
+        let genreSectionModel = InfoTableSectionModel(type: .genres, cellTypes: [.genres])
+        let descriptionSectionModel = InfoTableSectionModel(type: .description, cellTypes: [.description])
+        let ratingSectionModel = InfoTableSectionModel(type: .rating, cellTypes: [.rating])
+        let originalTitleSectionModel = InfoTableSectionModel(type: .originalTitle, cellTypes: [.originalTitle])
+        let releaseDateSectionModel = InfoTableSectionModel(type: .releaseDate, cellTypes: [.releaseDate])
+        let budgetSectionModel = InfoTableSectionModel(type: .budget, cellTypes: [.budget])
+        return [genreSectionModel, descriptionSectionModel, ratingSectionModel, originalTitleSectionModel, releaseDateSectionModel, budgetSectionModel]
     }
 }
 

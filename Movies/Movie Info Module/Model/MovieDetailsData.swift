@@ -10,10 +10,10 @@ import Alamofire
 // MARK: - MovieDetailsData -
 struct MovieDetailsData: Codable {
     let budget: Int
-    let genres: [DataName]
+    let genres: [GenreModel]
     let id: Int
     let backdropPath: String?
-    let productionCountries: [DataName]
+    let productionCountries: [CountryNameModel]
     let releaseDate: String?
     let originalTitle, overview, title: String
     let voteAverage: Double
@@ -29,6 +29,6 @@ struct MovieDetailsData: Codable {
 }
 
 // MARK: - Genre -
-struct DataName: Codable {
+struct CountryNameModel: Codable {
     var name: String
 }
