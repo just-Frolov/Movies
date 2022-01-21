@@ -126,7 +126,7 @@ extension MovieInfoViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let key = TableViewCellType.allCases[indexPath.row].rawValue
+            let key = TableViewCellType.allCases[indexPath.row].rawValue
         let value = movieInfo[key] ?? "No Info"
         let cell = InfoTableViewCell.dequeueingReusableCell(in: tableView, for: indexPath)
         cell.configure(header: key, text: value)

@@ -8,7 +8,7 @@
 import SnapKit
 
 enum TableViewCellType: String, CaseIterable {
-    case genres = "Жанр"
+    case genres = ""
     case description = "Описание"
     case rating = "Рейтинг IMBD"
     case originalTitle = "Оригинальное название"

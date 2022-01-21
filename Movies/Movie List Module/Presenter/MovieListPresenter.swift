@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import RealmSwift
 
 protocol MovieListViewProtocol: AnyObject {
     func setMovieList(_ moviesArray: [Movie])
@@ -29,19 +28,12 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     private var movieListPage = 1
     private var startMovieList = [Movie]() {
         didSet {
-            do {
-                try realm.write {
-                    startMovieList
-                }
-            } catch  {
-                print("Error saving movie \(error)")
-            }
+         
         }
     }
     
     //MARK: - Constants -
     private let group = DispatchGroup()
-    let realm = try! Realm()
     
     //MARK: - Life Cycle -
     required init(view: MovieListViewProtocol, router: RouterProtocol) {
