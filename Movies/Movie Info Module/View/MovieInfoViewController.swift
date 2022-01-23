@@ -213,7 +213,7 @@ extension MovieInfoViewController: UITableViewDataSource {
             currentMovieInfo = movieDetails.productionCountries[0].name
             break
         }
-        
+
         cell.configure(with: currentMovieInfo)
         return cell
     }
