@@ -20,6 +20,7 @@ enum TableViewCellType: CaseIterable {
     case releaseDate
     case production
     case budget
+    case revenue
 }
 
 class InfoTableViewCell: BaseTableViewCell {

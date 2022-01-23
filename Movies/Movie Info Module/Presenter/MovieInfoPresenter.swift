@@ -19,6 +19,9 @@ protocol MovieInfoViewPresenterProtocol: AnyObject {
     init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?)
     func viewDidLoad()
     func showPosterInFullScreen(image: UIImage)
+    func createGenreList(by genreArray: [GenreModel]) -> String?
+    func createDecimalNumber(from largeNumber: Int) -> String
+    func formatDate(from originalDate: String) -> String
 }
 
 class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
@@ -44,6 +47,42 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
         router?.showPosterInFullScreen(image: image)
     }
     
+    func createGenreList(by genreArray: [GenreModel]) -> String? {
+        var genreList = String()
+        for genre in genreArray {
+            genreList.addingDevidingPrefixIfNeeded()
+            genreList += genre.name.capitalizingFirstLetter()
+        }
+        return genreList
+    }
+    
+    func createDecimalNumber(from largeNumber: Int) -> String {
+        guard largeNumber != 0 else {
+            return "No Info"
+        }
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        let formattedNumber = numberFormatter.string(from: NSNumber(value:largeNumber)) ?? "?"
+        let currencyValue = formattedNumber + " USD"
+        return currencyValue
+    }
+    
+    func formatDate(from originalDate: String) -> String {
+        let dateFormatterGet = DateFormatter()
+        dateFormatterGet.dateFormat = "yyyy-MM-dd"
+
+        let dateFormatterPrint = DateFormatter()
+        dateFormatterPrint.locale = Locale(identifier: "ru_RU")
+        dateFormatterPrint.dateFormat = "d MMMM, yyyy"
+
+        if let date = dateFormatterGet.date(from: originalDate) {
+            return dateFormatterPrint.string(from: date)
+        } else {
+            return originalDate
+        }
+    }
+    
+    //MARK: - Private -
     private func getMovieInfo() {
         guard let movieID = movieID else {
             return
@@ -97,7 +136,8 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
         let originalTitleSectionModel = InfoTableSectionModel(type: .originalTitle, cellTypes: [.originalTitle])
         let releaseDateSectionModel = InfoTableSectionModel(type: .releaseDate, cellTypes: [.releaseDate])
         let budgetSectionModel = InfoTableSectionModel(type: .budget, cellTypes: [.budget])
-        return [genreSectionModel, descriptionSectionModel, ratingSectionModel, originalTitleSectionModel, releaseDateSectionModel, budgetSectionModel]
+        let revenueSectionModel = InfoTableSectionModel(type: .revenue, cellTypes: [.revenue])
+        return [genreSectionModel, descriptionSectionModel, ratingSectionModel, originalTitleSectionModel, releaseDateSectionModel, budgetSectionModel, revenueSectionModel]
     }
 }
 

@@ -111,9 +111,6 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     }
     
     private func movieListRequest(with endPoint: EndPoint) {
-        if GenreListConfigurable.shared.genreList == nil {
-            getGenreList()
-        }
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
             DispatchQueue.main.async {

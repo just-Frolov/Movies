@@ -16,6 +16,7 @@ enum TableViewSectionType: String, CaseIterable {
     case releaseDate = "Дата релиза"
     case production = "Производство"
     case budget = "Бюджет"
+    case revenue = "Доход"
 }
 
 class InfoTableViewSection: UITableViewHeaderFooterView {

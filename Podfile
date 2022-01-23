@@ -8,5 +8,6 @@ target 'Movies' do
   pod 'JGProgressHUD'
   pod 'SnapKit'
   pod 'youtube-ios-player-helper'
+  pod 'netfox'
     
 end

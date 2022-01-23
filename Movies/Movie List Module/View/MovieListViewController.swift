@@ -74,6 +74,15 @@ class MovieListViewController: UIViewController {
         setupNavigationBarAppearence()
     }
     
+    private func setupTableView() {
+        tableView.dataSource = self
+        tableView.delegate = self
+    }
+    
+    private func setupSearchBar() {
+        searchBar.delegate = self
+    }
+    
     private func createTitle() {
         title = "Popular Movies"
     }
@@ -92,15 +101,6 @@ class MovieListViewController: UIViewController {
         navigationController?.navigationBar.tintColor = .black
         navigationController?.navigationBar.scrollEdgeAppearance = navAppearance
         navigationController?.navigationBar.standardAppearance = navAppearance
-    }
-    
-    private func setupTableView() {
-        tableView.dataSource = self
-        tableView.delegate = self
-    }
-    
-    private func setupSearchBar() {
-        searchBar.delegate = self
     }
     
     private func addSubViews() {
@@ -288,8 +288,8 @@ extension MovieListViewController {
     }
     
     private func setValuesForCurrentVariables(with sort: String) {
-        currentMovieList.removeAll()
         movieSortingType = sort
+        currentMovieList.removeAll()
         movieSearchText.removeAll()
     }
 }

@@ -188,30 +188,25 @@ extension MovieInfoViewController: UITableViewDataSource {
         //MARK: - TODO
         switch cellType {
         case .genres:
-            currentMovieInfo = createGenreList(by: movieDetails.genres) ?? ""
-            break
+            currentMovieInfo = presenter.createGenreList(by: movieDetails.genres) ?? ""
         case .releaseDate:
             if let safeDate = movieDetails.releaseDate {
-                currentMovieInfo = formatDate(from: safeDate)
+                currentMovieInfo = presenter.formatDate(from: safeDate)
             } else {
                 currentMovieInfo = "No Info"
             }
-            break
         case .rating:
             currentMovieInfo = String(movieDetails.voteAverage)
-            break
         case .originalTitle:
             currentMovieInfo = movieDetails.originalTitle
-            break
         case .description:
             currentMovieInfo = movieDetails.overview
-            break
         case .budget:
-            currentMovieInfo = createDecimalNumber(from: movieDetails.budget)
-            break
+            currentMovieInfo = presenter.createDecimalNumber(from: movieDetails.budget)
         case .production:
             currentMovieInfo = movieDetails.productionCountries[0].name
-            break
+        case .revenue:
+            currentMovieInfo = presenter.createDecimalNumber(from: movieDetails.revenue)
         }
 
         cell.configure(with: currentMovieInfo)
@@ -241,7 +236,8 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
     
     func updateSections(_ sections: [InfoTableSectionModel]) {
         dataSource = sections
-        showTableView()
+        tableView.reloadData()
+        tableView.isHidden = false
     }
     
     func showMoviePoster() {
@@ -258,52 +254,12 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
     }
     
     //MARK: - Private -
-    private func showTableView() {
-        tableView.reloadData()
-        tableView.isHidden = false
-    }
-    
     private func setImage(from url: String?) {
         if let poster = url {
             NetworkService.shared.setImage(imageURL: poster,
                                            imageView: self.moviePoster)
         } else {
             self.moviePoster.image = UIImage(named: "noImageFound")
-        }
-    }
-        
-    private func createGenreList(by genreArray: [GenreModel]) -> String? {
-        var genreList = String()
-        for genre in genreArray {
-            genreList.addingDevidingPrefixIfNeeded()
-            genreList += genre.name.capitalizingFirstLetter()
-        }
-        return genreList
-    }
-    
-    private func createDecimalNumber(from largeNumber: Int) -> String {
-        guard largeNumber != 0 else {
-            return "No Info"
-        }
-        let numberFormatter = NumberFormatter()
-        numberFormatter.numberStyle = .decimal
-        let formattedNumber = numberFormatter.string(from: NSNumber(value:largeNumber)) ?? "?"
-        let currencyValue = formattedNumber + " USD"
-        return currencyValue
-    }
-    
-    private func formatDate(from originalDate: String) -> String {
-        let dateFormatterGet = DateFormatter()
-        dateFormatterGet.dateFormat = "yyyy-MM-dd"
-
-        let dateFormatterPrint = DateFormatter()
-        dateFormatterPrint.locale = Locale(identifier: "ru_RU")
-        dateFormatterPrint.dateFormat = "MMM d, yyyy"
-
-        if let date = dateFormatterGet.date(from: originalDate) {
-            return dateFormatterPrint.string(from: date)
-        } else {
-            return originalDate
         }
     }
 }
