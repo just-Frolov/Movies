@@ -6,6 +6,7 @@
 //
 
 import SnapKit
+import UIKit
 
 
 class MoviePosterViewController: UIViewController {
@@ -15,6 +16,12 @@ class MoviePosterViewController: UIViewController {
         image.contentMode = .scaleAspectFill
         image.layer.cornerRadius = 20
         image.layer.masksToBounds = true
+        image.isUserInteractionEnabled = true
+        image.frame = CGRect(x: 0,
+                                   y: 0,
+                                   width: 200,
+                                   height: 100)
+        image.center = view.center
         return image
     }()
     
@@ -26,7 +33,8 @@ class MoviePosterViewController: UIViewController {
         super.viewDidLoad()
         title = "Movie Poster"
         addSubview()
-        setupMoviePosterConstraints()
+        //setupMoviePosterConstraints()
+        addGesture()
         presenter.viewDidLoad()
     }
     
@@ -39,10 +47,28 @@ class MoviePosterViewController: UIViewController {
         view.addSubview(moviePoster)
     }
     
-    private func setupMoviePosterConstraints() {
+    private func setupMoviePosterConstraints(with scale: CGFloat = 1) {
         moviePoster.snp.makeConstraints { make in
-            make.width.equalToSuperview()
-            make.centerX.centerY.equalToSuperview()
+            make.width.equalToSuperview().multipliedBy(scale)
+            make.center.equalToSuperview()
+        }
+    }
+    
+    private func addGesture() {
+        let pinchGesture = UIPinchGestureRecognizer(target: self,
+                                                    action: #selector(didPinch(_:)))
+        moviePoster.addGestureRecognizer(pinchGesture)
+    }
+    
+    @objc private func didPinch(_ gesture: UIPinchGestureRecognizer) {
+        if gesture.state == .changed {
+            let scale = gesture.scale
+            print(scale)
+            moviePoster.frame = CGRect(x: 0,
+                                       y: 0,
+                                       width: 200*scale,
+                                       height: 100*scale)
+            moviePoster.center = view.center
         }
     }
 }
