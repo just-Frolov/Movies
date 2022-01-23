@@ -28,12 +28,15 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     private var movieListPage = 1
     private var startMovieList = [MovieModel]() {
         didSet {
-         
+            for movie in startMovieList {
+                createStoredMovie(by: movie)
+            }
         }
     }
     
     //MARK: - Constants -
     private let group = DispatchGroup()
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext 
     
     //MARK: - Life Cycle -
     required init(view: MovieListViewProtocol, router: RouterProtocol) {
@@ -47,7 +50,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             getGenreList()
             getMovieList()
         } else {
-            loadLastMovies()
+            getAllStoredMovies()
             showOfflineAlert()
         }
     }
@@ -82,10 +85,6 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     }
     
     //MARK: - Private -
-    private func loadLastMovies() {
-        //let movieList = realm.objects(Movie.self)
-    }
-    
     private func showOfflineAlert() {
         let message = "You are offline. Please, enable your Wi-Fi or connect using cellular data."
         view?.showErrorAlert(with: message)
@@ -131,4 +130,42 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             }
         }
     }
+}
+
+//MARK: - Core Data
+extension MovieListPresenter {
+    private func getAllStoredMovies() {
+        do {
+            let movies = try context.fetch(StoredMovieModel.fetchRequest())
+    print("title")
+            print(movies[0].title)
+            print(movies[1].title)
+            print(movies[2].title)
+        }
+        catch {
+            //error
+        }
+    }
+    
+    private func createStoredMovie(by movie: MovieModel) {
+        let newMovie = StoredMovieModel(context: context)
+        newMovie.title = movie.title
+        newMovie.poster = movie.backdropPath
+        saveMovie()
+    }
+    
+    private func saveMovie() {
+        do {
+            try context.save()
+        }
+        catch {
+            print("Error during save")
+        }
+    }
+    
+    private func deleteAllSavedMovies() {
+        //context.delete()
+    }
+    
+
 }
