@@ -28,6 +28,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     private var movieListPage = 1
     private var startMovieList = [MovieModel]() {
         didSet {
+            deleteAllSavedMovies()
             for movie in startMovieList {
                 createStoredMovie(by: movie)
             }
@@ -36,7 +37,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     
     //MARK: - Constants -
     private let group = DispatchGroup()
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext 
+    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     //MARK: - Life Cycle -
     required init(view: MovieListViewProtocol, router: RouterProtocol) {
@@ -50,14 +51,13 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             getGenreList()
             getMovieList()
         } else {
-            getAllStoredMovies()
+            getAllSavedMovies()
             showOfflineAlert()
         }
     }
     
     func getMovieList(by sort: String = "popularity.desc", startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
-        print(movieListPage)
         guard NetworkMonitor.shared.isConnected else {
             showOfflineAlert()
             return
@@ -95,56 +95,66 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         let endPoint = EndPoint.genres
         NetworkService.shared.request(endPoint: endPoint, expecting: GenreData.self) { [weak self] result in
             guard let strongSelf = self else { return }
-            DispatchQueue.main.async {
-                switch result {
-                case.success(let data):
-                    guard let genresArray = data else {return}
-                    GenreListConfigurable.shared.genreList = genresArray
-                    strongSelf.group.leave()
-                case.failure(let error):
-                    let message = "Failed to get genres: \(error)"
-                    strongSelf.view?.showErrorAlert(with: message)
-                }
+            
+            switch result {
+            case.success(let data):
+                guard let genresArray = data else {return}
+                GenreListConfigurable.shared.genreList = genresArray
+                strongSelf.group.leave()
+            case.failure(let error):
+                let message = "Failed to get genres: \(error)"
+                strongSelf.view?.showErrorAlert(with: message)
             }
+            
         }
     }
     
     private func movieListRequest(with endPoint: EndPoint) {
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
-            DispatchQueue.main.async {
-                switch result {
-                case.success(let data):
-                    guard let moviesArray = data?.results else {return}
-                    strongSelf.group.notify(queue: .main) {
-                        strongSelf.view?.setMovieList(moviesArray)
-                    }
-                    if strongSelf.startMovieList.isEmpty {
-                        strongSelf.startMovieList = moviesArray
-                    }
-                    strongSelf.movieListPage += 1
-                case.failure(let error):
-                    let message = "Failed to get data: \(error)"
-                    strongSelf.view?.showErrorAlert(with: message)
+            
+            switch result {
+            case.success(let data):
+                guard let moviesArray = data?.results else {return}
+                strongSelf.group.notify(queue: .main) {
+                    strongSelf.view?.setMovieList(moviesArray)
                 }
+                if strongSelf.startMovieList.isEmpty {
+                    strongSelf.startMovieList = moviesArray
+                }
+                strongSelf.movieListPage += 1
+            case.failure(let error):
+                let message = "Failed to get data: \(error)"
+                strongSelf.view?.showErrorAlert(with: message)
             }
+            
         }
     }
 }
 
 //MARK: - Core Data
 extension MovieListPresenter {
-    private func getAllStoredMovies() {
+    private func getAllSavedMovies() {
         do {
-            let movies = try context.fetch(StoredMovieModel.fetchRequest())
-    print("title")
-            print(movies[0].title)
-            print(movies[1].title)
-            print(movies[2].title)
+            let storedMovies = try context.fetch(StoredMovieModel.fetchRequest())
+            print(storedMovies.count)
+            guard let movies = createMovieList(from: storedMovies) else { return }
+            view?.setMovieList(movies)
         }
         catch {
-            //error
+            print("Error during get saved movies")
         }
+    }
+    
+    //TODO: - -
+    private func createMovieList(from storedMovies: [StoredMovieModel]) -> [MovieModel]? {
+        var movieList = [MovieModel]()
+        var currentMovie: MovieModel
+        for movie in storedMovies {
+            //currentMovie.title = movie.title
+            //currentMovie.backdropPath = movie.poster
+        }
+        return movieList
     }
     
     private func createStoredMovie(by movie: MovieModel) {
@@ -159,13 +169,19 @@ extension MovieListPresenter {
             try context.save()
         }
         catch {
-            print("Error during save")
+            print("Error during save movies")
         }
     }
     
     private func deleteAllSavedMovies() {
-        //context.delete()
+        do {
+            let storedMovies = try context.fetch(StoredMovieModel.fetchRequest())
+            for object in storedMovies {
+                context.delete(object)
+            }
+        }
+        catch {
+            print("Error during get saved movies")
+        }
     }
-    
-
 }
