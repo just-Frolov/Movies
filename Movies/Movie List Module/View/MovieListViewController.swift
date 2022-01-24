@@ -40,7 +40,7 @@ class MovieListViewController: UIViewController {
     
     //MARK: - Variables -
     var presenter: MovieListViewPresenterProtocol!
-    private var currentMovieList = [MovieModel]()
+    private var currentMovieList = [StoredMovieModel]()
     private var initialScrollTableViewHeight: CGFloat = 0.0
     private var currentMaxScrollTableViewHeight: CGFloat = 0.0
     private var movieSearchText = String()
@@ -153,7 +153,7 @@ extension MovieListViewController: UITableViewDataSource {
 //MARK: - UITableViewDelegate -
 extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let movieID = currentMovieList[indexPath.row].id
+        let movieID = Int(currentMovieList[indexPath.row].id)
         tableView.deselectRow(at: indexPath, animated: true)
         presenter.tapOnTheMovie(with: movieID)
     }
@@ -292,7 +292,7 @@ extension MovieListViewController {
 
 //MARK: - MovieListViewProtocol -
 extension MovieListViewController: MovieListViewProtocol {
-    func setMovieList(_ moviesArray: [MovieModel]) {
+    func setMovieList(_ moviesArray: [StoredMovieModel]) {
         self.currentMovieList.append(contentsOf: moviesArray)
         updateMovieList()
     }

@@ -8,7 +8,7 @@
 import UIKit
 
 protocol MovieListViewProtocol: AnyObject {
-    func setMovieList(_ moviesArray: [MovieModel])
+    func setMovieList(_ moviesArray: [StoredMovieModel])
     func showErrorAlert(with message: String)
     func searchDesiredMoviesLocally()
 }
@@ -26,17 +26,15 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     weak var view: MovieListViewProtocol?
     var router: RouterProtocol
     private var movieListPage = 1
-    private var startMovieList = [MovieModel]() {
+    private var startMovieList = [StoredMovieModel]() {
         didSet {
-            for movie in startMovieList {
-                createStoredMovie(by: movie)
-            }
+            storedMovie.save()
         }
     }
     
     //MARK: - Constants -
     private let group = DispatchGroup()
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    private let storedMovie = SavedDataServices.shared
     
     //MARK: - Life Cycle -
     required init(view: MovieListViewProtocol, router: RouterProtocol) {
@@ -50,7 +48,8 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             getGenreList()
             getMovieList()
         } else {
-            getAllSavedMovies()
+            let movieList = storedMovie.getAllSavedMovies()
+            view?.setMovieList(movieList)
             showOfflineAlert()
         }
     }
@@ -114,13 +113,17 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             
             switch result {
             case.success(let data):
-                guard let moviesArray = data?.results else {return}
+                guard let movieRequestResult = data?.results else {return}
+                
                 strongSelf.group.notify(queue: .main) {
+                    let moviesArray = movieRequestResult.map { strongSelf.storedMovie.createStoredMovie(from: $0) }
                     strongSelf.view?.setMovieList(moviesArray)
+                    
+                    if strongSelf.startMovieList.isEmpty {
+                        strongSelf.startMovieList = moviesArray
+                    }
                 }
-                if strongSelf.startMovieList.isEmpty {
-                    strongSelf.startMovieList = moviesArray
-                }
+                
                 strongSelf.movieListPage += 1
             case.failure(let error):
                 let message = "Failed to get data: \(error)"
@@ -128,55 +131,5 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             }
             
         }
-    }
-}
-
-//MARK: - Core Data
-extension MovieListPresenter {
-    private func getAllSavedMovies() {
-        do {
-            let storedMovies = try context.fetch(StoredMovieModel.fetchRequest())
-            print(storedMovies.count)
-            guard let movies = createMovieList(from: storedMovies) else { return }
-            view?.setMovieList(movies)
-        }
-        catch {
-            print("Error during get saved movies")
-        }
-    }
-    
-    //TODO: - -
-    private func createMovieList(from storedMovies: [StoredMovieModel]) -> [MovieModel]? {
-        var movieList = [MovieModel]()
-        var currentMovie: MovieModel
-        for movie in storedMovies {
-            //currentMovie.title = movie.title
-            //currentMovie.backdropPath = movie.poster
-        }
-        return movieList
-    }
-    
-    private func createStoredMovie(by movie: MovieModel) {
-        let newMovie = StoredMovieModel(context: context)
-        newMovie.title = movie.title
-        newMovie.poster = movie.backdropPath
-        saveMovie()
-    }
-    
-    private func saveMovie(with id: Int) {
-        do {
-            isEntityAttributeExist(id: id)
-            try context.save()
-        }
-        catch {
-            print("Error during save movies")
-        }
-    }
-    
-    func isEntityAttributeExist(id: Int) -> Bool {
-        let fetchRequest = StoredMovieModel.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == %@", id)
-        let res = try! context.fetch(fetchRequest)
-        return res.count > 0 ? true : false
     }
 }

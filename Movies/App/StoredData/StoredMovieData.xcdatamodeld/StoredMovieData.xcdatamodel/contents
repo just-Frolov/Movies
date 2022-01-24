@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19574" systemVersion="21A559" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="StoredMovieModel" representedClassName="StoredMovieModel" syncable="YES">
-        <attribute name="genreIDS" optional="YES"/>
-        <attribute name="id" optional="YES"/>
+        <attribute name="genreIDS" optional="YES" attributeType="Transformable" customClassName="[Int]"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="poster" optional="YES" attributeType="String"/>
-        <attribute name="releaseDate" optional="YES"/>
-        <attribute name="title" attributeType="String"/>
-        <attribute name="voteAverage" optional="YES"/>
+        <attribute name="releaseDate" optional="YES" attributeType="String"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="voteAverage" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <elements>
         <element name="StoredMovieModel" positionX="-63" positionY="-18" width="128" height="119"/>

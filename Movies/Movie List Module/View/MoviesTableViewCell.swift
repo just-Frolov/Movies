@@ -109,14 +109,15 @@ class MoviesTableViewCell: BaseTableViewCell {
     }
     
     //MARK: - Internal -
-    func configure(with model: MovieModel) {
+    func configure(with model: StoredMovieModel) {
         setMovieInfo(from: model)
-        setImage(from: model.backdropPath)
-        setMovieGenres(by: model.genreIDS)
+        setImage(from: model.poster)
+        guard let genreIds = model.genreIDS else { return }
+        setMovieGenres(by: genreIds)
     }
     
     //MARK: - Private -
-    private func setMovieInfo(from model: MovieModel) {
+    private func setMovieInfo(from model: StoredMovieModel) {
         imageView?.image = nil
         movieTitleLabel.text = model.title
         movieTitleLabel.textColor = .white

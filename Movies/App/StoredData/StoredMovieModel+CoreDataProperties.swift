@@ -2,7 +2,7 @@
 //  StoredMovieModel+CoreDataProperties.swift
 //  Movies
 //
-//  Created by Данил Фролов on 23.01.2022.
+//  Created by Данил Фролов on 24.01.2022.
 //
 //
 
@@ -16,11 +16,15 @@ extension StoredMovieModel {
         return NSFetchRequest<StoredMovieModel>(entityName: "StoredMovieModel")
     }
 
+    @NSManaged public var genreIDS: [Int]?
+    @NSManaged public var id: Int32
     @NSManaged public var poster: String?
+    @NSManaged public var releaseDate: String?
     @NSManaged public var title: String?
+    @NSManaged public var voteAverage: Double
 
 }
 
 extension StoredMovieModel : Identifiable {
-    
+
 }
