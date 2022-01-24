@@ -46,8 +46,8 @@ class Router: RouterProtocol {
     func showPosterInFullScreen(image: UIImage) {
         if let navigationController = navigationController {
             guard let videoViewController = assemblyBuilder?.createMoviePosterModule(router: self,
-                                                                                      image: image) else { return }
-            navigationController.pushViewController(videoViewController, animated: false)
+                                                                                     image: image) else { return }
+            navigationController.pushViewController(videoViewController, animated: true)
         }
     }
     

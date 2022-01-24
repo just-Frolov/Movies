@@ -22,5 +22,5 @@ extension StoredMovieModel {
 }
 
 extension StoredMovieModel : Identifiable {
-
+    
 }

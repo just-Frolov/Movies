@@ -58,7 +58,7 @@ class MovieListViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        createTitle()
+        title = "Popular Movies"
     }
     
     //MARK: - Private -
@@ -81,10 +81,6 @@ class MovieListViewController: UIViewController {
     
     private func setupSearchBar() {
         searchBar.delegate = self
-    }
-    
-    private func createTitle() {
-        title = "Popular Movies"
     }
     
     private func configureItems() {

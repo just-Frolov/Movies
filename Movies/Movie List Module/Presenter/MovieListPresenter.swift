@@ -28,7 +28,6 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     private var movieListPage = 1
     private var startMovieList = [MovieModel]() {
         didSet {
-            deleteAllSavedMovies()
             for movie in startMovieList {
                 createStoredMovie(by: movie)
             }
@@ -164,8 +163,9 @@ extension MovieListPresenter {
         saveMovie()
     }
     
-    private func saveMovie() {
+    private func saveMovie(with id: Int) {
         do {
+            isEntityAttributeExist(id: id)
             try context.save()
         }
         catch {
@@ -173,15 +173,10 @@ extension MovieListPresenter {
         }
     }
     
-    private func deleteAllSavedMovies() {
-        do {
-            let storedMovies = try context.fetch(StoredMovieModel.fetchRequest())
-            for object in storedMovies {
-                context.delete(object)
-            }
-        }
-        catch {
-            print("Error during get saved movies")
-        }
+    func isEntityAttributeExist(id: Int) -> Bool {
+        let fetchRequest = StoredMovieModel.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id)
+        let res = try! context.fetch(fetchRequest)
+        return res.count > 0 ? true : false
     }
 }
