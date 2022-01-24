@@ -28,13 +28,13 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     private var movieListPage = 1
     private var startMovieList = [StoredMovieModel]() {
         didSet {
-            storedMovie.save()
+            storedService.save()
         }
     }
     
     //MARK: - Constants -
     private let group = DispatchGroup()
-    private let storedMovie = SavedDataServices.shared
+    private let storedService = SavedDataServices.shared
     
     //MARK: - Life Cycle -
     required init(view: MovieListViewProtocol, router: RouterProtocol) {
@@ -48,7 +48,9 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             getGenreList()
             getMovieList()
         } else {
-            let movieList = storedMovie.getAllSavedMovies()
+            let genreList = storedService.getAllSavedGenres()
+            let movieList = storedService.getAllSavedMovies()
+            GenreListConfigurable.shared.genreList = genreList
             view?.setMovieList(movieList)
             showOfflineAlert()
         }
@@ -56,10 +58,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     
     func getMovieList(by sort: String = "popularity.desc", startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
-        guard NetworkMonitor.shared.isConnected else {
-            showOfflineAlert()
-            return
-        }
+        guard NetworkMonitor.shared.isConnected else { return }
         let endPoint = EndPoint.list(sort: sort, page: movieListPage)
         movieListRequest(with: endPoint)
     }
@@ -96,8 +95,11 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             
             switch result {
             case.success(let data):
-                guard let genresArray = data else {return}
+                guard let genreRequestResult = data else {return}
+                let genreRequestList = genreRequestResult.genres
+                let genresArray = genreRequestList.map { strongSelf.storedService.createStoredGenre(from: $0) }
                 GenreListConfigurable.shared.genreList = genresArray
+                strongSelf.storedService.save()
                 strongSelf.group.leave()
             case.failure(let error):
                 let message = "Failed to get genres: \(error)"
@@ -116,7 +118,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                 guard let movieRequestResult = data?.results else {return}
                 
                 strongSelf.group.notify(queue: .main) {
-                    let moviesArray = movieRequestResult.map { strongSelf.storedMovie.createStoredMovie(from: $0) }
+                    let moviesArray = movieRequestResult.map { strongSelf.storedService.createStoredMovie(from: $0) }
                     strongSelf.view?.setMovieList(moviesArray)
                     
                     if strongSelf.startMovieList.isEmpty {

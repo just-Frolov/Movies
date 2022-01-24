@@ -21,12 +21,12 @@ struct GenreModel: Codable {
 class GenreListConfigurable {
     static let shared = GenreListConfigurable()
     
-    var genreList: GenreData?
+    var genreList: [StoredGenreModel]?
     
     func getGenreName(id: Int) -> String {
         guard let safeGenreList = genreList else { return "" }
-        let genreElement = safeGenreList.genres.filter { $0.id == id }
+        let genreElement = safeGenreList.filter { $0.id == id }
         let genreName = genreElement[0].name
-        return genreName
+        return genreName ?? ""
     }
 }

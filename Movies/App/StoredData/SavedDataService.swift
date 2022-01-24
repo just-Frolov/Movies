@@ -25,7 +25,25 @@ class SavedDataServices {
             return []
         }
     }
-
+    
+    func getAllSavedGenres() -> [StoredGenreModel] {
+        do {
+            let storedGenres = try context.fetch(StoredGenreModel.fetchRequest())
+            return storedGenres
+        }
+        catch {
+            print("Error during get saved genres")
+            return []
+        }
+    }
+    
+    func createStoredGenre(from genreData: GenreModel) -> StoredGenreModel {
+        let newGenre = StoredGenreModel(context: context)
+        newGenre.id = Int32(genreData.id)
+        newGenre.name = genreData.name
+        return newGenre
+    }
+    
     func createStoredMovie(from movieData: MovieModel) -> StoredMovieModel {
         let newMovie = StoredMovieModel(context: context)
         newMovie.id = Int32(movieData.id)

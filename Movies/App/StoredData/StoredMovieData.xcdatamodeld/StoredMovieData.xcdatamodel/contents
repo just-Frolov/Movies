@@ -23,7 +23,7 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="StoredMovieModel" positionX="-63" positionY="-18" width="128" height="119"/>
         <element name="StoredGenreModel" positionX="-63" positionY="27" width="128" height="59"/>
+        <element name="StoredMovieModel" positionX="-63" positionY="-18" width="128" height="119"/>
     </elements>
 </model>
