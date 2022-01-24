@@ -11,6 +11,15 @@ import youtube_ios_player_helper
 
 class MovieInfoViewController: UIViewController {
     //MARK: - UI Elements -
+    private lazy var headerView: UIView = {
+        let header = UIView()
+        header.addSubview(playerView)
+        header.addSubview(playerViewSpinner)
+        header.addSubview(moviePoster)
+        header.addSubview(movieTitleLabel)
+        return header
+    }()
+    
     private lazy var playerView: YTPlayerView = {
         let player = YTPlayerView()
         player.isHidden = true
@@ -23,16 +32,32 @@ class MovieInfoViewController: UIViewController {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
         image.isHidden = true
+        image.isUserInteractionEnabled = true
         return image
     }()
     
+    private lazy var movieTitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 24,
+                                 weight: .bold)
+        label.numberOfLines = 0
+        label.textColor = .black
+        return label
+    }()
+
     private lazy var tableView: UITableView = {
-        let table = UITableView()
+        let table = UITableView(frame: CGRect(x: 0,
+                                              y: 0,
+                                              width: 0,
+                                              height: 0),
+                                style: .grouped)
+        table.backgroundColor = .clear
         table.separatorStyle = .none
         table.allowsSelection = false
+        table.isHidden = true
+        table.register(InfoTableViewSection.self,
+                       forHeaderFooterViewReuseIdentifier: InfoTableViewSection.identifier)
         InfoTableViewCell.register(in: table)
-        table.register(InfoTableViewHeader.self,
-                       forHeaderFooterViewReuseIdentifier: InfoTableViewHeader.identifier)
         return table
     }()
     
@@ -41,8 +66,9 @@ class MovieInfoViewController: UIViewController {
     
     //MARK: - Variables -
     var presenter: MovieInfoViewPresenterProtocol!
-    private var movieTitle = String()
-    private var movieInfo = [String: String]()
+    //TODO: - -
+    private var movieDetails: MovieDetailsData!
+    private var dataSource: [InfoTableSectionModel] = []
     
     //MARK: - Life Cycle -
     override func viewDidLoad() {
@@ -55,18 +81,22 @@ class MovieInfoViewController: UIViewController {
     
     //MARK: - Private -
     private func setupView() {
-        title = "Movie Details"
-        navigationController?.navigationBar.topItem?.title = " ";
         view.backgroundColor = .white
+        setupNavBar()
         setupTableView()
         setupPlayerView()
+        addTapRecognizerToPoster()
+    }
+    
+    private func setupNavBar() {
+        title = "Movie Details"
+        navigationController?.navigationBar.topItem?.title = "";
     }
     
     private func setupTableView() {
-        showSpinner(spinner)
-        tableView.isHidden = true
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.tableHeaderView = headerView
     }
     
     private func setupPlayerView() {
@@ -74,25 +104,43 @@ class MovieInfoViewController: UIViewController {
         playerView.delegate = self
     }
     
+    private func addTapRecognizerToPoster() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(posterTapped(tapGestureRecognizer:)))
+            moviePoster.addGestureRecognizer(tapGestureRecognizer)
+    }
+    
+    @objc func posterTapped(tapGestureRecognizer: UITapGestureRecognizer)
+    {
+        let tappedImage = tapGestureRecognizer.view as! UIImageView
+        guard let poster = tappedImage.image else { return }
+        presenter.showPosterInFullScreen(image: poster)
+    }
+    
     private func addSubViews() {
-        view.addSubview(playerView)
-        view.addSubview(playerViewSpinner)
-        view.addSubview(moviePoster)
         view.addSubview(tableView)
     }
     
     private func setupConstraints() {
+        setupHeaderViewConstraints()
         setupPlayerViewConstraints()
         setupPlayerViewSpinnerConstraints()
         setupMoviePosterConstraints()
+        setupMovieTitleLabelConstraints()
         setupTableViewConstraints()
+    }
+    
+    private func setupHeaderViewConstraints() {
+        headerView.snp.makeConstraints { make in
+            make.bottom.equalTo(290)
+            make.top.equalToSuperview()
+            make.width.equalToSuperview()
+        }
     }
     
     private func setupPlayerViewConstraints() {
         playerView.snp.makeConstraints { make in
-            make.top.equalTo(view.snp_topMargin)
             make.left.right.equalToSuperview()
-            make.height.lessThanOrEqualTo(200)
+            make.height.lessThanOrEqualTo(250)
         }
     }
     
@@ -104,15 +152,23 @@ class MovieInfoViewController: UIViewController {
     
     private func setupMoviePosterConstraints() {
         moviePoster.snp.makeConstraints { make in
-            make.top.equalTo(view.snp_topMargin)
+            make.top.equalToSuperview()
             make.left.right.equalToSuperview()
-            make.height.lessThanOrEqualTo(200)
+            make.height.lessThanOrEqualTo(250)
+        }
+    }
+    
+    private func setupMovieTitleLabelConstraints() {
+        movieTitleLabel.snp.makeConstraints { make in
+            make.top.equalTo(moviePoster.snp_bottomMargin).offset(30)
+            make.height.equalTo(25)
+            make.left.right.equalToSuperview().inset(20)
         }
     }
     
     private func setupTableViewConstraints() {
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(playerView.snp_bottomMargin)
+            make.top.equalTo(view.snp_topMargin)
             make.left.right.bottom.equalToSuperview()
         }
     }
@@ -121,15 +177,43 @@ class MovieInfoViewController: UIViewController {
 //MARK: - Extension -
 //MARK: - UITableViewDataSource -
 extension MovieInfoViewController: UITableViewDataSource {
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return dataSource.count
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return TableViewCellType.allCases.count
+        return dataSource[section].cellTypes.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let key = TableViewCellType.allCases[indexPath.row].rawValue
-        let value = movieInfo[key] ?? "No Info"
         let cell = InfoTableViewCell.dequeueingReusableCell(in: tableView, for: indexPath)
-        cell.configure(header: key, text: value)
+        let cellType = dataSource[indexPath.section].type
+        var currentMovieInfo = String()
+        //TODO: -
+        switch cellType {
+        case .genres:
+            currentMovieInfo = presenter.createGenreList(by: movieDetails.genres) ?? ""
+        case .releaseDate:
+            if let safeDate = movieDetails.releaseDate {
+                currentMovieInfo = formatDate(from: safeDate)
+            } else {
+                currentMovieInfo = "No Info"
+            }
+        case .rating:
+            currentMovieInfo = String(movieDetails.voteAverage)
+        case .originalTitle:
+            currentMovieInfo = movieDetails.originalTitle
+        case .description:
+            currentMovieInfo = movieDetails.overview
+        case .budget:
+            currentMovieInfo = createDecimalNumber(from: movieDetails.budget)
+        case .production:
+            currentMovieInfo = movieDetails.productionCountries[0].name
+        case .revenue:
+            currentMovieInfo = createDecimalNumber(from: movieDetails.revenue)
+        }
+
+        cell.configure(with: currentMovieInfo)
         return cell
     }
 }
@@ -137,22 +221,24 @@ extension MovieInfoViewController: UITableViewDataSource {
 //MARK: - UITableViewDelegate -
 extension MovieInfoViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: InfoTableViewHeader.identifier) as? InfoTableViewHeader
-        header?.configure(title: movieTitle)
-        return header
+        let sectionType = dataSource[section].type
+        let sectionTitle = sectionType.rawValue
+        let section = tableView.dequeueReusableHeaderFooterView(withIdentifier: InfoTableViewSection.identifier) as? InfoTableViewSection
+        section?.configure(title: sectionTitle)
+        return section
     }
 }
 
 //MARK: - MovieInfoViewProtocol -
 extension MovieInfoViewController: MovieInfoViewProtocol {
     //MARK: - Internal -
-    func setMovieInfo(_ model: MovieDetailsData) {
-            setImage(from: model.backdropPath)
-            setMovieDetails(from: model)
-            showTableView()
-            hideSpinner(spinner)
+    func setMovieInfo(from movieDetails: MovieDetailsData, with sectionType: [InfoTableSectionModel]) {
+        setImage(from: movieDetails.backdropPath)
+        movieTitleLabel.text = movieDetails.title
+        self.movieDetails = movieDetails
+        updateSections(sectionType)
     }
-    
+        
     func showMoviePoster() {
         playerViewSpinner.stopAnimating()
         moviePoster.isHidden = false
@@ -167,7 +253,8 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
     }
     
     //MARK: - Private -
-    private func showTableView() {
+    private func updateSections(_ sections: [InfoTableSectionModel]) {
+        dataSource = sections
         tableView.reloadData()
         tableView.isHidden = false
     }
@@ -179,38 +266,6 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
         } else {
             self.moviePoster.image = UIImage(named: "noImageFound")
         }
-    }
-    
-    private func setMovieDetails(from model: MovieDetailsData) {
-        let movieGenres = createGenreList(by: model.genres) ?? "No Info"
-        let movieBudget = createDecimalNumber(from: model.budget) ?? "No Info"
-        movieTitle = model.title
-        movieInfo[TableViewCellType.genres.rawValue] = movieGenres
-        movieInfo[TableViewCellType.description.rawValue] = model.overview
-        movieInfo[TableViewCellType.rating.rawValue] = String(model.voteAverage)
-        movieInfo[TableViewCellType.originalTitle.rawValue] = model.originalTitle
-        movieInfo[TableViewCellType.releaseDate.rawValue] = model.releaseDate
-        movieInfo[TableViewCellType.production.rawValue] = model.productionCountries[0].name
-        movieInfo[TableViewCellType.budget.rawValue] = movieBudget
-    }
-    
-    private func createGenreList(by genreArray: [DataName]) -> String? {
-        var genreList = String()
-        for genre in genreArray {
-            genreList.addingDevidingPrefixIfNeeded()
-            genreList += genre.name.capitalizingFirstLetter()
-        }
-        return genreList
-    }
-    
-    private func createDecimalNumber(from largeNumber: Int) -> String? {
-        guard largeNumber != 0 else {
-            return nil
-        }
-        let numberFormatter = NumberFormatter()
-        numberFormatter.numberStyle = .decimal
-        let formattedNumber = numberFormatter.string(from: NSNumber(value:largeNumber))
-        return formattedNumber
     }
 }
 

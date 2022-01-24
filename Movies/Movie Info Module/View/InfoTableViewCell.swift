@@ -7,27 +7,24 @@
 
 import SnapKit
 
-enum TableViewCellType: String, CaseIterable {
-    case genres = "Жанр"
-    case description = "Описание"
-    case rating = "Рейтинг IMBD"
-    case originalTitle = "Оригинальное название"
-    case releaseDate = "Дата релиза"
-    case production = "Производство"
-    case budget = "Бюджет"
+struct InfoTableSectionModel {
+    let type: TableViewSectionType
+    let cellTypes: [TableViewCellType]
+}
+
+enum TableViewCellType: CaseIterable {
+    case genres
+    case description 
+    case rating 
+    case originalTitle
+    case releaseDate
+    case production
+    case budget
+    case revenue
 }
 
 class InfoTableViewCell: BaseTableViewCell {
     //MARK: - UI Elements -
-    private lazy var staticMovieHeaderLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 14,
-                                 weight: .bold)
-        label.numberOfLines = 0
-        label.textColor = .lightGray
-        return label
-    }()
-    
     private lazy var movieInfoLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 15,
@@ -49,34 +46,24 @@ class InfoTableViewCell: BaseTableViewCell {
     }
     
     //MARK: - Internal -
-    func configure(header: String, text: String) {
-        staticMovieHeaderLabel.text = header
-        movieInfoLabel.text = text
+    func configure(with info: String) {
+        movieInfoLabel.text = info
     }
     
     //MARK: - Private -
     private func addSubviews() {
-        contentView.addSubview(staticMovieHeaderLabel)
         contentView.addSubview(movieInfoLabel)
     }
     
     private func setupConstraints() {
-        setupStaticMovieHeaderLabel()
         setupMovieInfoLabel()
-    }
-    
-    private func setupStaticMovieHeaderLabel() {
-        staticMovieHeaderLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(10)
-            make.left.right.equalToSuperview().inset(20)
-        }
     }
     
     private func setupMovieInfoLabel() {
         movieInfoLabel.snp.makeConstraints { make in
-            make.top.equalTo(staticMovieHeaderLabel.snp_bottomMargin).offset(15)
+            make.top.equalToSuperview().offset(10)
             make.left.right.equalToSuperview().inset(20)
-            make.bottom.equalToSuperview().inset(20)
+            make.bottom.equalToSuperview().inset(10)
         }
     }
 }

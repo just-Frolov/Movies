@@ -2,11 +2,7 @@ PODS:
   - Alamofire (5.4.4)
   - JGProgressHUD (2.2)
   - Kingfisher (7.1.2)
-  - Realm (10.16.0):
-    - Realm/Headers (= 10.16.0)
-  - Realm/Headers (10.16.0)
-  - RealmSwift (10.16.0):
-    - Realm (= 10.16.0)
+  - netfox (1.20.0)
   - SnapKit (5.0.1)
   - youtube-ios-player-helper (1.0.4)
 
@@ -14,7 +10,7 @@ DEPENDENCIES:
   - Alamofire
   - JGProgressHUD
   - Kingfisher
-  - RealmSwift
+  - netfox
   - SnapKit
   - youtube-ios-player-helper
 
@@ -23,8 +19,7 @@ SPEC REPOS:
     - Alamofire
     - JGProgressHUD
     - Kingfisher
-    - Realm
-    - RealmSwift
+    - netfox
     - SnapKit
     - youtube-ios-player-helper
 
@@ -32,11 +27,10 @@ SPEC CHECKSUMS:
   Alamofire: f3b09a368f1582ab751b3fff5460276e0d2cf5c9
   JGProgressHUD: d83d7a981b85d11205e19ff8ad5bb9c40571c847
   Kingfisher: 44ed6a8504763f27bab46163adfac83f5deb240c
-  Realm: b6027801398f3743fc222f096faa85281b506e6c
-  RealmSwift: b02a3d0e4947955da960b642c98ad3a461fc4e70
+  netfox: 6b5c9724304b0cd99ca8515ac732a9f710e4ea5f
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   youtube-ios-player-helper: e9b97535e816db3152179d84d999bc1807ecd689
 
-PODFILE CHECKSUM: 035a0f91610d254baa1112214e3227dd97ef4c95
+PODFILE CHECKSUM: 4a4137df64dd8347821d2521e3355b3d89cc6b04
 
 COCOAPODS: 1.11.2

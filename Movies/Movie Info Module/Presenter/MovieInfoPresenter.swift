@@ -8,7 +8,7 @@
 import UIKit
 
 protocol MovieInfoViewProtocol: AnyObject {
-    func setMovieInfo(_ model: MovieDetailsData)
+    func setMovieInfo(from movieDetails: MovieDetailsData, with sectionType: [InfoTableSectionModel])
     func showMoviePoster()
     func showMovieVideo(with id: String)
     func showErrorAlert(with message: String)
@@ -17,13 +17,17 @@ protocol MovieInfoViewProtocol: AnyObject {
 protocol MovieInfoViewPresenterProtocol: AnyObject {
     init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?)
     func viewDidLoad()
+    func showPosterInFullScreen(image: UIImage)
+    func createGenreList(by genreArray: [GenreModel]) -> String?
 }
 
 class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
     //MARK: - Variables -
     weak var view: MovieInfoViewProtocol?
-    var router: RouterProtocol?
-    let movieID: Int?
+    private var router: RouterProtocol?
+    
+    //MARK: - Constants -
+    private let movieID: Int?
     
     //MARK: - Life Cycle -
     required init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?) {
@@ -38,7 +42,21 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
         getMovieTrailerLink()
     }
     
-    func getMovieInfo() {
+    func showPosterInFullScreen(image: UIImage) {
+        router?.showPosterInFullScreen(image: image)
+    }
+    
+    func createGenreList(by genreArray: [GenreModel]) -> String? {
+        var genreList = String()
+        for genre in genreArray {
+            genreList.addingDevidingPrefixIfNeeded()
+            genreList += genre.name.capitalizingFirstLetter()
+        }
+        return genreList
+    }
+    
+    //MARK: - Private -
+    private func getMovieInfo() {
         guard let movieID = movieID else {
             return
         }
@@ -48,8 +66,9 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
             DispatchQueue.main.async {
                 switch result {
                 case.success(let data):
-                    guard let moviesArray = data else {return}
-                    strongSelf.view?.setMovieInfo(moviesArray)
+                    guard let movieDetails = data else {return}
+                    let tableViewSectionTypes = strongSelf.assembleModels()
+                    strongSelf.view?.setMovieInfo(from: movieDetails, with: tableViewSectionTypes)
                 case.failure(let error):
                     let message = "Failed to get info about movie: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
@@ -58,7 +77,7 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
         }
     }
     
-    func getMovieTrailerLink() {
+    private func getMovieTrailerLink() {
         guard let movieID = movieID else {
             return
         }
@@ -72,14 +91,25 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
                         strongSelf.view?.showMoviePoster()
                         return
                     }
-                    let firstVideo = 0
-                    let id = videoList[firstVideo].key
+                    let firstVideoIndex = 0
+                    let id = videoList[firstVideoIndex].key
                     strongSelf.view?.showMovieVideo(with: id)
                 case.failure(_):
                     strongSelf.view?.showMoviePoster()
                 }
             }
         }
+    }
+    
+    private func assembleModels() -> [InfoTableSectionModel] {
+        let genreSectionModel = InfoTableSectionModel(type: .genres, cellTypes: [.genres])
+        let descriptionSectionModel = InfoTableSectionModel(type: .description, cellTypes: [.description])
+        let ratingSectionModel = InfoTableSectionModel(type: .rating, cellTypes: [.rating])
+        let originalTitleSectionModel = InfoTableSectionModel(type: .originalTitle, cellTypes: [.originalTitle])
+        let releaseDateSectionModel = InfoTableSectionModel(type: .releaseDate, cellTypes: [.releaseDate])
+        let budgetSectionModel = InfoTableSectionModel(type: .budget, cellTypes: [.budget])
+        let revenueSectionModel = InfoTableSectionModel(type: .revenue, cellTypes: [.revenue])
+        return [genreSectionModel, descriptionSectionModel, ratingSectionModel, originalTitleSectionModel, releaseDateSectionModel, budgetSectionModel, revenueSectionModel]
     }
 }
 
