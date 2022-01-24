@@ -10,6 +10,7 @@ import UIKit
 protocol AssemblerBuilderProtocol {
     func createMovieListModule(router: RouterProtocol) -> UIViewController
     func createMovieInfoModule(router: RouterProtocol, movieID: Int?) -> UIViewController
+    func createMoviePosterModule(router: RouterProtocol, image: UIImage) -> UIViewController
 }
 
 class AssemblerModuleBuilder: AssemblerBuilderProtocol {
@@ -29,4 +30,13 @@ class AssemblerModuleBuilder: AssemblerBuilderProtocol {
         view.presenter = presenter
         return view
     }
+    
+    func createMoviePosterModule(router: RouterProtocol, image: UIImage) -> UIViewController {
+          let view = MoviePosterViewController()
+          let presenter = MoviePosterPresenter(view: view,
+                                             router: router,
+                                             image: image)
+          view.presenter = presenter
+          return view
+      }
 }

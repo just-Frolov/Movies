@@ -40,7 +40,7 @@ class MovieListViewController: UIViewController {
     
     //MARK: - Variables -
     var presenter: MovieListViewPresenterProtocol!
-    private var currentMovieList = [Movie]()
+    private var currentMovieList = [StoredMovieModel]()
     private var initialScrollTableViewHeight: CGFloat = 0.0
     private var currentMaxScrollTableViewHeight: CGFloat = 0.0
     private var movieSearchText = String()
@@ -58,7 +58,8 @@ class MovieListViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        createTitle()
+        title = "Popular Movies"
+        configureItems()
     }
     
     //MARK: - Private -
@@ -70,12 +71,16 @@ class MovieListViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        configureItems()
         setupNavigationBarAppearence()
     }
     
-    private func createTitle() {
-        title = "Popular Movies"
+    private func setupTableView() {
+        tableView.dataSource = self
+        tableView.delegate = self
+    }
+    
+    private func setupSearchBar() {
+        searchBar.delegate = self
     }
     
     private func configureItems() {
@@ -86,21 +91,12 @@ class MovieListViewController: UIViewController {
             action: #selector(showSortingActionSheet)
         )
     }
-
+    
     private func setupNavigationBarAppearence() {
         let navAppearance = UINavigationBarAppearance()
         navigationController?.navigationBar.tintColor = .black
         navigationController?.navigationBar.scrollEdgeAppearance = navAppearance
         navigationController?.navigationBar.standardAppearance = navAppearance
-    }
-    
-    private func setupTableView() {
-        tableView.dataSource = self
-        tableView.delegate = self
-    }
-    
-    private func setupSearchBar() {
-        searchBar.delegate = self
     }
     
     private func addSubViews() {
@@ -157,11 +153,11 @@ extension MovieListViewController: UITableViewDataSource {
 //MARK: - UITableViewDelegate -
 extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let movieID = currentMovieList[indexPath.row].id
+        let movieID = Int(currentMovieList[indexPath.row].id)
         tableView.deselectRow(at: indexPath, animated: true)
         presenter.tapOnTheMovie(with: movieID)
     }
-
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 250
     }
@@ -201,8 +197,8 @@ extension MovieListViewController: UITableViewDelegate {
         let topRow = IndexPath(row: 0,
                                section: 0)
         tableView.scrollToRow(at: topRow,
-                                   at: .top,
-                                   animated: false)
+                              at: .top,
+                              animated: false)
     }
 }
 
@@ -235,7 +231,7 @@ extension MovieListViewController: UISearchBarDelegate {
         if text.replacingOccurrences(of: " ", with: "").isEmpty {
             getNewMovies(true)
             DispatchQueue.main.async { [weak self] in
-                self?.view.endEditing(true)
+                self?.dismissKeyboard()
             }
         } else {
             getNewMoviesBySearch(true)
@@ -288,16 +284,22 @@ extension MovieListViewController {
     }
     
     private func setValuesForCurrentVariables(with sort: String) {
-        currentMovieList.removeAll()
         movieSortingType = sort
+        currentMovieList.removeAll()
         movieSearchText.removeAll()
     }
 }
 
 //MARK: - MovieListViewProtocol -
 extension MovieListViewController: MovieListViewProtocol {
-    func setMovieList(_ moviesArray: [Movie]) {
-        self.currentMovieList.append(contentsOf: moviesArray)
+    func setOfflineMode() {
+        let message = "You are offline. Please, enable your Wi-Fi or connect using cellular data."
+        showErrorAlert(with: message)
+        navigationItem.rightBarButtonItem = nil
+    }
+    
+    func setMovieList(_ moviesArray: [StoredMovieModel]) {
+        currentMovieList.append(contentsOf: moviesArray)
         updateMovieList()
     }
     
@@ -308,11 +310,6 @@ extension MovieListViewController: MovieListViewProtocol {
         if spinner.isVisible {
             hideSpinner(spinner)
         }
-    }
-    
-    func searchDesiredMoviesLocally() {
-        //currentMovieList = lastMovieList.filter { $0.title.lowercased().hasPrefix(movieSearchText.lowercased()) }
-        updateMovieList()
     }
     
     private func updateMovieList() {
@@ -326,18 +323,24 @@ extension MovieListViewController: MovieListViewProtocol {
         }
         
         guard !currentMovieList.isEmpty else {
-            tableView.isHidden = true
-            noMoviesLabel.isHidden = false
+            setVisibleForUI(isHidden: false)
             return
         }
         
         if tableView.isHidden {
-            tableView.isHidden = false
-            noMoviesLabel.isHidden = true
+            setVisibleForUI(isHidden: true)
+        }
+    }
+    
+    
+    
+    private func setVisibleForUI(isHidden: Bool) {
+        DispatchQueue.main.async { [weak self] in
+            self?.tableView.isHidden = !isHidden
+            self?.noMoviesLabel.isHidden = isHidden
         }
     }
 }
-
 
 
 

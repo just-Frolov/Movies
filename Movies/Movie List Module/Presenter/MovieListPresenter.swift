@@ -8,9 +8,9 @@
 import UIKit
 
 protocol MovieListViewProtocol: AnyObject {
-    func setMovieList(_ moviesArray: [Movie])
+    func setMovieList(_ moviesArray: [StoredMovieModel])
     func showErrorAlert(with message: String)
-    func searchDesiredMoviesLocally()
+    func setOfflineMode()
 }
 
 protocol MovieListViewPresenterProtocol: AnyObject {
@@ -26,14 +26,10 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     weak var view: MovieListViewProtocol?
     var router: RouterProtocol
     private var movieListPage = 1
-    private var startMovieList = [Movie]() {
-        didSet {
-         
-        }
-    }
     
     //MARK: - Constants -
     private let group = DispatchGroup()
+    private let storedService = SavedDataServices.shared
     
     //MARK: - Life Cycle -
     required init(view: MovieListViewProtocol, router: RouterProtocol) {
@@ -47,90 +43,92 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             getGenreList()
             getMovieList()
         } else {
-            loadLastMovies()
-            showOfflineAlert()
+            let genreList = storedService.getAllSavedGenres()
+            let movieList = storedService.getAllSavedMovies()
+            GenreListConfigurable.shared.genreList = genreList
+            view?.setMovieList(movieList)
+            view?.setOfflineMode()
         }
     }
     
     func getMovieList(by sort: String = "popularity.desc", startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
         guard NetworkMonitor.shared.isConnected else {
-            showOfflineAlert()
+            if startAgain == true {
+                let storedMovieList = storedService.getAllSavedMovies()
+                view?.setMovieList(storedMovieList)
+            }
             return
         }
         let endPoint = EndPoint.list(sort: sort, page: movieListPage)
         movieListRequest(with: endPoint)
     }
     
-    func getMovieListBySearch(_ text: String, startAgain: Bool = false) {
+    func getMovieListBySearch(_ filter: String, startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
         guard NetworkMonitor.shared.isConnected else {
-            view?.searchDesiredMoviesLocally()
+            let filteredMovieList = storedService.getSavedMovies(by: filter)
+            view?.setMovieList(filteredMovieList)
             return
         }
-        let endPoint = EndPoint.searchMovies(query: text, page: self.movieListPage)
+        let endPoint = EndPoint.searchMovies(query: filter, page: self.movieListPage)
         movieListRequest(with: endPoint)
     }
     
     func tapOnTheMovie(with id: Int) {
         guard NetworkMonitor.shared.isConnected else {
-            showOfflineAlert()
+            view?.setOfflineMode()
             return
         }
         router.showMovieDetails(by: id)
     }
     
     //MARK: - Private -
-    private func loadLastMovies() {
-        //let movieList = realm.objects(Movie.self)
-    }
-    
-    private func showOfflineAlert() {
-        let message = "You are offline. Please, enable your Wi-Fi or connect using cellular data."
-        view?.showErrorAlert(with: message)
-    }
-    
     private func getGenreList() {
         group.enter()
         let endPoint = EndPoint.genres
         NetworkService.shared.request(endPoint: endPoint, expecting: GenreData.self) { [weak self] result in
             guard let strongSelf = self else { return }
-            DispatchQueue.main.async {
-                switch result {
-                case.success(let data):
-                    guard let genresArray = data else {return}
-                    GenreListConfigurable.shared.genreList = genresArray
-                    strongSelf.group.leave()
-                case.failure(let error):
-                    let message = "Failed to get genres: \(error)"
-                    strongSelf.view?.showErrorAlert(with: message)
-                }
+            
+            switch result {
+            case.success(let data):
+                guard let genreRequestResult = data else { return }
+                
+                let genreRequestList = genreRequestResult.genres
+                let genresArray = genreRequestList.map { strongSelf.storedService.createStoredGenre(from: $0) }
+                GenreListConfigurable.shared.genreList = genresArray
+                strongSelf.storedService.save()
+                strongSelf.group.leave()
+            case.failure(let error):
+                let message = "Failed to get genres: \(error)"
+                strongSelf.view?.showErrorAlert(with: message)
             }
+            
         }
     }
     
     private func movieListRequest(with endPoint: EndPoint) {
-        if GenreListConfigurable.shared.genreList == nil {
-            getGenreList()
-        }
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
-            DispatchQueue.main.async {
-                switch result {
-                case.success(let data):
-                    guard let moviesArray = data?.results else {return}
-                    strongSelf.group.notify(queue: .main) {
-                        strongSelf.view?.setMovieList(moviesArray)
+            
+            switch result {
+            case.success(let data):
+                guard let movieRequestResult = data?.results else { return }
+                
+                strongSelf.group.notify(queue: .main) {
+                    let moviesArray = movieRequestResult.map {
+                        strongSelf.storedService.createStoredMovie(from: $0)
                     }
-                    if strongSelf.startMovieList.isEmpty {
-                        strongSelf.startMovieList = moviesArray
-                    }
-                    strongSelf.movieListPage += 1
-                case.failure(let error):
-                    let message = "Failed to get data: \(error)"
-                    strongSelf.view?.showErrorAlert(with: message)
+                    strongSelf.view?.setMovieList(moviesArray)
+                    strongSelf.storedService.save()
                 }
+                
+                strongSelf.movieListPage += 1
+            case.failure(let error):
+                let message = "Failed to get data: \(error)"
+                strongSelf.view?.showErrorAlert(with: message)
             }
+            
         }
     }
 }
