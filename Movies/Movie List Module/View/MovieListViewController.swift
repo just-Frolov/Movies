@@ -7,6 +7,7 @@
 
 import SnapKit
 import JGProgressHUD
+import Dispatch
 
 class MovieListViewController: UIViewController {
     //MARK: - UI Elements -
@@ -39,11 +40,12 @@ class MovieListViewController: UIViewController {
     
     //MARK: - Variables -
     var presenter: MovieListViewPresenterProtocol!
-    private var movies = [Movie]()
+    private var currentMovieList = [MovieModel]()
     private var initialScrollTableViewHeight: CGFloat = 0.0
     private var currentMaxScrollTableViewHeight: CGFloat = 0.0
     private var movieSearchText = String()
-    private var movieSort = SortType.byPopular.rawValue
+    private var movieSortingType = SortType.byPopular.rawValue
+    private var workItem: DispatchWorkItem?
     
     //MARK: - Life Cycle -
     override func viewDidLoad() {
@@ -56,7 +58,7 @@ class MovieListViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        createTitle()
+        title = "Popular Movies"
     }
     
     //MARK: - Private -
@@ -72,8 +74,13 @@ class MovieListViewController: UIViewController {
         setupNavigationBarAppearence()
     }
     
-    private func createTitle() {
-        title = "Popular Movies"
+    private func setupTableView() {
+        tableView.dataSource = self
+        tableView.delegate = self
+    }
+    
+    private func setupSearchBar() {
+        searchBar.delegate = self
     }
     
     private func configureItems() {
@@ -90,15 +97,6 @@ class MovieListViewController: UIViewController {
         navigationController?.navigationBar.tintColor = .black
         navigationController?.navigationBar.scrollEdgeAppearance = navAppearance
         navigationController?.navigationBar.standardAppearance = navAppearance
-    }
-    
-    private func setupTableView() {
-        tableView.dataSource = self
-        tableView.delegate = self
-    }
-    
-    private func setupSearchBar() {
-        searchBar.delegate = self
     }
     
     private func addSubViews() {
@@ -140,11 +138,11 @@ class MovieListViewController: UIViewController {
 //MARK: - UITableViewDataSource -
 extension MovieListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return movies.count
+        return currentMovieList.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let movie = movies[indexPath.row]
+        let movie = currentMovieList[indexPath.row]
         let cell = MoviesTableViewCell.dequeueingReusableCell(in: tableView,
                                                               for: indexPath)
         cell.configure(with: movie)
@@ -155,7 +153,7 @@ extension MovieListViewController: UITableViewDataSource {
 //MARK: - UITableViewDelegate -
 extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let movieID = movies[indexPath.row].id
+        let movieID = currentMovieList[indexPath.row].id
         tableView.deselectRow(at: indexPath, animated: true)
         presenter.tapOnTheMovie(with: movieID)
     }
@@ -187,12 +185,20 @@ extension MovieListViewController: UITableViewDelegate {
         currentMaxScrollTableViewHeight = 0.0
     }
     
-    private func getNewMovies() {
-        presenter.getMovieList(by: movieSort, startAgain: false)
+    private func getNewMovies(_ startAgain: Bool = false) {
+        presenter.getMovieList(by: movieSortingType, startAgain: startAgain)
     }
     
-    private func getNewMoviesBySearch() {
-        presenter.getMovieListBySearch(movieSearchText, startAgain: false)
+    private func getNewMoviesBySearch(_ startAgain: Bool = false) {
+        presenter.getMovieListBySearch(movieSearchText, startAgain: startAgain)
+    }
+    
+    private func scrollToTop() {
+        let topRow = IndexPath(row: 0,
+                               section: 0)
+        tableView.scrollToRow(at: topRow,
+                                   at: .top,
+                                   animated: false)
     }
 }
 
@@ -200,16 +206,35 @@ extension MovieListViewController: UITableViewDelegate {
 extension MovieListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
-        showSpinner(spinner)
-        resetCurrentTableViewHeight()
-        movies.removeAll()
-        if let text = searchBar.text?.capitalized,
-           !text.replacingOccurrences(of: " ", with: "").isEmpty {
-            movieSearchText = text
-            presenter.getMovieListBySearch(text, startAgain: true)
+        guard let searchText = searchBar.text else { return }
+        let delay = 0
+        getSearchResults(query: searchText, deadline: delay)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        getSearchResults(query: searchText)
+    }
+    
+    private func getSearchResults(query: String, deadline: Int = 500) {
+        workItem?.cancel()
+        let newWorkItem = DispatchWorkItem { [weak self] in
+            self?.startMovieSearchRequest(with: query)
+        }
+        workItem = newWorkItem
+        DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(deadline),
+                                          execute: newWorkItem)
+    }
+    
+    private func startMovieSearchRequest(with text: String) {
+        currentMovieList.removeAll()
+        movieSearchText = text
+        if text.replacingOccurrences(of: " ", with: "").isEmpty {
+            getNewMovies(true)
+            DispatchQueue.main.async { [weak self] in
+                self?.view.endEditing(true)
+            }
         } else {
-            movieSearchText.removeAll()
-            presenter.getMovieList(by: movieSort, startAgain: true)
+            getNewMoviesBySearch(true)
         }
     }
 }
@@ -259,47 +284,17 @@ extension MovieListViewController {
     }
     
     private func setValuesForCurrentVariables(with sort: String) {
-        movies.removeAll()
-        movieSort = sort
+        movieSortingType = sort
+        currentMovieList.removeAll()
         movieSearchText.removeAll()
     }
 }
 
 //MARK: - MovieListViewProtocol -
 extension MovieListViewController: MovieListViewProtocol {
-    func setMovieList(_ moviesArray: [Movie]) {
-        self.movies.append(contentsOf: moviesArray)
+    func setMovieList(_ moviesArray: [MovieModel]) {
+        self.currentMovieList.append(contentsOf: moviesArray)
         updateMovieList()
-    }
-    
-    private func updateMovieList() {
-        DispatchQueue.main.async { [weak self] in
-            guard let strongSelf = self else { return }
-            strongSelf.hideSpinner(strongSelf.spinner)
-            strongSelf.tableView.reloadData()
-            if strongSelf.movies.count == 20 {
-                strongSelf.scrollToTop()
-            }
-        }
-        
-        guard !movies.isEmpty else {
-            tableView.isHidden = true
-            noMoviesLabel.isHidden = false
-            return
-        }
-        
-        if tableView.isHidden {
-            tableView.isHidden = false
-            noMoviesLabel.isHidden = true
-        }
-    }
-    
-    private func scrollToTop() {
-        let topRow = IndexPath(row: 0,
-                               section: 0)
-        tableView.scrollToRow(at: topRow,
-                                   at: .top,
-                                   animated: false)
     }
     
     func showErrorAlert(with message: String) {
@@ -308,6 +303,33 @@ extension MovieListViewController: MovieListViewProtocol {
         }
         if spinner.isVisible {
             hideSpinner(spinner)
+        }
+    }
+    
+    func searchDesiredMoviesLocally() {
+        //currentMovieList = lastMovieList.filter { $0.title.lowercased().hasPrefix(movieSearchText.lowercased()) }
+        updateMovieList()
+    }
+    
+    private func updateMovieList() {
+        DispatchQueue.main.async { [weak self] in
+            guard let strongSelf = self else { return }
+            strongSelf.hideSpinner(strongSelf.spinner)
+            strongSelf.tableView.reloadData()
+            if strongSelf.currentMovieList.count == 20 {
+                strongSelf.scrollToTop()
+            }
+        }
+        
+        guard !currentMovieList.isEmpty else {
+            tableView.isHidden = true
+            noMoviesLabel.isHidden = false
+            return
+        }
+        
+        if tableView.isHidden {
+            tableView.isHidden = false
+            noMoviesLabel.isHidden = true
         }
     }
 }

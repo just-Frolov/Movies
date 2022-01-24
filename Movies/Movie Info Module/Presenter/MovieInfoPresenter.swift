@@ -8,15 +8,20 @@
 import UIKit
 
 protocol MovieInfoViewProtocol: AnyObject {
-    func setMovieInfo(_ model: MovieDetailsData)
+    func setMovieInfo(from movieDetails: MovieDetailsData)
     func showMoviePoster()
     func showMovieVideo(with id: String)
     func showErrorAlert(with message: String)
+    func updateSections(_ sections: [InfoTableSectionModel])
 }
 
 protocol MovieInfoViewPresenterProtocol: AnyObject {
     init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?)
     func viewDidLoad()
+    func showPosterInFullScreen(image: UIImage)
+    func createGenreList(by genreArray: [GenreModel]) -> String?
+    func createDecimalNumber(from largeNumber: Int) -> String
+    func formatDate(from originalDate: String) -> String
 }
 
 class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
@@ -38,7 +43,47 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
         getMovieTrailerLink()
     }
     
-    func getMovieInfo() {
+    func showPosterInFullScreen(image: UIImage) {
+        router?.showPosterInFullScreen(image: image)
+    }
+    
+    func createGenreList(by genreArray: [GenreModel]) -> String? {
+        var genreList = String()
+        for genre in genreArray {
+            genreList.addingDevidingPrefixIfNeeded()
+            genreList += genre.name.capitalizingFirstLetter()
+        }
+        return genreList
+    }
+    
+    func createDecimalNumber(from largeNumber: Int) -> String {
+        guard largeNumber != 0 else {
+            return "No Info"
+        }
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        let formattedNumber = numberFormatter.string(from: NSNumber(value:largeNumber)) ?? "?"
+        let currencyValue = formattedNumber + " USD"
+        return currencyValue
+    }
+    
+    func formatDate(from originalDate: String) -> String {
+        let dateFormatterGet = DateFormatter()
+        dateFormatterGet.dateFormat = "yyyy-MM-dd"
+
+        let dateFormatterPrint = DateFormatter()
+        dateFormatterPrint.locale = Locale(identifier: "ru_RU")
+        dateFormatterPrint.dateFormat = "d MMMM, yyyy"
+
+        if let date = dateFormatterGet.date(from: originalDate) {
+            return dateFormatterPrint.string(from: date)
+        } else {
+            return originalDate
+        }
+    }
+    
+    //MARK: - Private -
+    private func getMovieInfo() {
         guard let movieID = movieID else {
             return
         }
@@ -48,8 +93,10 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
             DispatchQueue.main.async {
                 switch result {
                 case.success(let data):
-                    guard let moviesArray = data else {return}
-                    strongSelf.view?.setMovieInfo(moviesArray)
+                    guard let movieDetails = data else {return}
+                    let tableViewSectionTypes = strongSelf.assembleModels()
+                    strongSelf.view?.setMovieInfo(from: movieDetails)
+                    strongSelf.view?.updateSections(tableViewSectionTypes)
                 case.failure(let error):
                     let message = "Failed to get info about movie: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
@@ -58,7 +105,7 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
         }
     }
     
-    func getMovieTrailerLink() {
+    private func getMovieTrailerLink() {
         guard let movieID = movieID else {
             return
         }
@@ -80,6 +127,17 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
                 }
             }
         }
+    }
+    
+    private func assembleModels() -> [InfoTableSectionModel] {
+        let genreSectionModel = InfoTableSectionModel(type: .genres, cellTypes: [.genres])
+        let descriptionSectionModel = InfoTableSectionModel(type: .description, cellTypes: [.description])
+        let ratingSectionModel = InfoTableSectionModel(type: .rating, cellTypes: [.rating])
+        let originalTitleSectionModel = InfoTableSectionModel(type: .originalTitle, cellTypes: [.originalTitle])
+        let releaseDateSectionModel = InfoTableSectionModel(type: .releaseDate, cellTypes: [.releaseDate])
+        let budgetSectionModel = InfoTableSectionModel(type: .budget, cellTypes: [.budget])
+        let revenueSectionModel = InfoTableSectionModel(type: .revenue, cellTypes: [.revenue])
+        return [genreSectionModel, descriptionSectionModel, ratingSectionModel, originalTitleSectionModel, releaseDateSectionModel, budgetSectionModel, revenueSectionModel]
     }
 }
 
