@@ -10,10 +10,10 @@ import UIKit
 class SavedDataServices {
     //MARK: - Static -
     static let shared = SavedDataServices()
-    
+
     //MARK: - Constant -
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
+
     //MARK: - Private -
     func getAllSavedMovies() -> [StoredMovieModel] {
         do {
@@ -25,7 +25,7 @@ class SavedDataServices {
             return []
         }
     }
-    
+
     func createStoredMovie(from movieData: MovieModel) -> StoredMovieModel {
         let newMovie = StoredMovieModel(context: context)
         newMovie.id = Int32(movieData.id)
@@ -36,7 +36,7 @@ class SavedDataServices {
         newMovie.voteAverage = movieData.voteAverage
         return newMovie
     }
-    
+
     func save() {
         do {
             try context.save()
