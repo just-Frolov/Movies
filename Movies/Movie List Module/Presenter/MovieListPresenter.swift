@@ -10,7 +10,7 @@ import UIKit
 protocol MovieListViewProtocol: AnyObject {
     func setMovieList(_ moviesArray: [StoredMovieModel])
     func showErrorAlert(with message: String)
-    func searchDesiredMoviesLocally()
+    func setOfflineMode()
 }
 
 protocol MovieListViewPresenterProtocol: AnyObject {
@@ -26,11 +26,6 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     weak var view: MovieListViewProtocol?
     var router: RouterProtocol
     private var movieListPage = 1
-    private var startMovieList = [StoredMovieModel]() {
-        didSet {
-            storedService.save()
-        }
-    }
     
     //MARK: - Constants -
     private let group = DispatchGroup()
@@ -52,41 +47,43 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             let movieList = storedService.getAllSavedMovies()
             GenreListConfigurable.shared.genreList = genreList
             view?.setMovieList(movieList)
-            showOfflineAlert()
+            view?.setOfflineMode()
         }
     }
     
     func getMovieList(by sort: String = "popularity.desc", startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
-        guard NetworkMonitor.shared.isConnected else { return }
+        guard NetworkMonitor.shared.isConnected else {
+            if startAgain == true {
+                let storedMovieList = storedService.getAllSavedMovies()
+                view?.setMovieList(storedMovieList)
+            }
+            return
+        }
         let endPoint = EndPoint.list(sort: sort, page: movieListPage)
         movieListRequest(with: endPoint)
     }
     
-    func getMovieListBySearch(_ text: String, startAgain: Bool = false) {
+    func getMovieListBySearch(_ filter: String, startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
         guard NetworkMonitor.shared.isConnected else {
-            view?.searchDesiredMoviesLocally()
+            let filteredMovieList = storedService.getSavedMovies(by: filter)
+            view?.setMovieList(filteredMovieList)
             return
         }
-        let endPoint = EndPoint.searchMovies(query: text, page: self.movieListPage)
+        let endPoint = EndPoint.searchMovies(query: filter, page: self.movieListPage)
         movieListRequest(with: endPoint)
     }
     
     func tapOnTheMovie(with id: Int) {
         guard NetworkMonitor.shared.isConnected else {
-            showOfflineAlert()
+            view?.setOfflineMode()
             return
         }
         router.showMovieDetails(by: id)
     }
     
     //MARK: - Private -
-    private func showOfflineAlert() {
-        let message = "You are offline. Please, enable your Wi-Fi or connect using cellular data."
-        view?.showErrorAlert(with: message)
-    }
-    
     private func getGenreList() {
         group.enter()
         let endPoint = EndPoint.genres
@@ -95,7 +92,8 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             
             switch result {
             case.success(let data):
-                guard let genreRequestResult = data else {return}
+                guard let genreRequestResult = data else { return }
+                
                 let genreRequestList = genreRequestResult.genres
                 let genresArray = genreRequestList.map { strongSelf.storedService.createStoredGenre(from: $0) }
                 GenreListConfigurable.shared.genreList = genresArray
@@ -115,15 +113,14 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             
             switch result {
             case.success(let data):
-                guard let movieRequestResult = data?.results else {return}
+                guard let movieRequestResult = data?.results else { return }
                 
                 strongSelf.group.notify(queue: .main) {
-                    let moviesArray = movieRequestResult.map { strongSelf.storedService.createStoredMovie(from: $0) }
-                    strongSelf.view?.setMovieList(moviesArray)
-                    
-                    if strongSelf.startMovieList.isEmpty {
-                        strongSelf.startMovieList = moviesArray
+                    let moviesArray = movieRequestResult.map {
+                        strongSelf.storedService.createStoredMovie(from: $0)
                     }
+                    strongSelf.view?.setMovieList(moviesArray)
+                    strongSelf.storedService.save()
                 }
                 
                 strongSelf.movieListPage += 1

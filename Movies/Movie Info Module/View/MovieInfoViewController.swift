@@ -191,7 +191,7 @@ extension MovieInfoViewController: UITableViewDataSource {
             currentMovieInfo = presenter.createGenreList(by: movieDetails.genres) ?? ""
         case .releaseDate:
             if let safeDate = movieDetails.releaseDate {
-                currentMovieInfo = presenter.formatDate(from: safeDate)
+                currentMovieInfo = formatDate(from: safeDate)
             } else {
                 currentMovieInfo = "No Info"
             }
@@ -202,11 +202,11 @@ extension MovieInfoViewController: UITableViewDataSource {
         case .description:
             currentMovieInfo = movieDetails.overview
         case .budget:
-            currentMovieInfo = presenter.createDecimalNumber(from: movieDetails.budget)
+            currentMovieInfo = createDecimalNumber(from: movieDetails.budget)
         case .production:
             currentMovieInfo = movieDetails.productionCountries[0].name
         case .revenue:
-            currentMovieInfo = presenter.createDecimalNumber(from: movieDetails.revenue)
+            currentMovieInfo = createDecimalNumber(from: movieDetails.revenue)
         }
 
         cell.configure(with: currentMovieInfo)

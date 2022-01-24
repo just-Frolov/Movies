@@ -26,6 +26,7 @@ class GenreListConfigurable {
     func getGenreName(id: Int) -> String {
         guard let safeGenreList = genreList else { return "" }
         let genreElement = safeGenreList.filter { $0.id == id }
+        guard !genreElement.isEmpty else { return "" }
         let genreName = genreElement[0].name
         return genreName ?? ""
     }

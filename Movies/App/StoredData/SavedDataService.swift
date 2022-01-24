@@ -10,14 +10,17 @@ import UIKit
 class SavedDataServices {
     //MARK: - Static -
     static let shared = SavedDataServices()
-
+    
     //MARK: - Constant -
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-
+    
     //MARK: - Private -
     func getAllSavedMovies() -> [StoredMovieModel] {
         do {
-            let storedMovies = try context.fetch(StoredMovieModel.fetchRequest())
+            let fetchRequest = StoredMovieModel.fetchRequest()
+            let sort = NSSortDescriptor(key: #keyPath(StoredMovieModel.title), ascending: true)
+            fetchRequest.sortDescriptors = [sort]
+            let storedMovies = try context.fetch(fetchRequest)
             return storedMovies
         }
         catch {
@@ -25,6 +28,23 @@ class SavedDataServices {
             return []
         }
     }
+    
+    func getSavedMovies(by filter: String) -> [StoredMovieModel] {
+        do {
+            let fetchRequest = StoredMovieModel.fetchRequest()
+            let sort = NSSortDescriptor(key: #keyPath(StoredMovieModel.title), ascending: true)
+            let predicate = NSPredicate(format: "title CONTAINS[c] %@", filter)
+            fetchRequest.sortDescriptors = [sort]
+            fetchRequest.predicate = predicate
+            let storedMovies = try context.fetch(fetchRequest)
+            return storedMovies
+        }
+        catch {
+            print("Error during get saved movies")
+            return []
+        }
+    }
+    
     
     func getAllSavedGenres() -> [StoredGenreModel] {
         do {
@@ -54,7 +74,7 @@ class SavedDataServices {
         newMovie.voteAverage = movieData.voteAverage
         return newMovie
     }
-
+    
     func save() {
         do {
             try context.save()
