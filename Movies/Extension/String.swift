@@ -20,4 +20,8 @@ extension String {
     func replace(target: String, withString: String) -> String{
         return self.replacingOccurrences(of: target, with: withString)
     }
+    
+    func trim() -> String {
+        return self.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+    }
 }

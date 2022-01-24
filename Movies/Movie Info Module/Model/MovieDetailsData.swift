@@ -26,7 +26,7 @@ struct MovieDetailsData: Codable {
     }
 }
 
-// MARK: - Genre -
+// MARK: - CountryNameModel -
 struct CountryNameModel: Codable {
     var name: String
 }

@@ -53,12 +53,13 @@ final class NetworkService: NetworkServiceProtocol {
         }
     }
     
+    //TODO: -
     func setImage(imageURL: String, imageView: UIImageView) {
         let baseURL = "https://image.tmdb.org/t/p"
         let imageSize = "/w500"
         let mainURL = baseURL + imageSize + imageURL
         let url = URL(string: mainURL)
-        imageView.kf.setImage(with: url)
+        imageView.kf.setImage(with: url) 
     }
     
     //MARK: - Private -

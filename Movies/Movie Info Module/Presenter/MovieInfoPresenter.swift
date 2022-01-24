@@ -8,11 +8,10 @@
 import UIKit
 
 protocol MovieInfoViewProtocol: AnyObject {
-    func setMovieInfo(from movieDetails: MovieDetailsData)
+    func setMovieInfo(from movieDetails: MovieDetailsData, with sectionType: [InfoTableSectionModel])
     func showMoviePoster()
     func showMovieVideo(with id: String)
     func showErrorAlert(with message: String)
-    func updateSections(_ sections: [InfoTableSectionModel])
 }
 
 protocol MovieInfoViewPresenterProtocol: AnyObject {
@@ -25,8 +24,10 @@ protocol MovieInfoViewPresenterProtocol: AnyObject {
 class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
     //MARK: - Variables -
     weak var view: MovieInfoViewProtocol?
-    var router: RouterProtocol?
-    let movieID: Int?
+    private var router: RouterProtocol?
+    
+    //MARK: - Constants -
+    private let movieID: Int?
     
     //MARK: - Life Cycle -
     required init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?) {
@@ -67,8 +68,7 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
                 case.success(let data):
                     guard let movieDetails = data else {return}
                     let tableViewSectionTypes = strongSelf.assembleModels()
-                    strongSelf.view?.setMovieInfo(from: movieDetails)
-                    strongSelf.view?.updateSections(tableViewSectionTypes)
+                    strongSelf.view?.setMovieInfo(from: movieDetails, with: tableViewSectionTypes)
                 case.failure(let error):
                     let message = "Failed to get info about movie: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
@@ -91,8 +91,8 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
                         strongSelf.view?.showMoviePoster()
                         return
                     }
-                    let firstVideo = 0
-                    let id = videoList[firstVideo].key
+                    let firstVideoIndex = 0
+                    let id = videoList[firstVideoIndex].key
                     strongSelf.view?.showMovieVideo(with: id)
                 case.failure(_):
                     strongSelf.view?.showMoviePoster()

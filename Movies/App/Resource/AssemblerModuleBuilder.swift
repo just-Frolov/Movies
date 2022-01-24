@@ -32,11 +32,11 @@ class AssemblerModuleBuilder: AssemblerBuilderProtocol {
     }
     
     func createMoviePosterModule(router: RouterProtocol, image: UIImage) -> UIViewController {
-          let view = MoviePosterViewController()
-          let presenter = MoviePosterPresenter(view: view,
+        let view = MoviePosterViewController()
+        let presenter = MoviePosterPresenter(view: view,
                                              router: router,
                                              image: image)
-          view.presenter = presenter
-          return view
-      }
+        view.presenter = presenter
+        return view
+    }
 }

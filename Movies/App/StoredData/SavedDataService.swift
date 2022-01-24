@@ -14,7 +14,7 @@ class SavedDataServices {
     //MARK: - Constant -
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
-    //MARK: - Private -
+    //MARK: - Internal -
     func getAllSavedMovies() -> [StoredMovieModel] {
         do {
             let fetchRequest = StoredMovieModel.fetchRequest()
@@ -40,7 +40,7 @@ class SavedDataServices {
             return storedMovies
         }
         catch {
-            print("Error during get saved movies")
+            print("Error during get saved movies by filter")
             return []
         }
     }

@@ -21,6 +21,7 @@ class MovieListViewController: UIViewController {
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.separatorStyle = .none
+        table.keyboardDismissMode = .onDrag
         MoviesTableViewCell.register(in: table)
         return table
     }()
@@ -146,6 +147,7 @@ extension MovieListViewController: UITableViewDataSource {
         let cell = MoviesTableViewCell.dequeueingReusableCell(in: tableView,
                                                               for: indexPath)
         cell.configure(with: movie)
+        cell.selectionStyle = .none
         return cell
     }
 }
@@ -154,7 +156,6 @@ extension MovieListViewController: UITableViewDataSource {
 extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let movieID = Int(currentMovieList[indexPath.row].id)
-        tableView.deselectRow(at: indexPath, animated: true)
         presenter.tapOnTheMovie(with: movieID)
     }
     
@@ -227,12 +228,9 @@ extension MovieListViewController: UISearchBarDelegate {
     
     private func startMovieSearchRequest(with text: String) {
         currentMovieList.removeAll()
-        movieSearchText = text
+        movieSearchText = text.trim()
         if text.replacingOccurrences(of: " ", with: "").isEmpty {
             getNewMovies(true)
-            DispatchQueue.main.async { [weak self] in
-                self?.dismissKeyboard()
-            }
         } else {
             getNewMoviesBySearch(true)
         }
@@ -320,19 +318,18 @@ extension MovieListViewController: MovieListViewProtocol {
             if strongSelf.currentMovieList.count == 20 {
                 strongSelf.scrollToTop()
             }
+            
+            guard !strongSelf.currentMovieList.isEmpty else {
+                strongSelf.setVisibleForUI(isHidden: false)
+                return
+            }
+            
+            if strongSelf.tableView.isHidden {
+                strongSelf.setVisibleForUI(isHidden: true)
+            }
         }
         
-        guard !currentMovieList.isEmpty else {
-            setVisibleForUI(isHidden: false)
-            return
-        }
-        
-        if tableView.isHidden {
-            setVisibleForUI(isHidden: true)
-        }
     }
-    
-    
     
     private func setVisibleForUI(isHidden: Bool) {
         DispatchQueue.main.async { [weak self] in

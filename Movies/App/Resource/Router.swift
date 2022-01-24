@@ -47,7 +47,7 @@ class Router: RouterProtocol {
         if let navigationController = navigationController {
             guard let videoViewController = assemblyBuilder?.createMoviePosterModule(router: self,
                                                                                      image: image) else { return }
-            navigationController.pushViewController(videoViewController, animated: true)
+            navigationController.present(videoViewController, animated: true, completion: nil)
         }
     }
     

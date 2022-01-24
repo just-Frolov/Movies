@@ -8,10 +8,10 @@ import Foundation
 
 // MARK: - MovieTrailerData -
 struct MovieTrailerData: Codable {
-    let results: [TrailerId]
+    let results: [TrailerIdModel]
 }
 
 // MARK: - TrailerId -
-struct TrailerId: Codable {
+struct TrailerIdModel: Codable {
     let key: String
 }

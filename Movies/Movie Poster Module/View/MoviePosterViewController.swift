@@ -20,8 +20,6 @@ class MoviePosterViewController: UIViewController {
     private lazy var moviePoster: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
-        image.layer.cornerRadius = 20
-        image.layer.masksToBounds = true
         image.isUserInteractionEnabled = true
         image.frame = CGRect(x: 0,
                              y: 0,
@@ -54,11 +52,7 @@ class MoviePosterViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         centerImage()
     }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        moviePoster.isHidden = true
-    }
-    
+
     //MARK: - Private -
     private func addSubview() {
         view.addSubview(scrollView)
@@ -91,7 +85,7 @@ class MoviePosterViewController: UIViewController {
         }
         
         if frameToCenter.size.height < viewSize.height {
-            frameToCenter.origin.y = (viewSize.height - frameToCenter.size.height) / 3
+            frameToCenter.origin.y = (viewSize.height - frameToCenter.size.height) / 2
         } else {
             frameToCenter.origin.y = 0
         }

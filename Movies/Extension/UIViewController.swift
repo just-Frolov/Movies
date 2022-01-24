@@ -23,10 +23,6 @@ extension UIViewController {
         spinner.dismiss()
     }
     
-    func dismissKeyboard() {
-        view.endEditing(true)
-    }
-    
     func createDecimalNumber(from largeNumber: Int) -> String {
         guard largeNumber != 0 else {
             return "No Info"

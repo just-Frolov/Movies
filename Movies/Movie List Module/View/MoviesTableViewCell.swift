@@ -6,23 +6,24 @@
 //
 
 import SnapKit
-import UIKit
 
 class MoviesTableViewCell: BaseTableViewCell {
     //MARK: - UI Elements -
     private lazy var movieView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .white
+        let view = UIView(frame: CGRect(x: 0,
+                                        y: 0,
+                                        width: contentView.bounds.width,
+                                        height: 200))
         view.addSubview(moviePoster)
         view.addSubview(movieTitleLabel)
         view.addSubview(movieRatingView)
-        view.addSubview(movieGenresBackgroundView)
-        view.addSubview(movieDataBackgroundView)
+        view.addSubview(movieGenresLabel)
+        view.addSubview(movieReleaseDataLabel)
         view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOffset = CGSize(width: 0.0, height: -2.0)
-        view.layer.shadowRadius = 3.0
-        view.layer.shadowOpacity = 0.15
-        view.layer.cornerRadius = 20
+        view.layer.shadowOpacity = 0.7
+        view.layer.shadowOffset = CGSize.zero
+        view.layer.shadowRadius = 5
+        view.layer.shadowPath = UIBezierPath(roundedRect: view.bounds, cornerRadius: 20).cgPath
         return view
     }()
     
@@ -30,7 +31,7 @@ class MoviesTableViewCell: BaseTableViewCell {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
         image.layer.cornerRadius = 20
-        image.layer.masksToBounds = true
+        image.clipsToBounds = true
         return image
     }()
     
@@ -42,34 +43,17 @@ class MoviesTableViewCell: BaseTableViewCell {
         return label
     }()
     
-    private lazy var movieDataBackgroundView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .black
-        view.alpha = 0.7
-        view.addSubview(movieReleaseDataLabel)
-        return view
-    }()
-    
     private lazy var movieReleaseDataLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 12, weight: .semibold)
+        label.font = .systemFont(ofSize: 12, weight: .bold)
         label.numberOfLines = 0
         label.textColor = .white
         return label
     }()
     
-    private lazy var movieGenresBackgroundView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .black
-        view.alpha = 0.7
-        view.addSubview(movieGenresLabel)
-        return view
-    }()
-    
     private lazy var movieGenresLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 12, weight: .regular)
-        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 12, weight: .bold)
         label.textColor = .white
         return label
     }()
@@ -112,41 +96,39 @@ class MoviesTableViewCell: BaseTableViewCell {
     func configure(with model: StoredMovieModel) {
         setMovieInfo(from: model)
         setImage(from: model.poster)
-        guard let genreIds = model.genreIDS else { return }
-        setMovieGenres(by: genreIds)
+        setMovieGenres(by: model.genreIDS)
     }
     
     //MARK: - Private -
+    private func addSubview() {
+        contentView.addSubview(movieView)
+    }
+    
     private func setMovieInfo(from model: StoredMovieModel) {
-        imageView?.image = nil
         movieTitleLabel.text = model.title
-        movieTitleLabel.textColor = .white
         movieReleaseDataLabel.text = model.releaseDate?.replace(target: "-", withString: ".")
         movieRatingLabel.text = String(model.voteAverage)
     }
     
     private func setImage(from link: String?) {
+        imageView?.image = nil
         if let poster = link {
             NetworkService.shared.setImage(imageURL: poster, imageView: self.moviePoster)
         } else {
             moviePoster.image = UIImage(named: "noImageFound")
-            movieTitleLabel.textColor = .black
         }
     }
     
-    private func setMovieGenres(by genreIDS: [Int]) {
+    private func setMovieGenres(by genreIDS: [Int]?) {
+        guard let safeGenreID = genreIDS else { return }
         var genreList = String()
         var genreName = String()
-        for genre in genreIDS {
+        for genre in safeGenreID {
             genreName = GenreListConfigurable.shared.getGenreName(id: genre)
             genreList.addingDevidingPrefixIfNeeded()
             genreList += genreName.capitalizingFirstLetter()
         }
         movieGenresLabel.text = genreList
-    }
-    
-    private func addSubview() {
-        contentView.addSubview(movieView)
     }
     
     private func setupConstraints() {
@@ -156,10 +138,8 @@ class MoviesTableViewCell: BaseTableViewCell {
         setupMovieRatingViewConstraints()
         setupMovieRatingLabelConstraints()
         setupMovieRatingIconConstraints()
-        setupMovieDataBackgroundViewConstraints()
         setupMovieReleaseDataLabelConstraints()
         setupMovieGenresLabelConstraints()
-        setupMovieGenresBackgroundViewConstraints()
     }
     
     private func setupMovieViewConstraints() {
@@ -207,31 +187,17 @@ class MoviesTableViewCell: BaseTableViewCell {
         }
     }
     
-    private func setupMovieGenresBackgroundViewConstraints() {
-        movieGenresBackgroundView.snp.makeConstraints { (make) -> Void in
-            make.left.top.equalTo(movieGenresLabel).offset(-3)
-            make.right.bottom.equalTo(movieGenresLabel).offset(3)
-        }
-    }
-    
     private func setupMovieGenresLabelConstraints() {
         movieGenresLabel.snp.makeConstraints { (make) -> Void in
-            make.left.equalTo(movieView).offset(20)
+            make.left.right.equalTo(movieView).inset(20)
             make.top.equalTo(movieView).offset(15)
-        }
-    }
-    
-    private func setupMovieDataBackgroundViewConstraints() {
-        movieDataBackgroundView.snp.makeConstraints { (make) -> Void in
-            make.left.top.equalTo(movieReleaseDataLabel).offset(-3)
-            make.right.bottom.equalTo(movieReleaseDataLabel).offset(3)
         }
     }
     
     private func setupMovieReleaseDataLabelConstraints() {
         movieReleaseDataLabel.snp.makeConstraints { (make) -> Void in
             make.left.equalTo(movieView).offset(20)
-            make.top.equalTo(movieGenresLabel.snp_bottomMargin).offset(20)
+            make.top.equalTo(movieGenresLabel.snp_bottomMargin).offset(15)
         }
     }
 }

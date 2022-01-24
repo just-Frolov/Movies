@@ -28,7 +28,6 @@ class InfoTableViewSection: UITableViewHeaderFooterView {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14,
                                  weight: .bold)
-        label.numberOfLines = 0
         label.textColor = .lightGray
         return label
     }()
@@ -37,7 +36,7 @@ class InfoTableViewSection: UITableViewHeaderFooterView {
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
         contentView.addSubview(movieSectionHeader)
-        setupMovieTitleLabelConstraints()
+        setupConstraints()
     }
     
     required init?(coder: NSCoder) {
@@ -50,6 +49,10 @@ class InfoTableViewSection: UITableViewHeaderFooterView {
     }
     
     //MARK: - Private -
+    private func setupConstraints() {
+        setupMovieTitleLabelConstraints()
+    }
+    
     private func setupMovieTitleLabelConstraints() {
         movieSectionHeader.snp.makeConstraints { make in
             make.bottom.top.equalToSuperview()
