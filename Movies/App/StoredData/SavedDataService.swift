@@ -6,24 +6,30 @@
 //
 
 import UIKit
+import CoreData
 
 class SavedDataServices {
     //MARK: - Static -
     static let shared = SavedDataServices()
     
+    //MARK: - Variables -
+    private var context: NSManagedObjectContext {
+        let viewContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        viewContext.mergePolicy = NSOverwriteMergePolicy
+        return viewContext
+    }
+    
     //MARK: - Constant -
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    private let fetchRequest = StoredMovieModel.fetchRequest()
     
     //MARK: - Internal -
     func getAllSavedMovies() -> [StoredMovieModel] {
         do {
-            let fetchRequest = StoredMovieModel.fetchRequest()
             let sort = NSSortDescriptor(key: #keyPath(StoredMovieModel.title), ascending: true)
             fetchRequest.sortDescriptors = [sort]
             let storedMovies = try context.fetch(fetchRequest)
             return storedMovies
-        }
-        catch {
+        } catch {
             print("Error during get saved movies")
             return []
         }
@@ -31,15 +37,13 @@ class SavedDataServices {
     
     func getSavedMovies(by filter: String) -> [StoredMovieModel] {
         do {
-            let fetchRequest = StoredMovieModel.fetchRequest()
             let sort = NSSortDescriptor(key: #keyPath(StoredMovieModel.title), ascending: true)
             let predicate = NSPredicate(format: "title CONTAINS[c] %@", filter)
             fetchRequest.sortDescriptors = [sort]
             fetchRequest.predicate = predicate
             let storedMovies = try context.fetch(fetchRequest)
             return storedMovies
-        }
-        catch {
+        } catch {
             print("Error during get saved movies by filter")
             return []
         }
@@ -50,8 +54,7 @@ class SavedDataServices {
         do {
             let storedGenres = try context.fetch(StoredGenreModel.fetchRequest())
             return storedGenres
-        }
-        catch {
+        } catch {
             print("Error during get saved genres")
             return []
         }
@@ -61,6 +64,7 @@ class SavedDataServices {
         let newGenre = StoredGenreModel(context: context)
         newGenre.id = Int32(genreData.id)
         newGenre.name = genreData.name
+        //save()
         return newGenre
     }
     
@@ -72,6 +76,7 @@ class SavedDataServices {
         newMovie.genreIDS = movieData.genreIDS
         newMovie.releaseDate = movieData.releaseDate
         newMovie.voteAverage = movieData.voteAverage
+        //save()
         return newMovie
     }
     
@@ -79,17 +84,8 @@ class SavedDataServices {
         do {
             try context.save()
         }
-        catch {
+        catch let error {
             print("Error during save movies\(error)")
         }
-    }
-    
-    private func isExist(id: String) -> Bool {
-        let fetchRequest = StoredMovieModel.fetchRequest()
-        let predicate = NSPredicate(format: "id = %d", id)
-        fetchRequest.predicate = predicate
-
-        let res = try! context.fetch(fetchRequest)
-        return res.count > 0 ? true : false
     }
 }

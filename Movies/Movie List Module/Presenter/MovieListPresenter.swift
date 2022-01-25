@@ -43,11 +43,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             getGenreList()
             getMovieList()
         } else {
-            let genreList = storedService.getAllSavedGenres()
-            let movieList = storedService.getAllSavedMovies()
-            GenreListConfigurable.shared.genreList = genreList
-            view?.setMovieList(movieList)
-            view?.setOfflineMode()
+            getSavedData()
         }
     }
     
@@ -55,8 +51,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         if startAgain { movieListPage = 1 }
         guard NetworkMonitor.shared.isConnected else {
             if startAgain == true {
-                let storedMovieList = storedService.getAllSavedMovies()
-                view?.setMovieList(storedMovieList)
+                getSavedData()
             }
             return
         }
@@ -67,8 +62,10 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     func getMovieListBySearch(_ filter: String, startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
         guard NetworkMonitor.shared.isConnected else {
-            let filteredMovieList = storedService.getSavedMovies(by: filter)
-            view?.setMovieList(filteredMovieList)
+            DispatchQueue.main.async { [weak self] in
+                guard let filteredMovieList = self?.storedService.getSavedMovies(by: filter) else { return }
+                self?.view?.setMovieList(filteredMovieList)
+            }
             return
         }
         let endPoint = EndPoint.searchMovies(query: filter, page: self.movieListPage)
@@ -84,51 +81,64 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     }
     
     //MARK: - Private -
+    private func getSavedData() {
+        DispatchQueue.main.async { [weak self] in
+            guard let strongSelf = self else { return }
+            let genreList = strongSelf.storedService.getAllSavedGenres()
+            let movieList = strongSelf.storedService.getAllSavedMovies()
+            GenreListConfigurable.shared.genreList = genreList
+            strongSelf.view?.setMovieList(movieList)
+            strongSelf.view?.setOfflineMode()
+        }
+    }
+    
     private func getGenreList() {
         genreGroup.enter()
         let endPoint = EndPoint.genres
-        NetworkService.shared.request(endPoint: endPoint, expecting: GenreData.self) { [weak self] result in
+        NetworkService.shared.request(endPoint: endPoint,
+                                      expecting: GenreData.self) { [weak self] result in
             guard let strongSelf = self else { return }
-            
-            switch result {
-            case.success(let data):
-                guard let genreRequestResult = data else { return }
-                
-                let genreRequestList = genreRequestResult.genres
-                let genresArray = genreRequestList.map { strongSelf.storedService.createStoredGenre(from: $0) }
-                GenreListConfigurable.shared.genreList = genresArray
-                strongSelf.storedService.save()
-                strongSelf.genreGroup.leave()
-            case.failure(let error):
-                let message = "Failed to get genres: \(error)"
-                strongSelf.view?.showErrorAlert(with: message)
+            DispatchQueue.main.async {
+                switch result {
+                case.success(let data):
+                    guard let genreRequestResult = data else { return }
+                    
+                    let genreRequestList = genreRequestResult.genres
+                    let genresArray = genreRequestList.map { strongSelf.storedService.createStoredGenre(from: $0) }
+                    GenreListConfigurable.shared.genreList = genresArray
+                    strongSelf.genreGroup.leave()
+                case.failure(let error):
+                    let message = "Failed to get genres: \(error)"
+                    strongSelf.view?.showErrorAlert(with: message)
+                }
             }
             
         }
     }
     
     private func movieListRequest(with endPoint: EndPoint) {
-        NetworkService.shared.request(endPoint: endPoint, expecting: MovieData.self) { [weak self] result in
+        NetworkService.shared.request(endPoint: endPoint,
+                                      expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
-            
-            switch result {
-            case.success(let data):
-                guard let movieRequestResult = data?.results else { return }
-                
-                strongSelf.genreGroup.notify(queue: .main) {
-                    let moviesArray = movieRequestResult.map {
-                        strongSelf.storedService.createStoredMovie(from: $0)
+            DispatchQueue.main.async {
+                switch result {
+                case.success(let data):
+                    guard let movieRequestResult = data?.results else { return }
+                    
+                    strongSelf.genreGroup.notify(queue: .main) {
+                        let moviesArray = movieRequestResult.map {
+                            strongSelf.storedService.createStoredMovie(from: $0)
+                        }
+                        strongSelf.view?.setMovieList(moviesArray)
+                        strongSelf.storedService.save()
                     }
-                    strongSelf.view?.setMovieList(moviesArray)
-                    strongSelf.storedService.save()
+                    
+                    strongSelf.movieListPage += 1
+                case.failure(let error):
+                    let message = "Failed to get data: \(error)"
+                    strongSelf.view?.showErrorAlert(with: message)
                 }
-                
-                strongSelf.movieListPage += 1
-            case.failure(let error):
-                let message = "Failed to get data: \(error)"
-                strongSelf.view?.showErrorAlert(with: message)
             }
-            
         }
     }
 }
