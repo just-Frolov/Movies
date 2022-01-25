@@ -204,11 +204,11 @@ extension MovieInfoViewController: UITableViewDataSource {
         case .originalTitle:
             currentMovieInfo = movieDetails.originalTitle
         case .description:
-            currentMovieInfo = movieDetails.overview
+            currentMovieInfo = movieDetails.overview.isEmpty ? "No Info" : movieDetails.overview
         case .budget:
             currentMovieInfo = createDecimalNumber(from: movieDetails.budget)
         case .production:
-            currentMovieInfo = movieDetails.productionCountries[0].name
+            currentMovieInfo = movieDetails.productionCountries.first?.name ?? "No Info"
         case .revenue:
             currentMovieInfo = createDecimalNumber(from: movieDetails.revenue)
         }
@@ -264,7 +264,7 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
             NetworkService.shared.setImage(imageURL: poster,
                                            imageView: self.moviePoster)
         } else {
-            self.moviePoster.image = UIImage(named: "noImageFound")
+            self.moviePoster.image = UIImage(named: "imageNotFound")
         }
     }
 }

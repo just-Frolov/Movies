@@ -59,7 +59,14 @@ final class NetworkService: NetworkServiceProtocol {
         let imageSize = "/w500"
         let mainURL = baseURL + imageSize + imageURL
         let url = URL(string: mainURL)
-        imageView.kf.setImage(with: url) 
+        imageView.kf.setImage(with: url) { result in
+            switch result {
+            case .failure(_):
+                imageView.image = UIImage(named: "imageNotFound")
+            default:
+                break
+            }
+        }
     }
     
     //MARK: - Private -

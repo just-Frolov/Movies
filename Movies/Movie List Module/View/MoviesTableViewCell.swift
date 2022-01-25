@@ -10,10 +10,10 @@ import SnapKit
 class MoviesTableViewCell: BaseTableViewCell {
     //MARK: - UI Elements -
     private lazy var movieView: UIView = {
-        let view = UIView(frame: CGRect(x: 0,
-                                        y: 0,
-                                        width: contentView.bounds.width,
-                                        height: 200))
+        let view = UIView(frame: CGRect(x: .zero,
+                                        y: .zero,
+                                        width: contentView.bounds.width+60,
+                                        height: 220))
         view.addSubview(moviePoster)
         view.addSubview(movieTitleLabel)
         view.addSubview(movieRatingView)
@@ -22,16 +22,20 @@ class MoviesTableViewCell: BaseTableViewCell {
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOpacity = 0.7
         view.layer.shadowOffset = CGSize.zero
-        view.layer.shadowRadius = 5
+        view.layer.shadowRadius = 3
         view.layer.shadowPath = UIBezierPath(roundedRect: view.bounds, cornerRadius: 20).cgPath
         return view
     }()
     
     private lazy var moviePoster: UIImageView = {
-        let image = UIImageView()
+        let image = UIImageView(frame: CGRect(x: .zero,
+                                              y: .zero,
+                                              width: contentView.bounds.width+70,
+                                              height: 250))
         image.contentMode = .scaleAspectFill
         image.layer.cornerRadius = 20
         image.clipsToBounds = true
+        image.addBlackGradientLayerInBackground(frame: image.frame)
         return image
     }()
     
@@ -92,6 +96,11 @@ class MoviesTableViewCell: BaseTableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        imageView?.image = nil
+    }
+    
     //MARK: - Internal -
     func configure(with model: StoredMovieModel) {
         setMovieInfo(from: model)
@@ -111,11 +120,10 @@ class MoviesTableViewCell: BaseTableViewCell {
     }
     
     private func setImage(from link: String?) {
-        imageView?.image = nil
         if let poster = link {
             NetworkService.shared.setImage(imageURL: poster, imageView: self.moviePoster)
         } else {
-            moviePoster.image = UIImage(named: "noImageFound")
+            moviePoster.image = UIImage(named: "imageNotFound")
         }
     }
     
