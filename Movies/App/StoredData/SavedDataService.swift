@@ -80,7 +80,16 @@ class SavedDataServices {
             try context.save()
         }
         catch {
-            print("Error during save movies")
+            print("Error during save movies\(error)")
         }
+    }
+    
+    private func isExist(id: String) -> Bool {
+        let fetchRequest = StoredMovieModel.fetchRequest()
+        let predicate = NSPredicate(format: "id = %d", id)
+        fetchRequest.predicate = predicate
+
+        let res = try! context.fetch(fetchRequest)
+        return res.count > 0 ? true : false
     }
 }

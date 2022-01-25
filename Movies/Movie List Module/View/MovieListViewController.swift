@@ -42,11 +42,9 @@ class MovieListViewController: UIViewController {
     //MARK: - Variables -
     var presenter: MovieListViewPresenterProtocol!
     private var currentMovieList = [StoredMovieModel]()
-    private var initialScrollTableViewHeight: CGFloat = 0.0
-    private var currentMaxScrollTableViewHeight: CGFloat = 0.0
     private var movieSearchText = String()
     private var movieSortingType = SortType.byPopular.rawValue
-    private var workItem: DispatchWorkItem?
+    private var workItemForSearchBar: DispatchWorkItem?
     
     //MARK: - Life Cycle -
     override func viewDidLoad() {
@@ -154,36 +152,22 @@ extension MovieListViewController: UITableViewDataSource {
 
 //MARK: - UITableViewDelegate -
 extension MovieListViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 250
+    }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let movieID = Int(currentMovieList[indexPath.row].id)
         presenter.tapOnTheMovie(with: movieID)
     }
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 250
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        guard isLoadingIndexPath(indexPath) else { return }
+        movieSearchText.isEmpty ? getNewMovies() : getNewMoviesBySearch()
     }
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        let cellHeight = CGFloat(250)
-        let loadingMark = cellHeight * 3
-        let contentHeight = scrollView.contentSize.height - scrollView.frame.height
-        
-        if (offsetY > contentHeight - loadingMark && offsetY > currentMaxScrollTableViewHeight - loadingMark) {
-            changeTableViewValues(contentHeight)
-            movieSearchText.isEmpty ? getNewMovies() : getNewMoviesBySearch()
-        }
-    }
-    
-    private func changeTableViewValues(_ contentHeight: CGFloat) {
-        if initialScrollTableViewHeight == 0 {
-            initialScrollTableViewHeight = contentHeight
-        }
-        currentMaxScrollTableViewHeight = contentHeight + initialScrollTableViewHeight
-    }
-    
-    private func resetCurrentTableViewHeight() {
-        currentMaxScrollTableViewHeight = 0.0
+    private func isLoadingIndexPath(_ indexPath: IndexPath) -> Bool {
+        return indexPath.row == currentMovieList.count - 5
     }
     
     private func getNewMovies(_ startAgain: Bool = false) {
@@ -217,11 +201,11 @@ extension MovieListViewController: UISearchBarDelegate {
     }
     
     private func getSearchResults(query: String, deadline: Int = 500) {
-        workItem?.cancel()
+        workItemForSearchBar?.cancel()
         let newWorkItem = DispatchWorkItem { [weak self] in
             self?.startMovieSearchRequest(with: query)
         }
-        workItem = newWorkItem
+        workItemForSearchBar = newWorkItem
         DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(deadline),
                                           execute: newWorkItem)
     }
@@ -272,7 +256,6 @@ extension MovieListViewController {
         showSpinner(spinner)
         clearSearchBar()
         setValuesForCurrentVariables(with: sort)
-        resetCurrentTableViewHeight()
         presenter.getMovieList(by: sort, startAgain: true)
     }
     
@@ -313,6 +296,7 @@ extension MovieListViewController: MovieListViewProtocol {
     private func updateMovieList() {
         DispatchQueue.main.async { [weak self] in
             guard let strongSelf = self else { return }
+            
             strongSelf.hideSpinner(strongSelf.spinner)
             strongSelf.tableView.reloadData()
             if strongSelf.currentMovieList.count == 20 {
@@ -320,21 +304,21 @@ extension MovieListViewController: MovieListViewProtocol {
             }
             
             guard !strongSelf.currentMovieList.isEmpty else {
-                strongSelf.setVisibleForUI(isHidden: false)
+                strongSelf.setVisibilityForUIElements(isEmpty: true)
                 return
             }
             
             if strongSelf.tableView.isHidden {
-                strongSelf.setVisibleForUI(isHidden: true)
+                strongSelf.setVisibilityForUIElements(isEmpty: false)
             }
         }
         
     }
     
-    private func setVisibleForUI(isHidden: Bool) {
+    private func setVisibilityForUIElements(isEmpty: Bool) {
         DispatchQueue.main.async { [weak self] in
-            self?.tableView.isHidden = !isHidden
-            self?.noMoviesLabel.isHidden = isHidden
+            self?.tableView.isHidden = isEmpty
+            self?.noMoviesLabel.isHidden = !isEmpty
         }
     }
 }

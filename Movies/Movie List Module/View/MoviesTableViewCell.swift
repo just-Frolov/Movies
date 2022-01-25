@@ -113,32 +113,6 @@ class MoviesTableViewCell: BaseTableViewCell {
         contentView.addSubview(movieView)
     }
     
-    private func setMovieInfo(from model: StoredMovieModel) {
-        movieTitleLabel.text = model.title
-        movieReleaseDataLabel.text = model.releaseDate?.replace(target: "-", withString: ".")
-        movieRatingLabel.text = String(model.voteAverage)
-    }
-    
-    private func setImage(from link: String?) {
-        if let poster = link {
-            NetworkService.shared.setImage(imageURL: poster, imageView: self.moviePoster)
-        } else {
-            moviePoster.image = UIImage(named: "imageNotFound")
-        }
-    }
-    
-    private func setMovieGenres(by genreIDS: [Int]?) {
-        guard let safeGenreID = genreIDS else { return }
-        var genreList = String()
-        var genreName = String()
-        for genre in safeGenreID {
-            genreName = GenreListConfigurable.shared.getGenreName(id: genre)
-            genreList.addingDevidingPrefixIfNeeded()
-            genreList += genreName.capitalizingFirstLetter()
-        }
-        movieGenresLabel.text = genreList
-    }
-    
     private func setupConstraints() {
         setupMovieViewConstraints()
         setupMoviePosterConstraints()
@@ -207,6 +181,32 @@ class MoviesTableViewCell: BaseTableViewCell {
             make.left.equalTo(movieView).offset(20)
             make.top.equalTo(movieGenresLabel.snp_bottomMargin).offset(15)
         }
+    }
+    
+    private func setMovieInfo(from model: StoredMovieModel) {
+        movieTitleLabel.text = model.title
+        movieReleaseDataLabel.text = model.releaseDate?.replace(target: "-", withString: ".")
+        movieRatingLabel.text = String(model.voteAverage)
+    }
+    
+    private func setImage(from link: String?) {
+        if let poster = link {
+            NetworkService.shared.setImage(imageURL: poster, imageView: self.moviePoster)
+        } else {
+            moviePoster.image = UIImage(named: "imageNotFound")
+        }
+    }
+    
+    private func setMovieGenres(by genreIDS: [Int]?) {
+        guard let safeGenreID = genreIDS else { return }
+        var genreList = String()
+        var genreName = String()
+        for genre in safeGenreID {
+            genreName = GenreListConfigurable.shared.getGenreName(id: genre)
+            genreList.addingDevidingPrefixIfNeeded()
+            genreList += genreName.capitalizingFirstLetter()
+        }
+        movieGenresLabel.text = genreList
     }
 }
 

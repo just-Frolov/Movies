@@ -28,7 +28,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     private var movieListPage = 1
     
     //MARK: - Constants -
-    private let group = DispatchGroup()
+    private let genreGroup = DispatchGroup()
     private let storedService = SavedDataServices.shared
     
     //MARK: - Life Cycle -
@@ -85,7 +85,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     
     //MARK: - Private -
     private func getGenreList() {
-        group.enter()
+        genreGroup.enter()
         let endPoint = EndPoint.genres
         NetworkService.shared.request(endPoint: endPoint, expecting: GenreData.self) { [weak self] result in
             guard let strongSelf = self else { return }
@@ -98,7 +98,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                 let genresArray = genreRequestList.map { strongSelf.storedService.createStoredGenre(from: $0) }
                 GenreListConfigurable.shared.genreList = genresArray
                 strongSelf.storedService.save()
-                strongSelf.group.leave()
+                strongSelf.genreGroup.leave()
             case.failure(let error):
                 let message = "Failed to get genres: \(error)"
                 strongSelf.view?.showErrorAlert(with: message)
@@ -115,7 +115,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
             case.success(let data):
                 guard let movieRequestResult = data?.results else { return }
                 
-                strongSelf.group.notify(queue: .main) {
+                strongSelf.genreGroup.notify(queue: .main) {
                     let moviesArray = movieRequestResult.map {
                         strongSelf.storedService.createStoredMovie(from: $0)
                     }
