@@ -18,7 +18,6 @@ protocol MovieInfoViewPresenterProtocol: AnyObject {
     init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?)
     func viewDidLoad()
     func showPosterInFullScreen(image: UIImage)
-    func createGenreList(by genreArray: [GenreModel]) -> String?
 }
 
 class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
@@ -44,15 +43,6 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
     
     func showPosterInFullScreen(image: UIImage) {
         router?.showPosterInFullScreen(image: image)
-    }
-    
-    func createGenreList(by genreArray: [GenreModel]) -> String? {
-        var genreList = String()
-        for genre in genreArray {
-            genreList.addingDevidingPrefixIfNeeded()
-            genreList += genre.name.capitalizingFirstLetter()
-        }
-        return genreList
     }
     
     //MARK: - Private -

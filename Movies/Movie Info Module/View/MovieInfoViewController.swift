@@ -190,7 +190,7 @@ extension MovieInfoViewController: UITableViewDataSource {
         
         switch cellType {
         case .genres:
-            currentMovieInfo = presenter.createGenreList(by: informationAboutTheCurrentMovie.genres) ?? ""
+            currentMovieInfo = createItemList(by: informationAboutTheCurrentMovie.genres) ?? ""
         case .releaseDate:
             if let safeDate = informationAboutTheCurrentMovie.releaseDate {
                 currentMovieInfo = formatDate(from: safeDate)

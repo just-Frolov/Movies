@@ -56,4 +56,13 @@ extension UIViewController {
             return originalDate
         }
     }
+    
+    func createItemList(by itemArray: [GenreModel]) -> String? {
+        var itemList = String()
+        for item in itemArray {
+            itemList.addingDevidingPrefixIfNeeded()
+            itemList += item.name.capitalizingFirstLetter()
+        }
+        return itemList
+    }
 }

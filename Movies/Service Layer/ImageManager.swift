@@ -8,13 +8,6 @@
 import Kingfisher
 import Foundation
 
-private struct Constants {
-    static let baseURL = "https://image.tmdb.org/t/p"
-    static let imageSize = "/w500"
-    
-    
-}
-
 struct ImageManager {
     //MARK: - Static Constants -
     static let shared = ImageManager()
