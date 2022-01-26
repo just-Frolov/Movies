@@ -20,7 +20,7 @@ protocol MovieListViewPresenterProtocol: AnyObject {
     func viewDidLoad()
     func getMovieList(by sort: String, startAgain: Bool)
     func getMovieListBySearch(_ text: String, startAgain: Bool)
-    func tapOnTheMovie(with id: Int)
+    func moviePosterTapped(with id: Int)
 }
 
 class MovieListPresenter: MovieListViewPresenterProtocol {
@@ -77,7 +77,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         movieListRequest(with: endPoint)
     }
     
-    func tapOnTheMovie(with id: Int) {
+    func moviePosterTapped(with id: Int) {
         guard NetworkMonitor.shared.isConnected else {
             view?.setOfflineMode()
             return
@@ -109,7 +109,9 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                     guard let genreRequestResult = data else { return }
                     
                     let genreRequestList = genreRequestResult.genres
-                    let genresArray = genreRequestList.map { strongSelf.storedService.createStoredGenre(from: $0) }
+                    let genresArray = genreRequestList.map {
+                        strongSelf.storedService.createStoredGenre(from: $0)
+                    }
                     GenreListConfigurable.shared.genreList = genresArray
                     strongSelf.genreGroup.leave()
                 case.failure(let error):

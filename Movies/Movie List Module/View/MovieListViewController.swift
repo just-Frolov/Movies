@@ -157,7 +157,7 @@ extension MovieListViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let movieID = Int(currentMovieList[indexPath.row].id)
-        presenter.tapOnTheMovie(with: movieID)
+        presenter.moviePosterTapped(with: movieID)
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -317,7 +317,6 @@ extension MovieListViewController: MovieListViewProtocol {
                 strongSelf.setVisibilityForUIElements(isEmpty: false)
             }
         }
-        
     }
     
     private func setVisibilityForUIElements(isEmpty: Bool) {
