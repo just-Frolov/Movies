@@ -8,12 +8,13 @@
 import UIKit
 import JGProgressHUD
 
+//MARK: - Alert -
 extension UIViewController {
     typealias AlertAction = () -> ()
     typealias AlertButtonAction = (String, AlertAction)
     
-    func showActionSheetWithCancel(titleAndAction: [AlertButtonAction], with title: String) {
-        let actionSheet = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
+    func showActionSheetWithCancel(titleAndAction: [AlertButtonAction], with alertTitle: String) {
+        let actionSheet = UIAlertController(title: alertTitle, message: nil, preferredStyle: .actionSheet)
         
         for value in titleAndAction {
             actionSheet.addAction(UIAlertAction(title: value.0, style: .default, handler: {
@@ -30,7 +31,10 @@ extension UIViewController {
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
     }
-    
+}
+
+//MARK: - Spinner -
+extension UIViewController {
     func showSpinner(_ spinner: JGProgressHUD) {
         DispatchQueue.main.async { [weak self] in
             guard let view = self?.view else { return }
@@ -43,7 +47,10 @@ extension UIViewController {
             spinner.dismiss()
         }
     }
-    
+}
+
+//MARK: - Value conversion -
+extension UIViewController {
     func createDecimalNumber(from largeNumber: Int) -> String {
         guard largeNumber != 0 else {
             return K.MovieDetails.noDescription
