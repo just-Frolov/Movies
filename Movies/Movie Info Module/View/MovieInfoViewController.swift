@@ -56,7 +56,7 @@ class MovieInfoViewController: UIViewController {
         table.allowsSelection = false
         table.isHidden = true
         table.register(InfoTableViewSection.self,
-                       forHeaderFooterViewReuseIdentifier: InfoTableViewSection.identifier)
+                       forHeaderFooterViewReuseIdentifier: K.sectionIdentifier)
         InfoTableViewCell.register(in: table)
         return table
     }()
@@ -66,8 +66,8 @@ class MovieInfoViewController: UIViewController {
     
     //MARK: - Variables -
     var presenter: MovieInfoViewPresenterProtocol!
-    //TODO: - -
-    private var movieDetails: MovieDetailsData!
+    
+    private var informationAboutTheCurrentMovie: MovieDetailsData!
     private var dataSource: [InfoTableSectionModel] = []
     
     //MARK: - Life Cycle -
@@ -89,7 +89,7 @@ class MovieInfoViewController: UIViewController {
     }
     
     private func setupNavBar() {
-        title = "Movie Details"
+        title = K.secondScreenName
         navigationController?.navigationBar.topItem?.title = "";
     }
     
@@ -132,8 +132,7 @@ class MovieInfoViewController: UIViewController {
     private func setupHeaderViewConstraints() {
         headerView.snp.makeConstraints { make in
             make.bottom.equalTo(290)
-            make.top.equalToSuperview()
-            make.width.equalToSuperview()
+            make.top.width.equalToSuperview()
         }
     }
     
@@ -152,8 +151,7 @@ class MovieInfoViewController: UIViewController {
     
     private func setupMoviePosterConstraints() {
         moviePoster.snp.makeConstraints { make in
-            make.top.equalToSuperview()
-            make.left.right.equalToSuperview()
+            make.left.right.top.equalToSuperview()
             make.height.lessThanOrEqualTo(250)
         }
     }
@@ -189,28 +187,28 @@ extension MovieInfoViewController: UITableViewDataSource {
         let cell = InfoTableViewCell.dequeueingReusableCell(in: tableView, for: indexPath)
         let cellType = dataSource[indexPath.section].type
         var currentMovieInfo = String()
-        //TODO: -
+        
         switch cellType {
         case .genres:
-            currentMovieInfo = presenter.createGenreList(by: movieDetails.genres) ?? ""
+            currentMovieInfo = presenter.createGenreList(by: informationAboutTheCurrentMovie.genres) ?? ""
         case .releaseDate:
-            if let safeDate = movieDetails.releaseDate {
+            if let safeDate = informationAboutTheCurrentMovie.releaseDate {
                 currentMovieInfo = formatDate(from: safeDate)
             } else {
-                currentMovieInfo = "No Info"
+                currentMovieInfo = K.MovieDetails.noDescription
             }
         case .rating:
-            currentMovieInfo = String(movieDetails.voteAverage)
+            currentMovieInfo = String(informationAboutTheCurrentMovie.voteAverage)
         case .originalTitle:
-            currentMovieInfo = movieDetails.originalTitle
+            currentMovieInfo = informationAboutTheCurrentMovie.originalTitle
         case .description:
-            currentMovieInfo = movieDetails.overview.isEmpty ? "No Info" : movieDetails.overview
+            currentMovieInfo = informationAboutTheCurrentMovie.overview.isEmpty ? K.MovieDetails.noDescription : informationAboutTheCurrentMovie.overview
         case .budget:
-            currentMovieInfo = createDecimalNumber(from: movieDetails.budget)
+            currentMovieInfo = createDecimalNumber(from: informationAboutTheCurrentMovie.budget)
         case .production:
-            currentMovieInfo = movieDetails.productionCountries.first?.name ?? "No Info"
+            currentMovieInfo = informationAboutTheCurrentMovie.productionCountries.first?.name ?? K.MovieDetails.noDescription
         case .revenue:
-            currentMovieInfo = createDecimalNumber(from: movieDetails.revenue)
+            currentMovieInfo = createDecimalNumber(from: informationAboutTheCurrentMovie.revenue)
         }
 
         cell.configure(with: currentMovieInfo)
@@ -223,7 +221,7 @@ extension MovieInfoViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let sectionType = dataSource[section].type
         let sectionTitle = sectionType.rawValue
-        let section = tableView.dequeueReusableHeaderFooterView(withIdentifier: InfoTableViewSection.identifier) as? InfoTableViewSection
+        let section = tableView.dequeueReusableHeaderFooterView(withIdentifier: K.sectionIdentifier) as? InfoTableViewSection
         section?.configure(title: sectionTitle)
         return section
     }
@@ -235,7 +233,7 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
     func setMovieInfo(from movieDetails: MovieDetailsData, with sectionType: [InfoTableSectionModel]) {
         setImage(from: movieDetails.backdropPath)
         movieTitleLabel.text = movieDetails.title
-        self.movieDetails = movieDetails
+        informationAboutTheCurrentMovie = movieDetails
         updateSections(sectionType)
     }
         
@@ -261,10 +259,11 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
     
     private func setImage(from url: String?) {
         if let poster = url {
-            NetworkService.shared.setImage(imageURL: poster,
+            guard let url = ImageManager.shared.fullURL(imageURL: poster) else { return }
+            ImageManager.shared.setImage(mainUrl: url,
                                            imageView: self.moviePoster)
         } else {
-            self.moviePoster.image = UIImage(named: "imageNotFound")
+            self.moviePoster.image = UIImage(named: K.Assets.defaultImageName)
         }
     }
 }

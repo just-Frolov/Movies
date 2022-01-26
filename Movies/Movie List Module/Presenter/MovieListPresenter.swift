@@ -6,11 +6,13 @@
 //
 
 import UIKit
+import NotificationCenter
 
 protocol MovieListViewProtocol: AnyObject {
     func setMovieList(_ moviesArray: [StoredMovieModel])
     func showErrorAlert(with message: String)
     func setOfflineMode()
+    func setOnlineMode()
 }
 
 protocol MovieListViewPresenterProtocol: AnyObject {
@@ -42,12 +44,15 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         if NetworkMonitor.shared.isConnected {
             getGenreList()
             getMovieList()
+            view?.setOnlineMode()
         } else {
             getSavedData()
+            view?.setOfflineMode()
         }
+        addTriggerToChangeTheInternet()
     }
     
-    func getMovieList(by sort: String = "popularity.desc", startAgain: Bool = false) {
+    func getMovieList(by sort: String = K.SortType.byPopular, startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
         guard NetworkMonitor.shared.isConnected else {
             if startAgain == true {
@@ -140,5 +145,17 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                 }
             }
         }
+    }
+    
+    private func addTriggerToChangeTheInternet() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(changeNetworkStatus),
+            name: Notification.Name(K.NotificationCenter.network),
+            object: nil)
+    }
+    
+    @objc func changeNetworkStatus() {
+        NetworkMonitor.shared.isConnected ? view?.setOnlineMode() : view?.setOfflineMode() 
     }
 }

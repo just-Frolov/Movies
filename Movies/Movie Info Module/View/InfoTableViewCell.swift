@@ -61,9 +61,8 @@ class InfoTableViewCell: BaseTableViewCell {
     
     private func setupMovieInfoLabel() {
         movieInfoLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(10)
             make.left.right.equalToSuperview().inset(20)
-            make.bottom.equalToSuperview().inset(10)
+            make.bottom.top.equalToSuperview().inset(10)
         }
     }
 }

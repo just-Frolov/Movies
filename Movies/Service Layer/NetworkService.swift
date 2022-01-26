@@ -7,13 +7,11 @@
 
 import Alamofire
 import Kingfisher
-import UIKit
 
 protocol NetworkServiceProtocol {
     func request<T: Codable>(endPoint: EndPoint,
                              expecting: T.Type,
                              completion: @escaping (Result<T?, Error>) -> Void)
-    func setImage(imageURL: String, imageView: UIImageView)
 }
 
 final class NetworkService: NetworkServiceProtocol {
@@ -50,22 +48,6 @@ final class NetworkService: NetworkServiceProtocol {
             
             let result = strongSelf.parseJson(safeData, expecting: expecting)
             completion(.success(result))
-        }
-    }
-    
-    //TODO: -
-    func setImage(imageURL: String, imageView: UIImageView) {
-        let baseURL = "https://image.tmdb.org/t/p"
-        let imageSize = "/w500"
-        let mainURL = baseURL + imageSize + imageURL
-        let url = URL(string: mainURL)
-        imageView.kf.setImage(with: url) { result in
-            switch result {
-            case .failure(_):
-                imageView.image = UIImage(named: "imageNotFound")
-            default:
-                break
-            }
         }
     }
     

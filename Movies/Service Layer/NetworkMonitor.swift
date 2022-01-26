@@ -6,6 +6,7 @@
 //
 
 import Network
+import NotificationCenter
 
 final class NetworkMonitor {
     //MARK: - Static -
@@ -28,6 +29,8 @@ final class NetworkMonitor {
         monitor.start(queue: queue)
         monitor.pathUpdateHandler = { [weak self] path in
             self?.isConnected = path.status == .satisfied
+            NotificationCenter.default.post(name: Notification.Name(K.NotificationCenter.network),
+                                            object: nil)
         }
     }
     

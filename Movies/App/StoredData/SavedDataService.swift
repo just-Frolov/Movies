@@ -19,12 +19,10 @@ class SavedDataServices {
         return viewContext
     }
     
-    //MARK: - Constant -
-    private let fetchRequest = StoredMovieModel.fetchRequest()
-    
     //MARK: - Internal -
     func getAllSavedMovies() -> [StoredMovieModel] {
         do {
+            let fetchRequest = StoredMovieModel.fetchRequest()
             let sort = NSSortDescriptor(key: #keyPath(StoredMovieModel.title), ascending: true)
             fetchRequest.sortDescriptors = [sort]
             let storedMovies = try context.fetch(fetchRequest)
@@ -37,6 +35,7 @@ class SavedDataServices {
     
     func getSavedMovies(by filter: String) -> [StoredMovieModel] {
         do {
+            let fetchRequest = StoredMovieModel.fetchRequest()
             let sort = NSSortDescriptor(key: #keyPath(StoredMovieModel.title), ascending: true)
             let predicate = NSPredicate(format: "title CONTAINS[c] %@", filter)
             fetchRequest.sortDescriptors = [sort]

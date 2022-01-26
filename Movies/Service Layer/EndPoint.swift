@@ -7,7 +7,7 @@
 
 import Alamofire
 
-struct Constants {
+private struct Constants {
     static let baseURL = "https://api.themoviedb.org/3/"
     static let kApiKey = "api_key="
     static let apiKey = "a5e9b83ceecaed49515d68d344c79b72"

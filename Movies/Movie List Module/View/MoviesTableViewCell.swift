@@ -19,24 +19,18 @@ class MoviesTableViewCell: BaseTableViewCell {
         view.addSubview(movieRatingView)
         view.addSubview(movieGenresLabel)
         view.addSubview(movieReleaseDataLabel)
-        view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOpacity = 0.7
-        view.layer.shadowOffset = CGSize.zero
-        view.layer.shadowRadius = 3
-        view.layer.shadowPath = UIBezierPath(roundedRect: view.bounds, cornerRadius: 20).cgPath
+        view.addBlackShadow(frame: view.frame)
         return view
     }()
     
     private lazy var moviePoster: UIImageView = {
-        let image = UIImageView(frame: CGRect(x: .zero,
-                                              y: .zero,
-                                              width: contentView.bounds.width+70,
-                                              height: 250))
-        image.contentMode = .scaleAspectFill
-        image.layer.cornerRadius = 20
-        image.clipsToBounds = true
-        image.addBlackGradientLayerInBackground(frame: image.frame)
-        return image
+        let imageView = UIImageView(frame: CGRect(x: .zero,
+                                                  y: .zero,
+                                                  width: contentView.bounds.width+70,
+                                                  height: 250))
+        imageView.contentMode = .scaleAspectFill
+        imageView.addBlackGradientLayerInBackground(frame: imageView.frame)
+        return imageView
     }()
     
     private lazy var movieTitleLabel: UILabel = {
@@ -50,7 +44,6 @@ class MoviesTableViewCell: BaseTableViewCell {
     private lazy var movieReleaseDataLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .bold)
-        label.numberOfLines = 0
         label.textColor = .white
         return label
     }()
@@ -72,7 +65,6 @@ class MoviesTableViewCell: BaseTableViewCell {
     private lazy var movieRatingLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .bold)
-        label.numberOfLines = 1
         label.textColor = .white
         return label
     }()
@@ -80,7 +72,7 @@ class MoviesTableViewCell: BaseTableViewCell {
     private lazy var movieRatingIcon: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
-        image.image = UIImage(systemName: "star.fill")
+        image.image = UIImage(systemName: K.Assets.starIcon)
         image.tintColor = .white
         return image
     }()
@@ -99,6 +91,12 @@ class MoviesTableViewCell: BaseTableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         imageView?.image = nil
+    }
+    
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
+        moviePoster.layer.cornerRadius = 20
+        moviePoster.clipsToBounds = true
     }
     
     //MARK: - Internal -
@@ -185,15 +183,18 @@ class MoviesTableViewCell: BaseTableViewCell {
     
     private func setMovieInfo(from model: StoredMovieModel) {
         movieTitleLabel.text = model.title
-        movieReleaseDataLabel.text = model.releaseDate?.replace(target: "-", withString: ".")
+        movieReleaseDataLabel.text = model.releaseDate?.replace(target: "-",
+                                                                withString: ".")
         movieRatingLabel.text = String(model.voteAverage)
     }
     
     private func setImage(from link: String?) {
         if let poster = link {
-            NetworkService.shared.setImage(imageURL: poster, imageView: self.moviePoster)
+            guard let url = ImageManager.shared.fullURL(imageURL: poster) else { return }
+            ImageManager.shared.setImage(mainUrl: url,
+                                           imageView: self.moviePoster)
         } else {
-            moviePoster.image = UIImage(named: "imageNotFound")
+            moviePoster.image = UIImage(named: K.Assets.defaultImageName)
         }
     }
     

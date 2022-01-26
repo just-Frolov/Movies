@@ -11,20 +11,19 @@ class MoviePosterViewController: UIViewController {
     //MARK: - UI Elements -
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
-        scrollView.clipsToBounds = true
         scrollView.addSubview(moviePoster)
+        scrollView.clipsToBounds = true
         scrollView.backgroundColor = .white
         return scrollView
     }()
     
     private lazy var moviePoster: UIImageView = {
-        let image = UIImageView()
+        let image = UIImageView(frame: CGRect(x: .zero,
+                                              y: .zero,
+                                              width: view.frame.size.width,
+                                              height: view.frame.size.width/1.5))
         image.contentMode = .scaleAspectFill
         image.isUserInteractionEnabled = true
-        image.frame = CGRect(x: 0,
-                             y: 0,
-                             width: view.frame.size.width,
-                             height: view.frame.size.width/1.5)
         image.center = view.center
         return image
     }()
@@ -42,7 +41,6 @@ class MoviePosterViewController: UIViewController {
     //MARK: - Life Cycle -
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Movie Poster"
         addSubview()
         setupConstraints()
         setupScrollView()

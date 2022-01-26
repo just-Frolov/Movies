@@ -57,9 +57,7 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
     
     //MARK: - Private -
     private func getMovieInfo() {
-        guard let movieID = movieID else {
-            return
-        }
+        guard let movieID = movieID else { return }
         let endPoint = EndPoint.movieDetails(id: movieID)
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieDetailsData.self) { [weak self] result in
             guard let strongSelf = self else { return }

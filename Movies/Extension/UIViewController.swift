@@ -16,31 +16,39 @@ extension UIViewController {
     }
     
     func showSpinner(_ spinner: JGProgressHUD) {
-        spinner.show(in: view)
+        DispatchQueue.main.async { [weak self] in
+            guard let view = self?.view else { return }
+            spinner.show(in: view)
+        }
     }
     
     func hideSpinner(_ spinner: JGProgressHUD) {
-        spinner.dismiss()
+        DispatchQueue.main.async {
+            spinner.dismiss()
+        }
     }
     
     func createDecimalNumber(from largeNumber: Int) -> String {
         guard largeNumber != 0 else {
-            return "No Info"
+            return K.MovieDetails.noDescription
         }
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
-        let formattedNumber = numberFormatter.string(from: NSNumber(value:largeNumber)) ?? "?"
-        let currencyValue = formattedNumber + " USD"
+        let formattedNumber = numberFormatter.string(from: NSNumber(value:largeNumber)) ?? K.MovieDetails.noDescription
+        let currencyValue = formattedNumber + K.MovieDetails.currency
         return currencyValue
     }
     
     func formatDate(from originalDate: String) -> String {
         let dateFormatterGet = DateFormatter()
-        dateFormatterGet.dateFormat = "yyyy-MM-dd"
+        let receivedFormat = "yyyy-MM-dd"
+        dateFormatterGet.dateFormat = receivedFormat
 
         let dateFormatterPrint = DateFormatter()
-        dateFormatterPrint.locale = Locale(identifier: "ru_RU")
-        dateFormatterPrint.dateFormat = "d MMMM, yyyy"
+        let printFormat = "d MMMM, yyyy"
+        let formattingLanguage = "ru_RU"
+        dateFormatterPrint.locale = Locale(identifier: formattingLanguage)
+        dateFormatterPrint.dateFormat = printFormat
 
         if let date = dateFormatterGet.date(from: originalDate) {
             return dateFormatterPrint.string(from: date)

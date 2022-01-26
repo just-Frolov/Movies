@@ -20,9 +20,6 @@ enum TableViewSectionType: String, CaseIterable {
 }
 
 class InfoTableViewSection: UITableViewHeaderFooterView {
-    //MARK: - Static -
-    static let identifier = "TableSection"
-    
     //MARK: - UI Elements -
     private lazy var movieSectionHeader: UILabel = {
         let label = UILabel()

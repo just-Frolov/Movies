@@ -10,7 +10,7 @@ import netfox
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 #if DEBUG
         NFX.sharedInstance().start()
@@ -18,26 +18,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         NetworkMonitor.shared.startMonitoring()
         return true
     }
-
+    
     // MARK: UISceneSession Lifecycle
-
+    
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         // Called when a new scene session is being created.
         // Use this method to select a configuration to create the new scene with.
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
+    
+    var orientationLock = UIInterfaceOrientationMask.portrait
 
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+            return self.orientationLock
+    }
+    
     // MARK: - Core Data stack
     lazy var persistentContainer: NSPersistentContainer = {
-           let container = NSPersistentContainer(name: "StoredMovieData")
-           container.loadPersistentStores { description, error in
-               if let error = error {
-                   fatalError("Unable to load persistent stores: \(error)")
-               }
-           }
-           return container
+        let container = NSPersistentContainer(name: "StoredMovieData")
+        container.loadPersistentStores { description, error in
+            if let error = error {
+                fatalError("Unable to load persistent stores: \(error)")
+            }
+        }
+        return container
     }()
-
+    
     // MARK: - Core Data Saving support
     func saveContext () {
         let context = persistentContainer.viewContext

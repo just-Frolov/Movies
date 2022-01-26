@@ -43,7 +43,7 @@ class MovieListViewController: UIViewController {
     var presenter: MovieListViewPresenterProtocol!
     private var currentMovieList = [StoredMovieModel]()
     private var movieSearchText = String()
-    private var movieSortingType = SortType.byPopular.rawValue
+    private var movieSortingType = K.SortType.byPopular
     private var workItemForSearchBar: DispatchWorkItem?
     
     //MARK: - Life Cycle -
@@ -57,8 +57,7 @@ class MovieListViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        title = "Popular Movies"
-        configureItems()
+        title = K.appName
     }
     
     //MARK: - Private -
@@ -73,6 +72,15 @@ class MovieListViewController: UIViewController {
         setupNavigationBarAppearence()
     }
     
+    private func setNavigationBarItems() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "arrow.up.arrow.down.square"),
+            style: .done,
+            target: self,
+            action: #selector(showSortingActionSheet)
+        )
+    }
+    
     private func setupTableView() {
         tableView.dataSource = self
         tableView.delegate = self
@@ -80,15 +88,6 @@ class MovieListViewController: UIViewController {
     
     private func setupSearchBar() {
         searchBar.delegate = self
-    }
-    
-    private func configureItems() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "arrow.up.arrow.down.square"),
-            style: .done,
-            target: self,
-            action: #selector(showSortingActionSheet)
-        )
     }
     
     private func setupNavigationBarAppearence() {
@@ -223,28 +222,22 @@ extension MovieListViewController: UISearchBarDelegate {
 
 //MARK: - ActionSheet -
 extension MovieListViewController {
-    public enum SortType: String {
-        case byPopular = "popularity.desc"
-        case byRevenue = "revenue.desc"
-        case byAverageCount = "vote_count.desc"
-    }
-    
     @objc private func showSortingActionSheet() {
         let alert = UIAlertController(title: "Как остортировать фильмы?", message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Самые популярные",
                                       style: .default,
                                       handler: { _ in
-            self.sortList(by: SortType.byPopular.rawValue)
+            self.sortList(by: K.SortType.byPopular)
         }))
         alert.addAction(UIAlertAction(title: "Cамые прибыльные",
                                       style: .default,
                                       handler: { _ in
-            self.sortList(by: SortType.byRevenue.rawValue)
+            self.sortList(by: K.SortType.byRevenue)
         }))
         alert.addAction(UIAlertAction(title: "Самые известные",
                                       style: .default,
                                       handler: { _ in
-            self.sortList(by: SortType.byAverageCount.rawValue)
+            self.sortList(by: K.SortType.byAverageCount)
         }))
         alert.addAction(UIAlertAction(title: "Отмена",
                                       style: .cancel,
@@ -273,10 +266,14 @@ extension MovieListViewController {
 
 //MARK: - MovieListViewProtocol -
 extension MovieListViewController: MovieListViewProtocol {
+    func setOnlineMode() {
+        showRightBarButton()
+    }
+    
     func setOfflineMode() {
         let message = "You are offline. Please, enable your Wi-Fi or connect using cellular data."
         showErrorAlert(with: message)
-        navigationItem.rightBarButtonItem = nil
+        hideRightBarButton()
     }
     
     func setMovieList(_ moviesArray: [StoredMovieModel]) {
@@ -288,8 +285,18 @@ extension MovieListViewController: MovieListViewProtocol {
         DispatchQueue.main.async { [weak self] in
             self?.showAlert("Error", with: message)
         }
-        if spinner.isVisible {
-            hideSpinner(spinner)
+        hideSpinner(spinner)
+    }
+    
+    private func hideRightBarButton() {
+        DispatchQueue.main.async { [weak self] in
+            self?.navigationItem.rightBarButtonItem = nil
+        }
+    }
+    
+    private func showRightBarButton() {
+        DispatchQueue.main.async { [weak self] in
+            self?.setNavigationBarItems()
         }
     }
     
