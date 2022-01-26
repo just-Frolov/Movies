@@ -77,7 +77,7 @@ class MovieListViewController: UIViewController {
             image: UIImage(systemName: "arrow.up.arrow.down.square"),
             style: .done,
             target: self,
-            action: #selector(showSortingActionSheet)
+            action: #selector(showActionSheetWithSortingType)
         )
     }
     
@@ -222,27 +222,25 @@ extension MovieListViewController: UISearchBarDelegate {
 
 //MARK: - ActionSheet -
 extension MovieListViewController {
-    @objc private func showSortingActionSheet() {
-        let alert = UIAlertController(title: "Как остортировать фильмы?", message: nil, preferredStyle: .actionSheet)
-        alert.addAction(UIAlertAction(title: "Самые популярные",
-                                      style: .default,
-                                      handler: { _ in
-            self.sortList(by: K.SortType.byPopular)
-        }))
-        alert.addAction(UIAlertAction(title: "Cамые прибыльные",
-                                      style: .default,
-                                      handler: { _ in
-            self.sortList(by: K.SortType.byRevenue)
-        }))
-        alert.addAction(UIAlertAction(title: "Самые известные",
-                                      style: .default,
-                                      handler: { _ in
-            self.sortList(by: K.SortType.byAverageCount)
-        }))
-        alert.addAction(UIAlertAction(title: "Отмена",
-                                      style: .cancel,
-                                      handler: nil))
-        present(alert, animated: true, completion: nil)
+    enum ActionSheetLabel: String {
+        case popular = "Самые популярные"
+        case revenue = "Cамые прибыльные"
+        case famous = "Самые известные"
+    }
+    
+    @objc private func showActionSheetWithSortingType() {
+        let title = "Как остортировать фильмы?"
+        showActionSheetWithCancel(titleAndAction: [
+            (ActionSheetLabel.popular.rawValue, { [weak self] in
+                self?.sortList(by: K.SortType.byPopular)
+            }),
+            (ActionSheetLabel.revenue.rawValue, { [weak self] in
+                self?.sortList(by: K.SortType.byRevenue)
+            }),
+            (ActionSheetLabel.famous.rawValue, { [weak self] in
+                self?.sortList(by: K.SortType.byAverageCount)
+            })
+        ], with: title)
     }
     
     private func sortList(by sort: String) {

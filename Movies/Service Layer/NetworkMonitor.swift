@@ -17,7 +17,7 @@ final class NetworkMonitor {
     private let monitor: NWPathMonitor
     
     //MARK: - Variables -
-    public private(set) var isConnected: Bool = false
+    internal private(set) var isConnected: Bool = false
     
     //MARK: - Life Cycle -
     private init() {

@@ -9,6 +9,22 @@ import UIKit
 import JGProgressHUD
 
 extension UIViewController {
+    typealias AlertAction = () -> ()
+    typealias AlertButtonAction = (String, AlertAction)
+    
+    func showActionSheetWithCancel(titleAndAction: [AlertButtonAction], with title: String) {
+        let actionSheet = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
+        
+        for value in titleAndAction {
+            actionSheet.addAction(UIAlertAction(title: value.0, style: .default, handler: {
+                (alert: UIAlertAction!) -> Void in
+                value.1()
+            }))
+        }
+        actionSheet.addAction(UIAlertAction(title: "Отмена", style: .cancel, handler: nil))
+        self.present(actionSheet, animated: true, completion: nil)
+    }
+    
     func showAlert(_ title: String, with message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -43,13 +59,13 @@ extension UIViewController {
         let dateFormatterGet = DateFormatter()
         let receivedFormat = "yyyy-MM-dd"
         dateFormatterGet.dateFormat = receivedFormat
-
+        
         let dateFormatterPrint = DateFormatter()
         let printFormat = "d MMMM, yyyy"
         let formattingLanguage = "ru_RU"
         dateFormatterPrint.locale = Locale(identifier: formattingLanguage)
         dateFormatterPrint.dateFormat = printFormat
-
+        
         if let date = dateFormatterGet.date(from: originalDate) {
             return dateFormatterPrint.string(from: date)
         } else {
