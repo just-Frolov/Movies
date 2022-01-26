@@ -29,11 +29,11 @@ class MovieInfoViewController: UIViewController {
     private lazy var playerViewSpinner = UIActivityIndicatorView(style: .medium)
     
     private lazy var moviePoster: UIImageView = {
-        let image = UIImageView()
-        image.contentMode = .scaleAspectFill
-        image.isHidden = true
-        image.isUserInteractionEnabled = true
-        return image
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.isHidden = true
+        imageView.isUserInteractionEnabled = true
+        return imageView
     }()
     
     private lazy var movieTitleLabel: UILabel = {

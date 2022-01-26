@@ -95,8 +95,7 @@ class MoviesTableViewCell: BaseTableViewCell {
     
     override func draw(_ rect: CGRect) {
         super.draw(rect)
-        moviePoster.layer.cornerRadius = 20
-        moviePoster.clipsToBounds = true
+        moviePoster.setCornerRadius(20)
     }
     
     //MARK: - Internal -
