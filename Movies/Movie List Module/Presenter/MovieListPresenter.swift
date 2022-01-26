@@ -156,6 +156,6 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     }
     
     @objc func changeNetworkStatus() {
-        NetworkMonitor.shared.isConnected ? view?.setOnlineMode() : view?.setOfflineMode() 
+        NetworkMonitor.shared.isConnected ? view?.setOnlineMode() : view?.setOfflineMode()
     }
 }

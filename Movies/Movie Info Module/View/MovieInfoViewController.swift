@@ -44,7 +44,7 @@ class MovieInfoViewController: UIViewController {
         label.textColor = .black
         return label
     }()
-
+    
     private lazy var tableView: UITableView = {
         let table = UITableView(frame: CGRect(x: 0,
                                               y: 0,
@@ -105,8 +105,9 @@ class MovieInfoViewController: UIViewController {
     }
     
     private func addTapRecognizerToPoster() {
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(posterTapped(tapGestureRecognizer:)))
-            moviePoster.addGestureRecognizer(tapGestureRecognizer)
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self,
+                                                          action: #selector(posterTapped(tapGestureRecognizer:)))
+        moviePoster.addGestureRecognizer(tapGestureRecognizer)
     }
     
     @objc func posterTapped(tapGestureRecognizer: UITapGestureRecognizer)
@@ -210,7 +211,7 @@ extension MovieInfoViewController: UITableViewDataSource {
         case .revenue:
             currentMovieInfo = createDecimalNumber(from: informationAboutTheCurrentMovie.revenue)
         }
-
+        
         cell.configure(with: currentMovieInfo)
         return cell
     }
@@ -236,7 +237,7 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
         informationAboutTheCurrentMovie = movieDetails
         updateSections(sectionType)
     }
-        
+    
     func showMoviePoster() {
         playerViewSpinner.stopAnimating()
         moviePoster.isHidden = false
@@ -261,7 +262,7 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
         if let poster = url {
             guard let url = ImageManager.shared.fullURL(imageURL: poster) else { return }
             ImageManager.shared.setImage(mainUrl: url,
-                                           imageView: self.moviePoster)
+                                         imageView: self.moviePoster)
         } else {
             self.moviePoster.image = UIImage(named: K.Assets.defaultImageName)
         }
