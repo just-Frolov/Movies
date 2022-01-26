@@ -8,21 +8,19 @@
 import UIKit
 
 extension UIView {
-    func addBlackGradientLayerInBackground(frame: CGRect){
+    func addGradientLayerInBackground(with colors: [UIColor]){
         let gradient = CAGradientLayer()
-        gradient.frame = frame
-        gradient.colors = [UIColor.black.cgColor,
-                           UIColor.clear.cgColor,
-                           UIColor.black.cgColor]
-        gradient.locations = [0.0, 0.5, 1.0]
+        gradient.frame = self.frame
+        gradient.colors = colors.map{ $0.cgColor }
+        //gradient.locations = locations
         gradient.opacity = 0.3
         self.layer.insertSublayer(gradient, at: 0)
     }
     
-    func addBlackShadow(frame: CGRect) {
-        self.layer.shadowColor = UIColor.black.cgColor
-        self.layer.shadowOpacity = 0.7
+    func addShadow(with color: CGColor) {
+        self.layer.shadowColor = color
         self.layer.shadowOffset = CGSize.zero
+        self.layer.shadowOpacity = 0.7
         self.layer.shadowRadius = 3
         self.layer.shadowPath = UIBezierPath(roundedRect: self.bounds,
                                              cornerRadius: 20).cgPath

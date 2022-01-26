@@ -25,7 +25,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let assemblyBuilder = AssemblerModuleBuilder()
         let router = Router(navigationController: navigationController,
                             assemblyBuilder: assemblyBuilder)
-        router.initialViewController()
+        router.showMovieList()
 
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()

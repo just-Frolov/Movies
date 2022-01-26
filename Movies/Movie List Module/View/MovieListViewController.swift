@@ -7,7 +7,6 @@
 
 import SnapKit
 import JGProgressHUD
-import Dispatch
 
 class MovieListViewController: UIViewController {
     //MARK: - UI Elements -
@@ -43,8 +42,8 @@ class MovieListViewController: UIViewController {
     var presenter: MovieListViewPresenterProtocol!
     private var currentMovieList = [StoredMovieModel]()
     private var movieSearchText = String()
-    private var movieSortingType = K.SortType.byPopular
-    private var workItemForSearchBar: DispatchWorkItem?
+    private var movieSortingType = Constants.SortType.byPopular
+    
     
     //MARK: - Life Cycle -
     override func viewDidLoad() {
@@ -57,7 +56,7 @@ class MovieListViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        title = K.appName
+        title = Constants.appName
     }
     
     //MARK: - Private -
@@ -161,19 +160,23 @@ extension MovieListViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard isLoadingIndexPath(indexPath) else { return }
-        movieSearchText.isEmpty ? getNewMovies() : getNewMoviesBySearch()
+        checkIfUpdateIsNeeded(for: indexPath)
     }
     
-    private func isLoadingIndexPath(_ indexPath: IndexPath) -> Bool {
+    private func checkIfUpdateIsNeeded(for indexPath: IndexPath) {
+        guard isCellToLoad(with: indexPath) else { return }
+        movieSearchText.isEmpty ? loadMoreResults() : getMoreResultsBySearch()
+    }
+    
+    private func isCellToLoad(with indexPath: IndexPath) -> Bool {
         return indexPath.row == currentMovieList.count - 5
     }
     
-    private func getNewMovies(_ startAgain: Bool = false) {
+    private func loadMoreResults(_ startAgain: Bool = false) {
         presenter.getMovieList(by: movieSortingType, startAgain: startAgain)
     }
     
-    private func getNewMoviesBySearch(_ startAgain: Bool = false) {
+    private func getMoreResultsBySearch(_ startAgain: Bool = false) {
         presenter.getMovieListBySearch(movieSearchText, startAgain: startAgain)
     }
     
@@ -198,26 +201,6 @@ extension MovieListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         getSearchResults(query: searchText)
     }
-    
-    private func getSearchResults(query: String, deadline: Int = 500) {
-        workItemForSearchBar?.cancel()
-        let newWorkItem = DispatchWorkItem { [weak self] in
-            self?.startMovieSearchRequest(with: query)
-        }
-        workItemForSearchBar = newWorkItem
-        DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(deadline),
-                                          execute: newWorkItem)
-    }
-    
-    private func startMovieSearchRequest(with text: String) {
-        currentMovieList.removeAll()
-        movieSearchText = text.trim()
-        if text.replacingOccurrences(of: " ", with: "").isEmpty {
-            getNewMovies(true)
-        } else {
-            getNewMoviesBySearch(true)
-        }
-    }
 }
 
 //MARK: - ActionSheet -
@@ -230,15 +213,15 @@ extension MovieListViewController {
     
     @objc private func showActionSheetWithSortingType() {
         let title = "Как остортировать фильмы?"
-        showActionSheetWithCancel(titleAndAction: [
+        showActionSheetWithCancel(actions: [
             (ActionSheetLabel.popular.rawValue, { [weak self] in
-                self?.sortList(by: K.SortType.byPopular)
+                self?.sortList(by: Constants.SortType.byPopular)
             }),
             (ActionSheetLabel.revenue.rawValue, { [weak self] in
-                self?.sortList(by: K.SortType.byRevenue)
+                self?.sortList(by: Constants.SortType.byRevenue)
             }),
             (ActionSheetLabel.famous.rawValue, { [weak self] in
-                self?.sortList(by: K.SortType.byAverageCount)
+                self?.sortList(by: Constants.SortType.byAverageCount)
             })
         ], with: title)
     }
@@ -281,7 +264,7 @@ extension MovieListViewController: MovieListViewProtocol {
     
     func showErrorAlert(with message: String) {
         DispatchQueue.main.async { [weak self] in
-            self?.showAlert("Error", with: message)
+            self?.showAlert(with: "Error", message)
         }
         hideSpinner(spinner)
     }

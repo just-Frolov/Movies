@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import NotificationCenter
 
 protocol MovieListViewProtocol: AnyObject {
     func setMovieList(_ moviesArray: [StoredMovieModel])
@@ -16,10 +15,10 @@ protocol MovieListViewProtocol: AnyObject {
 }
 
 protocol MovieListViewPresenterProtocol: AnyObject {
-    init(view: MovieListViewProtocol, router: RouterProtocol)
     func viewDidLoad()
     func getMovieList(by sort: String, startAgain: Bool)
     func getMovieListBySearch(_ text: String, startAgain: Bool)
+    func getMovieListLocalSearch(query: String, deadline: Int = 500)
     func moviePosterTapped(with id: Int)
 }
 
@@ -28,6 +27,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     weak var view: MovieListViewProtocol?
     var router: RouterProtocol
     private var movieListPage = 1
+    private var workItemForSearchBar: DispatchWorkItem?
     
     //MARK: - Constants -
     private let genreGroup = DispatchGroup()
@@ -52,10 +52,10 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         addTriggerToChangeTheInternet()
     }
     
-    func getMovieList(by sort: String = K.SortType.byPopular, startAgain: Bool = false) {
+    func getMovieList(by sort: String = Constants.SortType.byPopular, startAgain: Bool = false) {
         if startAgain { movieListPage = 1 }
         guard NetworkMonitor.shared.isConnected else {
-            if startAgain == true {
+            if startAgain {
                 getSavedData()
             }
             return
@@ -68,13 +68,32 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         if startAgain { movieListPage = 1 }
         guard NetworkMonitor.shared.isConnected else {
             DispatchQueue.main.async { [weak self] in
-                guard let filteredMovieList = self?.storedService.getSavedMovies(by: filter) else { return }
-                self?.view?.setMovieList(filteredMovieList)
+                self?.view?.setMovieList(self?.storedService.getSavedMovies(by: filter) ?? [])
             }
             return
         }
         let endPoint = EndPoint.searchMovies(query: filter, page: self.movieListPage)
         movieListRequest(with: endPoint)
+    }
+    
+    func getMovieListByOfflineSearch(query: String, deadline: Int = 500) {
+        workItemForSearchBar?.cancel()
+        let newWorkItem = DispatchWorkItem { [weak self] in
+            self?.startMovieSearchRequest(with: query)
+        }
+        workItemForSearchBar = newWorkItem
+        DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(deadline),
+                                          execute: newWorkItem)
+    }
+    
+    private func startMovieSearchRequest(with text: String) {
+        currentMovieList.removeAll()
+        movieSearchText = text.trim()
+        if text.replacingOccurrences(of: " ", with: "").isEmpty {
+            loadMoreResults(true)
+        } else {
+            getMoreResultsBySearch(true)
+        }
     }
     
     func moviePosterTapped(with id: Int) {
@@ -90,7 +109,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         DispatchQueue.main.async { [weak self] in
             guard let strongSelf = self else { return }
             let genreList = strongSelf.storedService.getAllSavedGenres()
-            let movieList = strongSelf.storedService.getAllSavedMovies()
+            let movieList = strongSelf.storedService.getSavedMovies()
             GenreListConfigurable.shared.genreList = genreList
             strongSelf.view?.setMovieList(movieList)
             strongSelf.view?.setOfflineMode()
@@ -153,7 +172,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(changeNetworkStatus),
-            name: Notification.Name(K.NotificationCenter.network),
+            name: Notification.Name.networkStatusWasChanged,
             object: nil)
     }
     

@@ -14,12 +14,13 @@ class MoviesTableViewCell: BaseTableViewCell {
                                         y: .zero,
                                         width: contentView.bounds.width+60,
                                         height: 220))
+        let shadowColor = UIColor.black.cgColor
         view.addSubview(moviePoster)
         view.addSubview(movieTitleLabel)
         view.addSubview(movieRatingView)
         view.addSubview(movieGenresLabel)
         view.addSubview(movieReleaseDataLabel)
-        view.addBlackShadow(frame: view.frame)
+        view.addShadow(with: shadowColor)
         return view
     }()
     
@@ -28,8 +29,9 @@ class MoviesTableViewCell: BaseTableViewCell {
                                                   y: .zero,
                                                   width: contentView.bounds.width+70,
                                                   height: 250))
+        let gradientColors: [UIColor] = [.black, .clear, .black]
         imageView.contentMode = .scaleAspectFill
-        imageView.addBlackGradientLayerInBackground(frame: imageView.frame)
+        imageView.addGradientLayerInBackground(with: gradientColors)
         return imageView
     }()
     
@@ -72,7 +74,7 @@ class MoviesTableViewCell: BaseTableViewCell {
     private lazy var movieRatingIcon: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
-        image.image = UIImage(systemName: K.Assets.starIcon)
+        image.image = UIImage(systemName: Constants.Assets.starIcon)
         image.tintColor = .white
         return image
     }()
@@ -193,7 +195,7 @@ class MoviesTableViewCell: BaseTableViewCell {
             ImageManager.shared.setImage(mainUrl: url,
                                          imageView: self.moviePoster)
         } else {
-            moviePoster.image = UIImage(named: K.Assets.defaultImageName)
+            moviePoster.image = UIImage(named: Constants.Assets.defaultImageName)
         }
     }
     

@@ -17,7 +17,7 @@ extension String {
         return prefix(1).capitalized + dropFirst()
     }
     
-    func replace(target: String, withString: String) -> String{
+    func replace(target: String, withString: String) -> String {
         return self.replacingOccurrences(of: target, with: withString)
     }
     

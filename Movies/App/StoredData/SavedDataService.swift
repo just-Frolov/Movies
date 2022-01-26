@@ -20,26 +20,15 @@ class SavedDataServices {
     }
     
     //MARK: - Internal -
-    func getAllSavedMovies() -> [StoredMovieModel] {
+    func getSavedMovies(by filter: String? = nil) -> [StoredMovieModel] {
         do {
             let fetchRequest = StoredMovieModel.fetchRequest()
             let sort = NSSortDescriptor(key: #keyPath(StoredMovieModel.title), ascending: true)
             fetchRequest.sortDescriptors = [sort]
-            let storedMovies = try context.fetch(fetchRequest)
-            return storedMovies
-        } catch {
-            print("Error during get saved movies")
-            return []
-        }
-    }
-    
-    func getSavedMovies(by filter: String) -> [StoredMovieModel] {
-        do {
-            let fetchRequest = StoredMovieModel.fetchRequest()
-            let sort = NSSortDescriptor(key: #keyPath(StoredMovieModel.title), ascending: true)
-            let predicate = NSPredicate(format: "title CONTAINS[c] %@", filter)
-            fetchRequest.sortDescriptors = [sort]
-            fetchRequest.predicate = predicate
+            if let filter = filter {
+                let predicate = NSPredicate(format: "title CONTAINS[c] %@", filter)
+                fetchRequest.predicate = predicate
+            }
             let storedMovies = try context.fetch(fetchRequest)
             return storedMovies
         } catch {
@@ -63,7 +52,6 @@ class SavedDataServices {
         let newGenre = StoredGenreModel(context: context)
         newGenre.id = Int32(genreData.id)
         newGenre.name = genreData.name
-        //save()
         return newGenre
     }
     
@@ -75,7 +63,6 @@ class SavedDataServices {
         newMovie.genreIDS = movieData.genreIDS
         newMovie.releaseDate = movieData.releaseDate
         newMovie.voteAverage = movieData.voteAverage
-        //save()
         return newMovie
     }
     

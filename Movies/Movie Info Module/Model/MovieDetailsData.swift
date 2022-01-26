@@ -5,8 +5,6 @@
 //  Created by Данил Фролов on 14.01.2022.
 //
 
-import Alamofire
-
 // MARK: - MovieDetailsData -
 struct MovieDetailsData: Codable {
     let budget, revenue, id: Int

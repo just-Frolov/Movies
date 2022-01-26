@@ -15,7 +15,6 @@ protocol MovieInfoViewProtocol: AnyObject {
 }
 
 protocol MovieInfoViewPresenterProtocol: AnyObject {
-    init(view: MovieInfoViewProtocol, router: RouterProtocol, movieID: Int?)
     func viewDidLoad()
     func showPosterInFullScreen(image: UIImage)
 }
@@ -47,7 +46,11 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
     
     //MARK: - Private -
     private func getMovieInfo() {
-        guard let movieID = movieID else { return }
+        guard let movieID = movieID else {
+            let message = "Failed to get movie info"
+            view?.showErrorAlert(with: message)
+            return
+        }
         let endPoint = EndPoint.movieDetails(id: movieID)
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieDetailsData.self) { [weak self] result in
             guard let strongSelf = self else { return }
@@ -66,9 +69,7 @@ class MovieInfoPresenter: MovieInfoViewPresenterProtocol {
     }
     
     private func getMovieTrailerLink() {
-        guard let movieID = movieID else {
-            return
-        }
+        guard let movieID = movieID else { return }
         let endPoint = EndPoint.movieTrailer(id: movieID)
         NetworkService.shared.request(endPoint: endPoint, expecting: MovieTrailerData.self) { [weak self] result in
             guard let strongSelf = self else { return }

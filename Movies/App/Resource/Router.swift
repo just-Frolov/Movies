@@ -13,7 +13,7 @@ protocol RouterMain {
 }
 
 protocol RouterProtocol: RouterMain {
-    func initialViewController()
+    func showMovieList()
     func showMovieDetails(by movieID: Int)
     func showPosterInFullScreen(image: UIImage)
     func popToRoot()
@@ -28,32 +28,24 @@ class Router: RouterProtocol {
         self.assemblyBuilder = assemblyBuilder
     }
     
-    func initialViewController() {
-        if let navigationController = navigationController {
-            guard let viewController = assemblyBuilder?.createMovieListModule(router: self) else { return }
-            navigationController.viewControllers = [viewController]
-        }
+    func showMovieList() {
+        guard let viewController = assemblyBuilder?.createMovieListModule(router: self) else { return }
+        navigationController?.viewControllers = [viewController]
     }
     
     func showMovieDetails(by movieID: Int) {
-        if let navigationController = navigationController {
-            guard let infoViewController = assemblyBuilder?.createMovieInfoModule(router: self,
-                                                                                  movieID: movieID) else { return }
-            navigationController.pushViewController(infoViewController, animated: true)
-        }
+        guard let infoViewController = assemblyBuilder?.createMovieInfoModule(router: self,
+                                                                              movieID: movieID) else { return }
+        navigationController?.pushViewController(infoViewController, animated: true)
     }
     
     func showPosterInFullScreen(image: UIImage) {
-        if let navigationController = navigationController {
             guard let videoViewController = assemblyBuilder?.createMoviePosterModule(router: self,
                                                                                      image: image) else { return }
-            navigationController.present(videoViewController, animated: true, completion: nil)
-        }
+            navigationController?.present(videoViewController, animated: true, completion: nil)
     }
     
     func popToRoot() {
-        if let navigationController = navigationController {
-            navigationController.popToRootViewController(animated: true)
-        }
+        navigationController?.popToRootViewController(animated: true)
     }
 }

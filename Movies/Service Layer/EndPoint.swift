@@ -7,7 +7,7 @@
 
 import Alamofire
 
-private struct Constants {
+private struct EndPointConstants {
     static let baseURL = "https://api.themoviedb.org/3/"
     static let kApiKey = "api_key="
     static let apiKey = "a5e9b83ceecaed49515d68d344c79b72"
@@ -56,8 +56,6 @@ enum EndPoint {
                 .movieDetails,
                 .movieTrailer:
             return URLEncoding.default
-            //        default:
-            //            return JSONEncoding.default
         }
     }
     
@@ -65,24 +63,20 @@ enum EndPoint {
         switch self {
         case .list(sort: let sort, page: let page):
             return ["page": page, "sort_by": sort]
-        case .genres:
-            return ["": ""]
         case .searchMovies(query: let query, page: let page):
             return ["query": query, "page": page]
-        case .movieDetails(_):
-            return ["": ""]
-        case .movieTrailer(_):
-            return ["": ""]
+        default:
+            return [:]
         }
     }
     
     func fullURLString() -> String {
         return String(format: "%@%@?%@%@&%@%@",
-                      Constants.baseURL,
+                      EndPointConstants.baseURL,
                       self.path,
-                      Constants.kApiKey,
-                      Constants.apiKey,
-                      Constants.kLanguage,
-                      Constants.language)
+                      EndPointConstants.kApiKey,
+                      EndPointConstants.apiKey,
+                      EndPointConstants.kLanguage,
+                      EndPointConstants.language)
     }
 }

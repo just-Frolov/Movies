@@ -12,14 +12,15 @@ protocol MoviePosterViewProtocol: AnyObject {
 }
 
 protocol MoviePosterViewPresenterProtocol: AnyObject {
-    init(view: MoviePosterViewController, router: RouterProtocol, image: UIImage)
     func viewDidLoad()
 }
 
 class MoviePosterPresenter: MoviePosterViewPresenterProtocol {
     //MARK: - Variables -
     weak var view: MoviePosterViewController?
-    var router: RouterProtocol?
+    private var router: RouterProtocol?
+    
+    //MARK: - Constants -
     let image: UIImage!
     
     //MARK: - Life Cycle -

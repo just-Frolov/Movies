@@ -5,9 +5,9 @@
 //  Created by Данил Фролов on 26.01.2022.
 //
 
-struct K {
+struct Constants {
     static let appName = "🍿Popular Movies"
-    static let secondScreenName = "Movie Details"
+    static let movieDetailsScreenTitle = "Movie Details"
     static let sectionIdentifier = "TableSection"
     
     struct MovieDetails {
@@ -18,10 +18,6 @@ struct K {
     struct Assets {
         static let defaultImageName = "imageNotFound"
         static let starIcon = "star.fill"
-    }
-    
-    struct NotificationCenter {
-        static let network = "InternetСonnectionChanged"
     }
     
     struct SortType {

@@ -5,8 +5,6 @@
 //  Created by Данил Фролов on 17.01.2022.
 //
 
-import Foundation
-
 // MARK: - GenreData -
 struct GenreData: Codable {
     let genres: [GenreModel]
@@ -29,5 +27,14 @@ class GenreListConfigurable {
         guard !genreElement.isEmpty else { return "" }
         let genreName = genreElement.first?.name
         return genreName ?? ""
+    }
+    
+    func createGenreList(by genreArray: [GenreModel]) -> String? {
+        var genreList = String()
+        for genre in genreArray {
+            genreList.addingDevidingPrefixIfNeeded()
+            genreList += genre.name.capitalizingFirstLetter()
+        }
+        return genreList
     }
 }

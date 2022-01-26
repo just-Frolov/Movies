@@ -24,7 +24,7 @@ struct ImageManager {
         imageView.kf.setImage(with: url) { result in
             switch result {
             case .failure(_):
-                imageView.image = UIImage(named: K.Assets.defaultImageName)
+                imageView.image = UIImage(named: Constants.Assets.defaultImageName)
             default:
                 break
             }

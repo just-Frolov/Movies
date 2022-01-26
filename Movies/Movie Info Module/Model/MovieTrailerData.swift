@@ -4,7 +4,6 @@
 //
 //  Created by Данил Фролов on 16.01.2022.
 //
-import Foundation
 
 // MARK: - MovieTrailerData -
 struct MovieTrailerData: Codable {

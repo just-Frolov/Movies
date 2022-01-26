@@ -6,7 +6,6 @@
 //
 
 import Alamofire
-import Kingfisher
 
 protocol NetworkServiceProtocol {
     func request<T: Codable>(endPoint: EndPoint,

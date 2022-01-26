@@ -6,7 +6,6 @@
 //
 
 import SnapKit
-import JGProgressHUD
 import youtube_ios_player_helper
 
 class MovieInfoViewController: UIViewController {
@@ -56,13 +55,10 @@ class MovieInfoViewController: UIViewController {
         table.allowsSelection = false
         table.isHidden = true
         table.register(InfoTableViewSection.self,
-                       forHeaderFooterViewReuseIdentifier: K.sectionIdentifier)
+                       forHeaderFooterViewReuseIdentifier: Constants.sectionIdentifier)
         InfoTableViewCell.register(in: table)
         return table
     }()
-    
-    //MARK: - Constants -
-    private let spinner = JGProgressHUD(style: .dark)
     
     //MARK: - Variables -
     var presenter: MovieInfoViewPresenterProtocol!
@@ -89,7 +85,7 @@ class MovieInfoViewController: UIViewController {
     }
     
     private func setupNavBar() {
-        title = K.secondScreenName
+        title = Constants.movieDetailsScreenTitle
         navigationController?.navigationBar.topItem?.title = "";
     }
     
@@ -191,25 +187,25 @@ extension MovieInfoViewController: UITableViewDataSource {
         
         switch cellType {
         case .genres:
-            currentMovieInfo = createItemList(by: informationAboutTheCurrentMovie.genres) ?? ""
+            currentMovieInfo = GenreListConfigurable.shared.createGenreList(by: informationAboutTheCurrentMovie.genres) ?? ""
         case .releaseDate:
             if let safeDate = informationAboutTheCurrentMovie.releaseDate {
-                currentMovieInfo = formatDate(from: safeDate)
+                currentMovieInfo = DateFormatter.string(iso: safeDate)
             } else {
-                currentMovieInfo = K.MovieDetails.noDescription
+                currentMovieInfo = Constants.MovieDetails.noDescription
             }
         case .rating:
             currentMovieInfo = String(informationAboutTheCurrentMovie.voteAverage)
         case .originalTitle:
             currentMovieInfo = informationAboutTheCurrentMovie.originalTitle
         case .description:
-            currentMovieInfo = informationAboutTheCurrentMovie.overview.isEmpty ? K.MovieDetails.noDescription : informationAboutTheCurrentMovie.overview
+            currentMovieInfo = informationAboutTheCurrentMovie.overview.isEmpty ? Constants.MovieDetails.noDescription : informationAboutTheCurrentMovie.overview
         case .budget:
-            currentMovieInfo = createDecimalNumber(from: informationAboutTheCurrentMovie.budget)
+            currentMovieInfo = informationAboutTheCurrentMovie.budget.createDecimalNumber()
         case .production:
-            currentMovieInfo = informationAboutTheCurrentMovie.productionCountries.first?.name ?? K.MovieDetails.noDescription
+            currentMovieInfo = informationAboutTheCurrentMovie.productionCountries.first?.name ?? Constants.MovieDetails.noDescription
         case .revenue:
-            currentMovieInfo = createDecimalNumber(from: informationAboutTheCurrentMovie.revenue)
+            currentMovieInfo = informationAboutTheCurrentMovie.revenue.createDecimalNumber()
         }
         
         cell.configure(with: currentMovieInfo)
@@ -222,7 +218,7 @@ extension MovieInfoViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let sectionType = dataSource[section].type
         let sectionTitle = sectionType.rawValue
-        let section = tableView.dequeueReusableHeaderFooterView(withIdentifier: K.sectionIdentifier) as? InfoTableViewSection
+        let section = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.sectionIdentifier) as? InfoTableViewSection
         section?.configure(title: sectionTitle)
         return section
     }
@@ -248,7 +244,7 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
     }
     
     func showErrorAlert(with message: String) {
-        showAlert("Error", with: message)
+        showAlert(with: "Error", message)
     }
     
     //MARK: - Private -
@@ -264,7 +260,7 @@ extension MovieInfoViewController: MovieInfoViewProtocol {
             ImageManager.shared.setImage(mainUrl: url,
                                          imageView: self.moviePoster)
         } else {
-            self.moviePoster.image = UIImage(named: K.Assets.defaultImageName)
+            self.moviePoster.image = UIImage(named: Constants.Assets.defaultImageName)
         }
     }
 }

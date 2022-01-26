@@ -5,8 +5,6 @@
 //  Created by Данил Фролов on 10.01.2022.
 //
 
-import Foundation
-
 // MARK: - MovieData -
 struct MovieData: Codable {
     let results: [MovieModel]
