@@ -31,7 +31,7 @@ final class NetworkService: NetworkServiceProtocol {
             completion(.failure(RequestError.invalidURL))
             return
         }
-
+        
         AF.request(url,
                    method: endPoint.method,
                    parameters: endPoint.parameters,
@@ -53,7 +53,7 @@ final class NetworkService: NetworkServiceProtocol {
     
     //MARK: - Private -
     private func parseJson<T: Codable>(_ data: Data,
-                           expecting: T.Type) -> T? {
+                                       expecting: T.Type) -> T? {
         let decoder = JSONDecoder()
         do {
             let decodateData = try decoder.decode(expecting, from: data)

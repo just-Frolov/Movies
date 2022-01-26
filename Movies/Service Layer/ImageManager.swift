@@ -6,7 +6,6 @@
 //
 
 import Kingfisher
-import Foundation
 
 struct ImageManager {
     //MARK: - Static Constants -

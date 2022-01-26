@@ -56,8 +56,8 @@ enum EndPoint {
                 .movieDetails,
                 .movieTrailer:
             return URLEncoding.default
-//        default:
-//            return JSONEncoding.default
+            //        default:
+            //            return JSONEncoding.default
         }
     }
     

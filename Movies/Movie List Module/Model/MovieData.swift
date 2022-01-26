@@ -20,7 +20,7 @@ struct MovieModel: Codable {
     let releaseDate: String?
     let title: String
     let voteAverage: Double
-
+    
     enum CodingKeys: String, CodingKey {
         case backdropPath = "backdrop_path"
         case genreIDS = "genre_ids"

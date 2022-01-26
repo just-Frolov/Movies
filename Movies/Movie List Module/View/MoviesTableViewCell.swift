@@ -191,7 +191,7 @@ class MoviesTableViewCell: BaseTableViewCell {
         if let poster = link {
             guard let url = ImageManager.shared.fullURL(imageURL: poster) else { return }
             ImageManager.shared.setImage(mainUrl: url,
-                                           imageView: self.moviePoster)
+                                         imageView: self.moviePoster)
         } else {
             moviePoster.image = UIImage(named: K.Assets.defaultImageName)
         }

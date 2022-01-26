@@ -50,7 +50,7 @@ class MoviePosterViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         centerImage()
     }
-
+    
     //MARK: - Private -
     private func addSubview() {
         view.addSubview(scrollView)

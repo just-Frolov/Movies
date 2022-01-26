@@ -27,7 +27,7 @@ class GenreListConfigurable {
         guard let safeGenreList = genreList else { return "" }
         let genreElement = safeGenreList.filter { $0.id == id }
         guard !genreElement.isEmpty else { return "" }
-        let genreName = genreElement[0].name
+        let genreName = genreElement.first?.name
         return genreName ?? ""
     }
 }
