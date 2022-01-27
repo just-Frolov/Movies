@@ -6,9 +6,8 @@
 //
 
 import SnapKit
-import JGProgressHUD
 
-class MovieListViewController: UIViewController {
+class MovieListViewController: BaseViewController {
     //MARK: - UI Elements -
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
@@ -35,15 +34,9 @@ class MovieListViewController: UIViewController {
         return label
     }()
     
-    //MARK: - Constants -
-    private let spinner = JGProgressHUD(style: .dark)
-    
     //MARK: - Variables -
     var presenter: MovieListViewPresenterProtocol!
     private var currentMovieList = [StoredMovieModel]()
-    private var movieSearchText = String()
-    private var movieSortingType = Constants.SortType.byPopular
-    
     
     //MARK: - Life Cycle -
     override func viewDidLoad() {
@@ -165,19 +158,11 @@ extension MovieListViewController: UITableViewDelegate {
     
     private func checkIfUpdateIsNeeded(for indexPath: IndexPath) {
         guard isCellToLoad(with: indexPath) else { return }
-        movieSearchText.isEmpty ? loadMoreResults() : getMoreResultsBySearch()
+        presenter.getMoreMovies()
     }
     
     private func isCellToLoad(with indexPath: IndexPath) -> Bool {
         return indexPath.row == currentMovieList.count - 5
-    }
-    
-    private func loadMoreResults(_ startAgain: Bool = false) {
-        presenter.getMovieList(by: movieSortingType, startAgain: startAgain)
-    }
-    
-    private func getMoreResultsBySearch(_ startAgain: Bool = false) {
-        presenter.getMovieListBySearch(movieSearchText, startAgain: startAgain)
     }
     
     private func scrollToTop() {
@@ -195,11 +180,14 @@ extension MovieListViewController: UISearchBarDelegate {
         searchBar.resignFirstResponder()
         guard let searchText = searchBar.text else { return }
         let delay = 0
-        getSearchResults(query: searchText, deadline: delay)
+        clearListOfCurrentMovies()
+        presenter.getMovieListBySearch(query: searchText.trim(), deadline: delay)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        getSearchResults(query: searchText)
+        let delay = 500
+        clearListOfCurrentMovies()
+        presenter.getMovieListBySearch(query: searchText.trim(), deadline: delay)
     }
 }
 
@@ -227,9 +215,9 @@ extension MovieListViewController {
     }
     
     private func sortList(by sort: String) {
-        showSpinner(spinner)
+        showSpinner()
         clearSearchBar()
-        setValuesForCurrentVariables(with: sort)
+        clearListOfCurrentMovies()
         presenter.getMovieList(by: sort, startAgain: true)
     }
     
@@ -238,10 +226,8 @@ extension MovieListViewController {
         searchBar.text?.removeAll()
     }
     
-    private func setValuesForCurrentVariables(with sort: String) {
-        movieSortingType = sort
+    private func clearListOfCurrentMovies() {
         currentMovieList.removeAll()
-        movieSearchText.removeAll()
     }
 }
 
@@ -265,8 +251,8 @@ extension MovieListViewController: MovieListViewProtocol {
     func showErrorAlert(with message: String) {
         DispatchQueue.main.async { [weak self] in
             self?.showAlert(with: "Error", message)
+            self?.hideSpinner()
         }
-        hideSpinner(spinner)
     }
     
     private func hideRightBarButton() {
@@ -285,7 +271,7 @@ extension MovieListViewController: MovieListViewProtocol {
         DispatchQueue.main.async { [weak self] in
             guard let strongSelf = self else { return }
             
-            strongSelf.hideSpinner(strongSelf.spinner)
+            strongSelf.hideSpinner()
             strongSelf.tableView.reloadData()
             if strongSelf.currentMovieList.count == 20 {
                 strongSelf.scrollToTop()

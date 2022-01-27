@@ -26,6 +26,9 @@
 		B050145D27A1816F00588522 /* NotificationName.swift in Sources */ = {isa = PBXBuildFile; fileRef = B050145C27A1816F00588522 /* NotificationName.swift */; };
 		B050145F27A1975600588522 /* Int.swift in Sources */ = {isa = PBXBuildFile; fileRef = B050145E27A1975600588522 /* Int.swift */; };
 		B050146127A199E400588522 /* DateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B050146027A199E400588522 /* DateFormatter.swift */; };
+		B050146327A2945B00588522 /* TableRegistable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B050146227A2945B00588522 /* TableRegistable.swift */; };
+		B050146527A2947E00588522 /* CellReusable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B050146427A2947E00588522 /* CellReusable.swift */; };
+		B050146727A2951500588522 /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B050146627A2951500588522 /* BaseViewController.swift */; };
 		B0545B1327938927009410D8 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0545B1227938927009410D8 /* String.swift */; };
 		B0581DEB279AAEAB0055D9F6 /* InfoTableViewSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0581DEA279AAEAB0055D9F6 /* InfoTableViewSection.swift */; };
 		B0581DED279B0D640055D9F6 /* MoviePosterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0581DEC279B0D640055D9F6 /* MoviePosterViewController.swift */; };
@@ -72,6 +75,9 @@
 		B050145C27A1816F00588522 /* NotificationName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationName.swift; sourceTree = "<group>"; };
 		B050145E27A1975600588522 /* Int.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Int.swift; sourceTree = "<group>"; };
 		B050146027A199E400588522 /* DateFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatter.swift; sourceTree = "<group>"; };
+		B050146227A2945B00588522 /* TableRegistable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableRegistable.swift; sourceTree = "<group>"; };
+		B050146427A2947E00588522 /* CellReusable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellReusable.swift; sourceTree = "<group>"; };
+		B050146627A2951500588522 /* BaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
 		B0545B1227938927009410D8 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		B0581DEA279AAEAB0055D9F6 /* InfoTableViewSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoTableViewSection.swift; sourceTree = "<group>"; };
 		B0581DEC279B0D640055D9F6 /* MoviePosterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviePosterViewController.swift; sourceTree = "<group>"; };
@@ -304,7 +310,10 @@
 		B0D754FE27985615001B96DA /* View */ = {
 			isa = PBXGroup;
 			children = (
+				B050146627A2951500588522 /* BaseViewController.swift */,
 				B096EAE8278CD2C300B1C362 /* BaseTableViewCell.swift */,
+				B050146227A2945B00588522 /* TableRegistable.swift */,
+				B050146427A2947E00588522 /* CellReusable.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -456,6 +465,7 @@
 				B0212D41278C7DB000CA85E7 /* AssemblerModuleBuilder.swift in Sources */,
 				B0212D47278C8B8E00CA85E7 /* MovieData.swift in Sources */,
 				B0C2E669279F05B400E4515F /* UIView.swift in Sources */,
+				B050146327A2945B00588522 /* TableRegistable.swift in Sources */,
 				B050145927A0BC8C00588522 /* Constants.swift in Sources */,
 				B099751027A02C6D0048F31B /* StoredMovieModel+CoreDataClass.swift in Sources */,
 				B050145B27A1393800588522 /* ImageManager.swift in Sources */,
@@ -468,6 +478,7 @@
 				B099750F27A02C6D0048F31B /* StoredGenreModel+CoreDataProperties.swift in Sources */,
 				B064D2B327917B6000301B4F /* MovieDetailsData.swift in Sources */,
 				B099751127A02C6D0048F31B /* StoredMovieModel+CoreDataProperties.swift in Sources */,
+				B050146727A2951500588522 /* BaseViewController.swift in Sources */,
 				B0581DEF279B0D850055D9F6 /* MoviePosterPresenter.swift in Sources */,
 				B099750E27A02C6D0048F31B /* StoredGenreModel+CoreDataClass.swift in Sources */,
 				B050145F27A1975600588522 /* Int.swift in Sources */,
@@ -478,6 +489,7 @@
 				B0212D26278C733F00CA85E7 /* SceneDelegate.swift in Sources */,
 				B064D2A9279021E600301B4F /* EndPoint.swift in Sources */,
 				B090771A27957DB800AD46DD /* GenreData.swift in Sources */,
+				B050146527A2947E00588522 /* CellReusable.swift in Sources */,
 				B090771C2795B73D00AD46DD /* InfoTableViewCell.swift in Sources */,
 				B0545B1327938927009410D8 /* String.swift in Sources */,
 				B064D2AF2791680200301B4F /* MovieInfoPresenter.swift in Sources */,

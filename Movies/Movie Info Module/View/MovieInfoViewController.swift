@@ -128,7 +128,7 @@ class MovieInfoViewController: UIViewController {
     
     private func setupHeaderViewConstraints() {
         headerView.snp.makeConstraints { make in
-            make.bottom.equalTo(290)
+            make.height.equalTo(290)
             make.top.width.equalToSuperview()
         }
     }

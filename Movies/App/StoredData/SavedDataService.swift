@@ -14,12 +14,34 @@ class SavedDataServices {
     
     //MARK: - Variables -
     private var context: NSManagedObjectContext {
-        let viewContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        let viewContext = persistentContainer.viewContext
         viewContext.mergePolicy = NSOverwriteMergePolicy
         return viewContext
     }
     
+    private lazy var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "StoredMovieData")
+        container.loadPersistentStores { description, error in
+            if let error = error {
+                fatalError("Unable to load persistent stores: \(error)")
+            }
+        }
+        return container
+    }()
+  
     //MARK: - Internal -
+    func saveContext () {
+        let context = persistentContainer.viewContext
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            }
+        }
+    }
+    
     func getSavedMovies(by filter: String? = nil) -> [StoredMovieModel] {
         do {
             let fetchRequest = StoredMovieModel.fetchRequest()
@@ -64,14 +86,5 @@ class SavedDataServices {
         newMovie.releaseDate = movieData.releaseDate
         newMovie.voteAverage = movieData.voteAverage
         return newMovie
-    }
-    
-    func save() {
-        do {
-            try context.save()
-        }
-        catch let error {
-            print("Error during save movies\(error)")
-        }
     }
 }

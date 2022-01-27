@@ -17,16 +17,18 @@ protocol MovieListViewProtocol: AnyObject {
 protocol MovieListViewPresenterProtocol: AnyObject {
     func viewDidLoad()
     func getMovieList(by sort: String, startAgain: Bool)
-    func getMovieListBySearch(_ text: String, startAgain: Bool)
-    func getMovieListLocalSearch(query: String, deadline: Int = 500)
+    func getMovieListBySearch(query: String, deadline: Int)
+    func getMoreMovies()
     func moviePosterTapped(with id: Int)
 }
 
 class MovieListPresenter: MovieListViewPresenterProtocol {
     //MARK: - Variables -
     weak var view: MovieListViewProtocol?
-    var router: RouterProtocol
+    private var router: RouterProtocol
     private var movieListPage = 1
+    private var movieSearchText = String()
+    private var movieSortingType = Constants.SortType.byPopular
     private var workItemForSearchBar: DispatchWorkItem?
     
     //MARK: - Constants -
@@ -52,8 +54,9 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         addTriggerToChangeTheInternet()
     }
     
-    func getMovieList(by sort: String = Constants.SortType.byPopular, startAgain: Bool = false) {
-        if startAgain { movieListPage = 1 }
+    func getMovieList(by query: String = "", startAgain: Bool = false) {
+        let sort = query.isEmpty ? movieSortingType : query
+        if startAgain { resetValueForCurrentVariables(sort: sort) }
         guard NetworkMonitor.shared.isConnected else {
             if startAgain {
                 getSavedData()
@@ -64,36 +67,15 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         movieListRequest(with: endPoint)
     }
     
-    func getMovieListBySearch(_ filter: String, startAgain: Bool = false) {
-        if startAgain { movieListPage = 1 }
-        guard NetworkMonitor.shared.isConnected else {
-            DispatchQueue.main.async { [weak self] in
-                self?.view?.setMovieList(self?.storedService.getSavedMovies(by: filter) ?? [])
-            }
-            return
-        }
-        let endPoint = EndPoint.searchMovies(query: filter, page: self.movieListPage)
-        movieListRequest(with: endPoint)
-    }
-    
-    func getMovieListByOfflineSearch(query: String, deadline: Int = 500) {
+    func getMovieListBySearch(query: String, deadline: Int) {
         workItemForSearchBar?.cancel()
+        resetValueForCurrentVariables(searchText: query)
         let newWorkItem = DispatchWorkItem { [weak self] in
-            self?.startMovieSearchRequest(with: query)
+            query == "" ? self?.startMovieSearchRequest(query) : self?.getMovieList()
         }
         workItemForSearchBar = newWorkItem
         DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(deadline),
                                           execute: newWorkItem)
-    }
-    
-    private func startMovieSearchRequest(with text: String) {
-        currentMovieList.removeAll()
-        movieSearchText = text.trim()
-        if text.replacingOccurrences(of: " ", with: "").isEmpty {
-            loadMoreResults(true)
-        } else {
-            getMoreResultsBySearch(true)
-        }
     }
     
     func moviePosterTapped(with id: Int) {
@@ -104,7 +86,20 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         router.showMovieDetails(by: id)
     }
     
+    func getMoreMovies() {
+        movieSearchText.trim().isEmpty ? getMovieList() : getMovieListBySearch(query: movieSearchText, deadline: 0)
+    }
+    
     //MARK: - Private -
+    private func resetValueForCurrentVariables(sort: String = "", searchText: String = "") {
+        movieListPage = 1
+        movieSearchText = searchText
+        
+        if movieSortingType == "" {
+            movieSortingType = sort
+        }
+    }
+    
     private func getSavedData() {
         DispatchQueue.main.async { [weak self] in
             guard let strongSelf = self else { return }
@@ -156,7 +151,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                             strongSelf.storedService.createStoredMovie(from: $0)
                         }
                         strongSelf.view?.setMovieList(moviesArray)
-                        strongSelf.storedService.save()
+                        strongSelf.storedService.saveContext()
                     }
                     
                     strongSelf.movieListPage += 1
@@ -166,6 +161,18 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                 }
             }
         }
+    }
+    
+    private func startMovieSearchRequest(_ filter: String, startAgain: Bool = true) {
+        if startAgain { resetValueForCurrentVariables(searchText: filter) }
+        guard NetworkMonitor.shared.isConnected else {
+            DispatchQueue.main.async { [weak self] in
+                self?.view?.setMovieList(self?.storedService.getSavedMovies(by: filter) ?? [])
+            }
+            return
+        }
+        let endPoint = EndPoint.searchMovies(query: filter, page: self.movieListPage)
+        movieListRequest(with: endPoint)
     }
     
     private func addTriggerToChangeTheInternet() {

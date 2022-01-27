@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import JGProgressHUD
 
 //MARK: - Alert -
 extension UIViewController {
@@ -31,25 +30,4 @@ extension UIViewController {
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
     }
-}
-
-//MARK: - Spinner -
-extension UIViewController {
-    func showSpinner(_ spinner: JGProgressHUD) {
-        DispatchQueue.main.async { [weak self] in
-            guard let strongSelf = self else { return }
-            spinner.show(in: strongSelf.view)
-        }
-    }
-    
-    func hideSpinner(_ spinner: JGProgressHUD) {
-        DispatchQueue.main.async {
-            spinner.dismiss()
-        }
-    }
-}
-
-//MARK: - Value conversion -
-extension UIViewController {
-    
 }

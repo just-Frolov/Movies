@@ -22,11 +22,7 @@ class GenreListConfigurable {
     var genreList: [StoredGenreModel]?
     
     func getGenreName(id: Int) -> String {
-        guard let safeGenreList = genreList else { return "" }
-        let genreElement = safeGenreList.filter { $0.id == id }
-        guard !genreElement.isEmpty else { return "" }
-        let genreName = genreElement.first?.name
-        return genreName ?? ""
+        return genreList?.first(where: { $0.id == id })?.name ?? ""
     }
     
     func createGenreList(by genreArray: [GenreModel]) -> String? {
