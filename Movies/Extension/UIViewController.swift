@@ -9,8 +9,8 @@ import UIKit
 
 //MARK: - Alert -
 extension UIViewController {
-    typealias AlertAction = () -> ()
-    typealias AlertButtonAction = (String, AlertAction)
+    typealias EmptyBlock = () -> ()
+    typealias AlertButtonAction = (String, EmptyBlock)
     
     func showActionSheetWithCancel(actions: [AlertButtonAction], with alertTitle: String) {
         let actionSheet = UIAlertController(title: alertTitle, message: nil, preferredStyle: .actionSheet)

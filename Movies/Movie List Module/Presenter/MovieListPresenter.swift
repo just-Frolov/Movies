@@ -41,6 +41,10 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
         self.router = router
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     //MARK: - Internal -
     func viewDidLoad() {
         if NetworkMonitor.shared.isConnected {
@@ -131,6 +135,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                 case.failure(let error):
                     let message = "Failed to get genres: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
+                    strongSelf.genreGroup.leave()
                 }
             }
         }
@@ -141,6 +146,7 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                                       expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
             DispatchQueue.main.async {
+                //genreGroup.notify(queue: <#T##DispatchQueue#>, work: <#T##DispatchWorkItem#>)
                 switch result {
                 case.success(let data):
                     guard let movieRequestResult = data?.results else { return }

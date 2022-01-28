@@ -52,7 +52,6 @@ class MovieInfoViewController: UIViewController {
                                 style: .grouped)
         table.backgroundColor = .clear
         table.separatorStyle = .none
-        table.allowsSelection = false
         table.isHidden = true
         table.register(InfoTableViewSection.self,
                        forHeaderFooterViewReuseIdentifier: Constants.sectionIdentifier)
@@ -62,7 +61,6 @@ class MovieInfoViewController: UIViewController {
     
     //MARK: - Variables -
     var presenter: MovieInfoViewPresenterProtocol!
-    
     private var informationAboutTheCurrentMovie: MovieDetailsData!
     private var dataSource: [InfoTableSectionModel] = []
     

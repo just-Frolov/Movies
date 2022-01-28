@@ -201,13 +201,7 @@ class MoviesTableViewCell: BaseTableViewCell {
     
     private func setMovieGenres(by genreIDS: [Int]?) {
         guard let safeGenreID = genreIDS else { return }
-        var genreList = String()
-        var genreName = String()
-        for genre in safeGenreID {
-            genreName = GenreListConfigurable.shared.getGenreName(id: genre)
-            genreList.addingDevidingPrefixIfNeeded()
-            genreList += genreName.capitalizingFirstLetter()
-        }
+        let genreList = GenreListConfigurable.shared.createGenreList(by: safeGenreID)
         movieGenresLabel.text = genreList
     }
 }

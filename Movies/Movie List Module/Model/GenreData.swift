@@ -33,4 +33,15 @@ class GenreListConfigurable {
         }
         return genreList
     }
+    
+    func createGenreList(by genreIDS: [Int]) -> String? {
+        var genreList = String()
+        var genreName = String()
+        for id in genreIDS {
+            genreName = getGenreName(id: id)
+            genreList.addingDevidingPrefixIfNeeded()
+            genreList += genreName.capitalizingFirstLetter()
+        }
+        return genreList
+    }
 }

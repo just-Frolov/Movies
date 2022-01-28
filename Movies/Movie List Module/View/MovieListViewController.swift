@@ -136,7 +136,6 @@ extension MovieListViewController: UITableViewDataSource {
         let cell = MoviesTableViewCell.dequeueingReusableCell(in: tableView,
                                                               for: indexPath)
         cell.configure(with: movie)
-        cell.selectionStyle = .none
         return cell
     }
 }
