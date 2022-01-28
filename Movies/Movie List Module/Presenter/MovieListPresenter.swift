@@ -32,7 +32,6 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     private var workItemForSearchBar: DispatchWorkItem?
     
     //MARK: - Constants -
-    private let genreGroup = DispatchGroup()
     private let storedService = SavedDataServices.shared
     
     //MARK: - Life Cycle -
@@ -49,7 +48,6 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     func viewDidLoad() {
         if NetworkMonitor.shared.isConnected {
             getGenreList()
-            getMovieList()
             view?.setOnlineMode()
         } else {
             getSavedData()
@@ -116,12 +114,12 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
     }
     
     private func getGenreList() {
-        genreGroup.enter()
         let endPoint = EndPoint.genres
         NetworkService.shared.request(endPoint: endPoint,
                                       expecting: GenreData.self) { [weak self] result in
             guard let strongSelf = self else { return }
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                self?.getMovieList()
                 switch result {
                 case.success(let data):
                     guard let genreRequestResult = data else { return }
@@ -131,11 +129,9 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                         strongSelf.storedService.createStoredGenre(from: $0)
                     }
                     GenreListConfigurable.shared.genreList = genresArray
-                    strongSelf.genreGroup.leave()
                 case.failure(let error):
                     let message = "Failed to get genres: \(error)"
                     strongSelf.view?.showErrorAlert(with: message)
-                    strongSelf.genreGroup.leave()
                 }
             }
         }
@@ -146,11 +142,9 @@ class MovieListPresenter: MovieListViewPresenterProtocol {
                                       expecting: MovieData.self) { [weak self] result in
             guard let strongSelf = self else { return }
             DispatchQueue.main.async {
-                //genreGroup.notify(queue: <#T##DispatchQueue#>, work: <#T##DispatchWorkItem#>)
                 switch result {
                 case.success(let data):
                     guard let movieRequestResult = data?.results else { return }
-                    
                     
                     let moviesArray = movieRequestResult.map {
                         strongSelf.storedService.createStoredMovie(from: $0)

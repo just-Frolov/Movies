@@ -26,7 +26,7 @@ class MovieListViewController: BaseViewController {
     
     private lazy var noMoviesLabel: UILabel = {
         let label = UILabel()
-        label.text = "No movies found for your search!"
+        label.text = "No movies found!"
         label.textAlignment = .center
         label.textColor = .black
         label.font = .systemFont(ofSize: 20, weight: .bold)

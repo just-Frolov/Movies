@@ -15,7 +15,7 @@ extension Int {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
         let formattedNumber = numberFormatter.string(from: NSNumber(value:self)) ?? Constants.MovieDetails.noDescription
-        let currencyValue = formattedNumber + Constants.MovieDetails.currency
+        let currencyValue = formattedNumber + " " + Constants.MovieDetails.currency
         return currencyValue
     }
 }
