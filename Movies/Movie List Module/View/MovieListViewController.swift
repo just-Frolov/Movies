@@ -181,13 +181,13 @@ extension MovieListViewController: UISearchBarDelegate {
         guard let searchText = searchBar.text else { return }
         let delay = 0
         clearListOfCurrentMovies()
-        presenter.getMovieListBySearch(query: searchText.trim(), deadline: delay)
+        presenter.getMovieListBySearch(query: searchText.trim(), deadline: delay, startAgain: true)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         let delay = 500
         clearListOfCurrentMovies()
-        presenter.getMovieListBySearch(query: searchText.trim(), deadline: delay)
+        presenter.getMovieListBySearch(query: searchText.trim(), deadline: delay, startAgain: true)
     }
 }
 
